@@ -26,21 +26,55 @@
             padding-bottom: 80px; 
         }
 
+        /* --- XL HEADING STYLING --- */
+        .xl-heading-container {
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .xl-heading {
+            color: #FFFFFF;
+            /* Using a heavy, impactful font to match the logo style */
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: clamp(24px, 4vw, 42px);
+            line-height: 1.2;
+            text-transform: uppercase;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .inline-logo {
+            height: clamp(24px, 4vw, 42px); /* Scales exactly with the text */
+            width: auto;
+            vertical-align: middle;
+            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
+            margin-top: -4px; /* Optical alignment adjustment */
+        }
+
         /* --- THE MAP STYLING --- */
         .impossibles-map-wrapper {
             position: relative;
             width: 100%;
             max-width: 1000px;
             margin-bottom: 40px;
-            /* Ensures the D3 SVG scales correctly */
+            /* Locks the container to the exact D3 mapping ratio */
             aspect-ratio: 975 / 610; 
         }
 
-        /* The SVG map drawn by D3 */
+        /* The SVG map layers */
         .impossibles-map-wrapper svg {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
-            display: block;
         }
 
         /* Styling for the drawn states */
@@ -51,119 +85,71 @@
             stroke-linejoin: round;
         }
 
-        @keyframes popInPin {
-            0% { transform: translate(-50%, -100%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -100%) scale(1.15); opacity: 1; }
-            75% { transform: translate(-50%, -100%) scale(0.95); opacity: 1; }
-            100% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
+        /* The layer that holds the dynamic lines */
+        #lines-layer {
+            z-index: 2;
+            pointer-events: none;
         }
 
-        /* --- DYNAMIC PIN STRUCTURE --- */
-        .vote-pin {
+        .connection-line {
+            stroke: #FFFFFF;
+            stroke-width: 2px;
+            filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.5));
+        }
+
+        /* The layer that holds the HTML bubbles */
+        #labels-layer {
             position: absolute;
-            transform: translate(-50%, -100%);
-            transform-origin: bottom center;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: flex-end;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
             z-index: 10;
-            opacity: 0; 
-            animation: popInPin 0.6s ease-out both;
+            pointer-events: none; /* Lets you click the map behind them if needed */
         }
 
-        .vote-pin:hover {
-            z-index: 20;
-            transform: translate(-50%, -100%) scale(1.05);
-            transition: transform 0.2s ease;
-        }
-
-        /* Re-engineered pin structure for bulletproof anchoring */
-        .pin-anchor-group {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            transform-origin: bottom center;
-            transition: all 0.3s ease;
-        }
-
+        /* --- DYNAMIC PIN BUBBLE STYLING --- */
         .pin-circle {
-            width: 65px;
-            height: 65px;
+            position: absolute;
+            width: 52px; /* 20% smaller */
+            height: 52px;
             border-radius: 50%;
             border: 2px solid #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            background-color: #000033; /* Locked to Navy */
+            color: #FFFFFF; /* Locked to White */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            color: #FFFFFF;
             line-height: 1.1;
             box-sizing: border-box;
             padding: 4px;
-            position: relative;
-            z-index: 3;
+            /* Centers the div exactly on the physics engine's X/Y coordinate */
+            transform: translate(-50%, -50%); 
+            pointer-events: auto;
+            transition: transform 0.1s ease;
         }
 
-        .pin-line {
-            width: 2px;
-            height: 25px;
-            background-color: #FFFFFF;
-            box-shadow: 2px 0 4px rgba(0,0,0,0.2);
-            position: relative;
-            z-index: 2;
-            margin-top: -2px; /* Pulls slightly into the circle */
-        }
-
-        .pin-dot {
-            width: 6px;
-            height: 6px;
-            background-color: #FFFFFF;
-            border-radius: 50%;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.6);
-            margin-top: -2px; /* Pulls slightly into the line */
-            z-index: 4;
-            position: relative;
+        .pin-circle:hover {
+            transform: translate(-50%, -50%) scale(1.1);
+            z-index: 20;
         }
 
         .vote-count {
-            font-size: 20px;
+            font-size: 16px; /* Adjusted for smaller bubble */
             font-weight: bold;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.3);
-            margin-bottom: 2px;
+            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
+            margin-bottom: 1px;
         }
 
         .city-label {
-            font-size: 8px;
+            font-size: 7px; /* Adjusted for smaller bubble */
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: bold;
             white-space: nowrap;
         }
-
-        /* --- BULLETPROOF COLLISION CLASSES --- */
-        /* Rotates the entire upper structure around the dot */
-        .diag-right .pin-anchor-group {
-            transform: rotate(45deg);
-        }
-        /* Counter-rotates the text circle so it stays level */
-        .diag-right .pin-circle {
-            transform: rotate(-45deg);
-        }
-        .diag-right .pin-line {
-            height: 45px;
-        }
-
-        .diag-left .pin-anchor-group {
-            transform: rotate(-45deg);
-        }
-        .diag-left .pin-circle {
-            transform: rotate(45deg);
-        }
-        .diag-left .pin-line {
-            height: 45px;
-        }
-
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
@@ -212,6 +198,14 @@
 </head>
 <body>
 
+    <div class="xl-heading-container">
+        <h1 class="xl-heading">
+            SIGN UP FOR UPDATES AND TELL 
+            <img src="impossibles_logo.png" alt="The Impossibles" class="inline-logo"> 
+            WHERE TO PLAY NEXT!
+        </h1>
+    </div>
+
     <div class="impossibles-map-wrapper" id="dynamic-map">
         </div>
 
@@ -249,106 +243,111 @@
     </div>
 
     <script>
-        // 1. PLACEHOLDER DATA 
+        // 1. PLACEHOLDER DATA
         const databaseSubmissions = [
-            { city: "San Diego", votes: 5, lat: 32.7157, lng: -117.1611, color: "#D62828" },
-            { city: "Austin", votes: 42, lat: 30.2672, lng: -97.7431, color: "#2A9D8F" },
-            { city: "Chicago", votes: 18, lat: 41.8781, lng: -87.6298, color: "#F77F00" },
-            { city: "Detroit", votes: 12, lat: 42.3314, lng: -83.0458, color: "#000033" },
-            { city: "Pensacola", votes: 1, lat: 30.4213, lng: -87.2169, color: "#E9C46A" }
+            { city: "San Diego", votes: 5, lat: 32.7157, lng: -117.1611 },
+            { city: "Austin", votes: 42, lat: 30.2672, lng: -97.7431 },
+            { city: "Chicago", votes: 18, lat: 41.8781, lng: -87.6298 },
+            { city: "Detroit", votes: 12, lat: 42.3314, lng: -83.0458 },
+            { city: "Pensacola", votes: 1, lat: 30.4213, lng: -87.2169 }
         ];
 
-        const mapContainer = document.getElementById('dynamic-map');
-        const placedPins = [];
-        const COLLISION_THRESHOLD = 8.0; // Distance checking for overlap
-
-        // D3 Setup configuration based on standard US TopoJSON dimensions
+        // D3 Setup configuration
         const width = 975;
         const height = 610;
 
-        // Create the D3 native projection (Flawless Lat/Lng math)
+        // Native D3 map projection
         const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
         const path = d3.geoPath().projection(projection);
 
         // 2. FETCH MAP DATA AND RENDER
         d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
             
-            // Draw the SVG Base Map
-            const svg = d3.select("#dynamic-map").append("svg")
+            // A. Draw the SVG Base Map
+            const mapSvg = d3.select("#dynamic-map").append("svg")
                 .attr("viewBox", [0, 0, width, height])
                 .attr("preserveAspectRatio", "xMidYMid meet");
 
-            // Render the states
-            svg.append("g")
+            mapSvg.append("g")
                 .selectAll("path")
                 .data(topojson.feature(us, us.objects.states).features)
                 .join("path")
                 .attr("class", "state-path")
                 .attr("d", path);
 
-            // 3. PLOT THE HTML PINS OVER THE SVG
-            plotDynamicPins(databaseSubmissions);
-        });
+            // B. Create the dynamic SVG Lines Layer
+            const linesSvg = d3.select("#dynamic-map").append("svg")
+                .attr("id", "lines-layer")
+                .attr("viewBox", [0, 0, width, height])
+                .attr("preserveAspectRatio", "xMidYMid meet");
 
-        function determineDirectionClass(x, y) {
-            // Converts exact pixel values to percentages for collision checking
-            const xPct = (x / width) * 100;
-            const yPct = (y / height) * 100;
+            // C. Create the HTML Labels Layer
+            const labelsLayer = d3.select("#dynamic-map").append("div")
+                .attr("id", "labels-layer");
 
-            for (let pin of placedPins) {
-                let dist = Math.sqrt(Math.pow(pin.x - xPct, 2) + Math.pow(pin.y - yPct, 2));
-                if (dist < COLLISION_THRESHOLD) {
-                    return (xPct >= pin.x) ? "diag-right" : "diag-left";
+            // 3. PREPARE PHYSICS NODES
+            const nodes = [];
+            databaseSubmissions.forEach(loc => {
+                const coords = projection([loc.lng, loc.lat]);
+                if (coords) {
+                    nodes.push({
+                        city: loc.city,
+                        votes: loc.votes,
+                        anchorX: coords[0], // The fixed dot on the map
+                        anchorY: coords[1],
+                        x: coords[0],       // The starting point for the bubble
+                        y: coords[1] - 40   // Spawns slightly above the city initially
+                    });
                 }
-            }
-            return "straight"; 
-        }
-
-        function plotDynamicPins(dataArray) {
-            let delayCounter = 0.2;
-
-            dataArray.forEach(location => {
-                // Let D3 convert the Lat/Lng to exact X/Y map pixels
-                const coords = projection([location.lng, location.lat]);
-                
-                // If coordinates fall outside the map, skip it
-                if (!coords) return; 
-
-                const pixelX = coords[0];
-                const pixelY = coords[1];
-
-                // Convert pixel coordinates to percentages so HTML overlays perfectly over responsive SVG
-                const leftPct = (pixelX / width) * 100;
-                const topPct = (pixelY / height) * 100;
-
-                const directionClass = determineDirectionClass(pixelX, pixelY);
-                placedPins.push({ x: leftPct, y: topPct });
-
-                const textColor = (location.color === "#E9C46A") ? "#000033" : "#FFFFFF";
-                const textShadow = (location.color === "#E9C46A") ? "none" : "0 1px 3px rgba(0,0,0,0.3)";
-
-                const pinElement = document.createElement('div');
-                pinElement.className = `vote-pin ${directionClass}`;
-                pinElement.style.left = `${leftPct}%`;
-                pinElement.style.top = `${topPct}%`;
-                pinElement.style.animationDelay = `${delayCounter}s`;
-
-                // Render the new solid structure
-                pinElement.innerHTML = `
-                    <div class="pin-anchor-group">
-                        <div class="pin-circle" style="background-color: ${location.color}; color: ${textColor};">
-                            <div class="vote-count" style="text-shadow: ${textShadow};">${location.votes}</div>
-                            <div class="city-label">${location.city}</div>
-                        </div>
-                        <div class="pin-line"></div>
-                    </div>
-                    <div class="pin-dot"></div>
-                `;
-
-                mapContainer.appendChild(pinElement);
-                delayCounter += 0.4; 
             });
-        }
+
+            // 4. DRAW FIXED CITY DOTS
+            linesSvg.selectAll(".anchor-dot")
+                .data(nodes)
+                .join("circle")
+                .attr("class", "anchor-dot")
+                .attr("cx", d => d.anchorX)
+                .attr("cy", d => d.anchorY)
+                .attr("r", 4)
+                .attr("fill", "#FFFFFF")
+                .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.6))");
+
+            // 5. DRAW DYNAMIC LINES
+            const link = linesSvg.selectAll(".connection-line")
+                .data(nodes)
+                .join("line")
+                .attr("class", "connection-line");
+
+            // 6. DRAW HTML BUBBLES
+            const bubble = labelsLayer.selectAll(".pin-circle")
+                .data(nodes)
+                .join("div")
+                .attr("class", "pin-circle")
+                .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.city}</div>`);
+
+            // 7. THE PHYSICS ENGINE (Force Simulation)
+            // This prevents bubbles from overlapping and stretches the lines dynamically
+            const simulation = d3.forceSimulation(nodes)
+                // Force bubbles apart if they touch (26px radius + 6px padding = 32px safety zone)
+                .force("collide", d3.forceCollide().radius(32).iterations(4)) 
+                // Pull bubbles toward their specific city anchors
+                .force("x", d3.forceX(d => d.anchorX).strength(0.15))
+                .force("y", d3.forceY(d => d.anchorY - 40).strength(0.15))
+                .on("tick", () => {
+                    
+                    // Update line coordinates on every frame of the physics calculation
+                    link
+                        .attr("x1", d => d.anchorX)
+                        .attr("y1", d => d.anchorY)
+                        .attr("x2", d => d.x)
+                        .attr("y2", d => d.y);
+
+                    // Update HTML bubble positions using exact percentage mapping
+                    bubble
+                        .style("left", d => `${(d.x / width) * 100}%`)
+                        .style("top", d => `${(d.y / height) * 100}%`);
+                });
+        });
     </script>
 </body>
 </html>
