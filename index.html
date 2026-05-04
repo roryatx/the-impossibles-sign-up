@@ -86,6 +86,8 @@
             box-sizing: border-box;
             padding: 4px;
             background-color: #000033; /* Default color */
+            position: relative;
+            z-index: 3;
         }
 
         .pin-line {
@@ -93,7 +95,8 @@
             height: 25px;
             background-color: #FFFFFF;
             box-shadow: 2px 0 4px rgba(0,0,0,0.2);
-            transition: all 0.3s ease;
+            position: relative;
+            z-index: 2;
         }
 
         .pin-dot {
@@ -103,7 +106,7 @@
             border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0,0,0,0.6);
             margin-top: -1px; 
-            z-index: 2;
+            z-index: 4;
         }
 
         .vote-count {
@@ -122,28 +125,25 @@
         }
 
         /* --- COLLISION AVOIDANCE CLASSES --- */
-        /* If the JS detects overlap, it applies these classes to push the bubble out of the way */
-        
         .diag-right .pin-inner-wrapper {
-            transform: translate(30px, -15px);
+            transform: translate(35px, -20px);
         }
         .diag-right .pin-line {
-            height: 45px;
+            height: 55px;
             transform-origin: bottom center;
             transform: rotate(45deg);
-            margin-top: -10px;
+            margin-top: -15px;
         }
 
         .diag-left .pin-inner-wrapper {
-            transform: translate(-30px, -15px);
+            transform: translate(-35px, -20px);
         }
         .diag-left .pin-line {
-            height: 45px;
+            height: 55px;
             transform-origin: bottom center;
             transform: rotate(-45deg);
-            margin-top: -10px;
+            margin-top: -15px;
         }
-
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
@@ -230,47 +230,56 @@
     </div>
 
     <script>
-        // 1. PLACEHOLDER DATA (Will be replaced by Firebase live fetch later)
-        // You can test the dynamic mapping by adding new cities to this list!
+        // 1. PLACEHOLDER DATA 
         const databaseSubmissions = [
             { city: "San Diego", votes: 5, lat: 32.7157, lng: -117.1611, color: "#D62828" },
             { city: "Austin", votes: 42, lat: 30.2672, lng: -97.7431, color: "#2A9D8F" },
             { city: "Chicago", votes: 18, lat: 41.8781, lng: -87.6298, color: "#F77F00" },
             { city: "Detroit", votes: 12, lat: 42.3314, lng: -83.0458, color: "#000033" },
-            { city: "Pensacola", votes: 1, lat: 30.4213, lng: -87.2169, color: "#E9C46A" },
-            // Example of a new dynamic submission - uncomment to test:
-            // { city: "New York", votes: 8, lat: 40.7128, lng: -74.0060, color: "#6699CC" }
+            { city: "Pensacola", votes: 1, lat: 30.4213, lng: -87.2169, color: "#E9C46A" }
         ];
 
-        // Core variables
         const mapContainer = document.getElementById('dynamic-map');
         const placedPins = [];
-        const COLLISION_THRESHOLD = 6; // Percentage distance before triggering diagonal shift
+        const COLLISION_THRESHOLD = 8.5; // Increased boundary to ensure bubbles clear each other
 
         // 2. MATHEMATICAL PROJECTION FORMULA
-        // Specifically calculated to map Lat/Lng onto the curvature of your us.png image
+        // Calibrated exactly for the Albers curve and boundaries of your us.png image
         function getMapCoordinates(lat, lng) {
-            // Linear constraints
-            const x = (lng + 126.3) * 1.58; 
-            
-            // Y includes an Albers curvature adjustment so the West/East coasts arc properly
-            const y = ((50.3 - lat) * 4.22) - (Math.pow(lng + 96, 2) * 0.04); 
-            
+            const minLng = -125;
+            const maxLng = -66;
+            const minLat = 24.5;
+            const maxLat = 49.5;
+
+            // Base linear percentages
+            let x = ((lng - minLng) / (maxLng - minLng)) * 100;
+            let y = ((maxLat - lat) / (maxLat - minLat)) * 100;
+
+            // Albers Horizontal Compression (pinches the bottom inwards)
+            const xCenter = (( -96 - minLng ) / (maxLng - minLng)) * 100; 
+            const distanceFromCenter = x - xCenter;
+            x = x - (distanceFromCenter * (50 - lat) * 0.006);
+
+            // Albers Vertical Curve (pushes edges upwards)
+            const curve = Math.pow(lng + 96, 2) * 0.015;
+            y = y - curve;
+
+            // Scale to fit the transparent padding inside us.png
+            x = (x * 0.90) + 4; 
+            y = (y * 0.82) + 2; 
+
             return { x, y };
         }
 
         // 3. COLLISION AVOIDANCE LOGIC
         function determineDirectionClass(x, y) {
             for (let pin of placedPins) {
-                // Calculate distance between new point and existing points
                 let dist = Math.sqrt(Math.pow(pin.x - x, 2) + Math.pow(pin.y - y, 2));
-                
                 if (dist < COLLISION_THRESHOLD) {
-                    // If too close, shift it away from the existing pin
                     return (x >= pin.x) ? "diag-right" : "diag-left";
                 }
             }
-            return "straight"; // Default vertical pin
+            return "straight"; 
         }
 
         // 4. RENDER FUNCTION
@@ -278,27 +287,20 @@
             let delayCounter = 0.2;
 
             dataArray.forEach(location => {
-                // Calculate coordinates
                 const coords = getMapCoordinates(location.lat, location.lng);
-                
-                // Determine if we need to bend the line to avoid overlap
                 const directionClass = determineDirectionClass(coords.x, coords.y);
                 
-                // Save to registry for future collision checks
                 placedPins.push({ x: coords.x, y: coords.y });
 
-                // Text color handling for light background bubbles
                 const textColor = (location.color === "#E9C46A") ? "#000033" : "#FFFFFF";
                 const textShadow = (location.color === "#E9C46A") ? "none" : "0 1px 3px rgba(0,0,0,0.3)";
 
-                // Generate the HTML element
                 const pinElement = document.createElement('div');
                 pinElement.className = `vote-pin ${directionClass}`;
                 pinElement.style.left = `${coords.x}%`;
                 pinElement.style.top = `${coords.y}%`;
                 pinElement.style.animationDelay = `${delayCounter}s`;
 
-                // Add the internal structure
                 pinElement.innerHTML = `
                     <div class="pin-inner-wrapper">
                         <div class="pin-circle" style="background-color: ${location.color}; color: ${textColor};">
@@ -310,15 +312,11 @@
                     <div class="pin-dot"></div>
                 `;
 
-                // Inject into map
                 mapContainer.appendChild(pinElement);
-
-                // Increment animation delay so they pop up one by one
                 delayCounter += 0.4; 
             });
         }
 
-        // Run the engine when the page loads
         window.onload = () => {
             plotDynamicMap(databaseSubmissions);
         };
