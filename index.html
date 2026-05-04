@@ -19,7 +19,7 @@
             background-color: #000000;
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
-            padding: 40px 20px;
+            padding: 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -31,7 +31,7 @@
             width: 100%;
             max-width: 1000px;
             text-align: center;
-            margin-bottom: 20px;
+            margin-bottom: 30px;
         }
 
         .xl-heading {
@@ -57,6 +57,46 @@
             margin-top: -4px; 
         }
 
+        /* --- BUTTON GRID STYLING --- */
+        .link-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 30px;
+        }
+
+        .link-button {
+            background-color: #000033;
+            color: #FFFFFF;
+            border: 2px solid #FFFFFF;
+            border-radius: 25px;
+            padding: 12px 15px;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: bold;
+            font-size: 11px;
+            text-align: center;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+        }
+
+        .link-button:hover {
+            background-color: #FFFFFF;
+            color: #000033;
+            transform: translateY(-2px);
+        }
+
+        /* Mobile Adjustments for Grid */
+        @media (max-width: 600px) {
+            .link-grid { grid-template-columns: 1fr; }
+        }
+
         /* --- THE MAP STYLING --- */
         .impossibles-map-wrapper {
             position: relative;
@@ -67,11 +107,8 @@
         }
 
         .impossibles-map-wrapper svg {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
         }
 
         .state-path {
@@ -81,58 +118,26 @@
             stroke-linejoin: round;
         }
 
-        #lines-layer { 
-            position: absolute; 
-            top: 0; 
-            left: 0; 
-            width: 100%; 
-            height: 100%; 
-            z-index: 2; 
-            pointer-events: none; 
-        }
-        
+        #lines-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
         .connection-line { stroke: #FFFFFF; stroke-width: 2px; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.5)); }
+        #labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
 
-        #labels-layer {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            z-index: 10; pointer-events: none; 
-        }
-
-        /* --- DYNAMIC PIN BUBBLE STYLING --- */
         .pin-circle {
-            position: absolute;
-            width: 52px;
-            height: 52px;
-            border-radius: 50%;
-            border: 2px solid #FFFFFF;
-            background-color: #000033;
-            color: #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            line-height: 1.1;
-            box-sizing: border-box;
-            padding: 4px;
-            transform: translate(-50%, -50%); 
-            pointer-events: auto;
-            transition: transform 0.1s ease;
+            position: absolute; width: 52px; height: 52px; border-radius: 50%;
+            border: 2px solid #FFFFFF; background-color: #000033; color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+            align-items: center; justify-content: center; line-height: 1.1;
+            box-sizing: border-box; padding: 4px; transform: translate(-50%, -50%); 
+            pointer-events: auto; transition: transform 0.1s ease;
         }
 
-        .pin-circle:hover { transform: translate(-50%, -50%) scale(1.1); z-index: 20; }
-        .vote-count { font-size: 16px; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.5); margin-bottom: 1px; }
-        .city-label { font-size: 7px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; }
+        .vote-count { font-size: 16px; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.5); }
+        .city-label { font-size: 7px; text-transform: uppercase; font-weight: bold; white-space: nowrap; }
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
-            background-color: #000033; 
-            padding: 30px 40px 40px 40px; 
-            border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
-            width: 100%; 
-            max-width: 600px; 
-            margin: 0 auto; 
+            background-color: #000033; padding: 40px; border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 600px; margin: 0 auto; 
         }
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
         .impossibles-half { flex: 1; min-width: calc(50% - 15px); }
@@ -149,10 +154,7 @@
             width: 100%; padding: 18px; background-color: #FFFFFF; color: #000033;
             font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
             border: none; cursor: pointer; font-size: 16px; margin-top: 15px;
-            transition: background-color 0.2s ease;
         }
-        .impossibles-submit-btn:hover { background-color: #E0E0E0; }
-        .impossibles-submit-btn:disabled { background-color: #999; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -165,13 +167,24 @@
         </h1>
     </div>
 
+    <div class="link-grid">
+        <a href="https://blueberryhill.com/events/the-impossibles-blue-detective/" class="link-button" target="_blank">AUG 21 ST. LOUIS - TICKETS</a>
+        <a href="https://www.reggieslive.com/show/the-impossibles-2/" class="link-button" target="_blank">AUG 22 CHICAGO MATINEE - TICKETS</a>
+        <a href="https://www.themagicbag.com/event-details/the-impossibles-the-boy-detective" class="link-button" target="_blank">AUG 23 DETROIT - TICKETS</a>
+        <a href="https://www.supernovaska.com/tickets" class="link-button" target="_blank">SEP 12 SUPERNOVA FEST - TICKETS</a>
+        <a href="https://thefestfl.com/" class="link-button" target="_blank">OCT 23-25 FEST GAINESVILLE</a>
+        <a href="https://open.spotify.com/artist/6jZ0G33zL8wZfW8uG6A2sF" class="link-button" target="_blank">LISTEN ON SPOTIFY</a>
+        <a href="https://music.apple.com/us/artist/the-impossibles/2908076" class="link-button" target="_blank">LISTEN ON APPLE MUSIC</a>
+        <a href="https://www.youtube.com/@TheImpossiblesAustin" class="link-button" target="_blank">THE IMPOSSIBLES YOUTUBE</a>
+    </div>
+
     <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="impossibles-form-wrapper">
         <form id="tour-vote-form">
             <div class="impossibles-grid">
                 <div class="impossibles-half">
-                    <label class="impossibles-label">Where Should We Play? What City?</label>
+                    <label class="impossibles-label">City</label>
                     <input type="text" name="city" class="impossibles-input" placeholder="Austin" required>
                 </div>
                 <div class="impossibles-half">
@@ -203,7 +216,6 @@
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue, get, set, update, increment } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        // 1. INITIALIZE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyDUDBMlQIsRehOQFRqyoAKlWElWjox4ZOo",
             authDomain: "the-impossibles-sign-up.firebaseapp.com",
@@ -216,174 +228,72 @@
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        // 2. D3 MAP SETUP
-        const width = 975;
-        const height = 610;
+        const width = 975; const height = 610;
         const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
         const path = d3.geoPath().projection(projection);
 
         let mapSvg, linesSvg, labelsLayer, simulation;
 
         d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
-            mapSvg = d3.select("#dynamic-map").append("svg")
-                .attr("viewBox", [0, 0, width, height])
-                .attr("preserveAspectRatio", "xMidYMid meet");
-
-            mapSvg.append("g")
-                .selectAll("path")
-                .data(topojson.feature(us, us.objects.states).features)
-                .join("path")
-                .attr("class", "state-path")
-                .attr("d", path);
-
-            linesSvg = d3.select("#dynamic-map").append("svg")
-                .attr("id", "lines-layer")
-                .attr("viewBox", [0, 0, width, height])
-                .attr("preserveAspectRatio", "xMidYMid meet");
-
+            mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
+            mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
+            linesSvg = d3.select("#dynamic-map").append("svg").attr("id", "lines-layer").attr("viewBox", [0, 0, width, height]);
             labelsLayer = d3.select("#dynamic-map").append("div").attr("id", "labels-layer");
-
             listenToDatabase();
         });
 
-        // 3. RENDER THE DYNAMIC DATA
         function listenToDatabase() {
             const locationsRef = ref(db, 'locations');
             onValue(locationsRef, (snapshot) => {
-                const data = snapshot.val();
-                if (!data) return;
-
+                const data = snapshot.val(); if (!data) return;
                 const nodes = [];
                 Object.keys(data).forEach(key => {
-                    const loc = data[key];
-                    const coords = projection([loc.lng, loc.lat]);
-                    if (coords) {
-                        nodes.push({
-                            city: loc.city,
-                            votes: loc.votes,
-                            anchorX: coords[0],
-                            anchorY: coords[1],
-                            x: coords[0],
-                            y: coords[1] - 40
-                        });
-                    }
+                    const loc = data[key]; const coords = projection([loc.lng, loc.lat]);
+                    if (coords) nodes.push({ city: loc.city, votes: loc.votes, anchorX: coords[0], anchorY: coords[1], x: coords[0], y: coords[1] - 40 });
                 });
-
-                linesSvg.selectAll("*").remove();
-                labelsLayer.selectAll("*").remove();
-
-                linesSvg.selectAll(".anchor-dot")
-                    .data(nodes).join("circle")
-                    .attr("class", "anchor-dot")
-                    .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY)
-                    .attr("r", 4).attr("fill", "#FFFFFF")
-                    .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.6))");
-
-                const link = linesSvg.selectAll(".connection-line")
-                    .data(nodes).join("line").attr("class", "connection-line");
-
-                const bubble = labelsLayer.selectAll(".pin-circle")
-                    .data(nodes).join("div").attr("class", "pin-circle")
-                    .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.city}</div>`);
-
+                linesSvg.selectAll("*").remove(); labelsLayer.selectAll("*").remove();
+                linesSvg.selectAll(".anchor-dot").data(nodes).join("circle").attr("class", "anchor-dot").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 4).attr("fill", "#FFFFFF");
+                const link = linesSvg.selectAll(".connection-line").data(nodes).join("line").attr("class", "connection-line");
+                const bubble = labelsLayer.selectAll(".pin-circle").data(nodes).join("div").attr("class", "pin-circle").html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.city}</div>`);
                 if (simulation) simulation.stop();
-                simulation = d3.forceSimulation(nodes)
-                    .force("collide", d3.forceCollide().radius(28).iterations(4)) 
-                    .force("x", d3.forceX(d => d.anchorX).strength(0.15))
-                    .force("y", d3.forceY(d => d.anchorY - 40).strength(0.15))
-                    .on("tick", () => {
-                        link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY)
-                            .attr("x2", d => d.x).attr("y2", d => d.y);
-                        bubble.style("left", d => `${(d.x / width) * 100}%`)
-                              .style("top", d => `${(d.y / height) * 100}%`);
-                    });
+                simulation = d3.forceSimulation(nodes).force("collide", d3.forceCollide().radius(28)).force("x", d3.forceX(d => d.anchorX).strength(0.15)).force("y", d3.forceY(d => d.anchorY - 40).strength(0.15)).on("tick", () => {
+                    link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
+                    bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
+                });
             });
         }
 
-        // 4. HANDLE FORM SUBMISSION 
         document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
             e.preventDefault();
-            
             const submitBtn = document.getElementById('submit-button');
-            submitBtn.disabled = true;
-            submitBtn.innerText = "Processing...";
-
+            submitBtn.disabled = true; submitBtn.innerText = "Processing...";
             const city = e.target.city.value.trim();
             const state = e.target.state.value.trim().toUpperCase();
-            const firstname = e.target.firstname.value.trim();
-            const lastname = e.target.lastname.value.trim();
             const email = e.target.email.value.trim();
-            
             const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
             try {
-                // A. MAKE.COM SECURE WEBHOOK INTEGRATION
-                // This payload is simple, Make.com will handle mapping it to Sender.net
-                const makePayload = {
-                    email: email,
-                    firstname: firstname,
-                    lastname: lastname,
-                    city: city,
-                    state: state
-                };
+                // Post to Make.com Webhook
+                await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
+                    method: "POST", headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city, state })
+                });
 
-                try {
-                    const makeResponse = await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
-                        method: "POST",
-                        headers: {
-                            "Content-Type": "application/json"
-                        },
-                        body: JSON.stringify(makePayload)
-                    });
-
-                    if (!makeResponse.ok) {
-                        console.error("Warning: Make.com webhook failed to process the request.");
-                    }
-                } catch(makeError) {
-                    console.error("Warning: Could not reach Make.com", makeError);
-                }
-
-                // B. UPDATE FIREBASE VOTE TALLY
+                // Update Firebase
                 const locRef = ref(db, `locations/${locationId}`);
-                const snapshot = await get(locRef);
-
-                if (snapshot.exists()) {
-                    await update(ref(db, 'locations'), {
-                        [`${locationId}/votes`]: increment(1)
-                    });
+                const snap = await get(locRef);
+                if (snap.exists()) {
+                    await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
                     const geoData = await geoRes.json();
-
-                    if (geoData && geoData.length > 0) {
-                        await set(locRef, {
-                            city: city,
-                            state: state,
-                            lat: parseFloat(geoData[0].lat),
-                            lng: parseFloat(geoData[0].lon),
-                            votes: 1
-                        });
-                    } else {
-                        alert("We couldn't find that city on the map. Please check your spelling and try again!");
-                        submitBtn.disabled = false;
-                        submitBtn.innerText = "Cast Your Vote";
-                        return;
+                    if (geoData.length > 0) {
+                        await set(locRef, { city, state, lat: parseFloat(geoData[0].lat), lng: parseFloat(geoData[0].lon), votes: 1 });
                     }
                 }
-
-                e.target.reset();
-                submitBtn.innerText = "Vote Cast! Thank You!";
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.innerText = "Cast Your Vote";
-                }, 3000);
-
-            } catch (error) {
-                console.error("Error casting vote:", error);
-                alert("Something went wrong. Please try again.");
-                submitBtn.disabled = false;
-                submitBtn.innerText = "Cast Your Vote";
-            }
+                e.target.reset(); submitBtn.innerText = "Vote Cast!";
+                setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "Cast Your Vote"; }, 3000);
+            } catch (err) { console.error(err); submitBtn.disabled = false; }
         });
     </script>
 </body>
