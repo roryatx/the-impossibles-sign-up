@@ -81,7 +81,16 @@
             stroke-linejoin: round;
         }
 
-        #lines-layer { z-index: 2; pointer-events: none; }
+        #lines-layer { 
+            position: absolute; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            z-index: 2; 
+            pointer-events: none; 
+        }
+        
         .connection-line { stroke: #FFFFFF; stroke-width: 2px; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.5)); }
 
         #labels-layer {
@@ -117,13 +126,13 @@
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
-            background-color: #000033; padding: 40px; border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 600px; margin: 0 auto; 
-        }
-        .impossibles-form-wrapper h2 {
-            color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px;
-            border-bottom: 2px solid #FFFFFF; padding-bottom: 10px; margin-top: 0;
-            margin-bottom: 30px; font-size: 24px; text-align: center;
+            background-color: #000033; 
+            padding: 30px 40px 40px 40px; 
+            border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); 
+            width: 100%; 
+            max-width: 600px; 
+            margin: 0 auto; 
         }
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
         .impossibles-half { flex: 1; min-width: calc(50% - 15px); }
@@ -159,7 +168,6 @@
     <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="impossibles-form-wrapper">
-        <h2>Bring The Tour To You</h2>
         <form id="tour-vote-form">
             <div class="impossibles-grid">
                 <div class="impossibles-half">
@@ -216,7 +224,6 @@
 
         let mapSvg, linesSvg, labelsLayer, simulation;
 
-        // Draw the base SVG map once
         d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
             mapSvg = d3.select("#dynamic-map").append("svg")
                 .attr("viewBox", [0, 0, width, height])
@@ -236,11 +243,10 @@
 
             labelsLayer = d3.select("#dynamic-map").append("div").attr("id", "labels-layer");
 
-            // START LISTENING TO FIREBASE
             listenToDatabase();
         });
 
-        // 3. RENDER THE DYNAMIC DATA FROM FIREBASE
+        // 3. RENDER THE DYNAMIC DATA
         function listenToDatabase() {
             const locationsRef = ref(db, 'locations');
             onValue(locationsRef, (snapshot) => {
@@ -263,11 +269,9 @@
                     }
                 });
 
-                // Clear previous layers
                 linesSvg.selectAll("*").remove();
                 labelsLayer.selectAll("*").remove();
 
-                // Draw Dots
                 linesSvg.selectAll(".anchor-dot")
                     .data(nodes).join("circle")
                     .attr("class", "anchor-dot")
@@ -275,16 +279,13 @@
                     .attr("r", 4).attr("fill", "#FFFFFF")
                     .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.6))");
 
-                // Draw Lines
                 const link = linesSvg.selectAll(".connection-line")
                     .data(nodes).join("line").attr("class", "connection-line");
 
-                // Draw Bubbles
                 const bubble = labelsLayer.selectAll(".pin-circle")
                     .data(nodes).join("div").attr("class", "pin-circle")
                     .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.city}</div>`);
 
-                // Run Physics Engine
                 if (simulation) simulation.stop();
                 simulation = d3.forceSimulation(nodes)
                     .force("collide", d3.forceCollide().radius(28).iterations(4)) 
@@ -299,7 +300,7 @@
             });
         }
 
-        // 4. HANDLE FORM SUBMISSION (Geocoding & Writing to Firebase)
+        // 4. HANDLE FORM SUBMISSION 
         document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
@@ -309,27 +310,53 @@
 
             const city = e.target.city.value.trim();
             const state = e.target.state.value.trim().toUpperCase();
+            const firstname = e.target.firstname.value.trim();
+            const lastname = e.target.lastname.value.trim();
+            const email = e.target.email.value.trim();
             
-            // Create a unique ID for the database (e.g., "austin_tx")
             const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
             try {
-                // A. Check if the city already exists in Firebase
+                // A. SENDER.NET INTEGRATION
+                const senderToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNDgwYTBmNjU4MThkOWMwZmI1OTZiZjdiMjNkMDg5ZjNlMzA4NThkOTE0ODRmNjdjYmQyNjc0NDVlMjIxMWQ1NGM0OTI5ZmFlNDk1NmQwOTAiLCJpYXQiOjE3Nzc5MjQ5ODQuMzEyNzE1LCJuYmYiOjE3Nzc5MjQ5ODQuMzEyNzE5LCJleHAiOjQ5MzE1MjQ5ODQuMzEwNzY2LCJzdWIiOiIxMDY5ODc4Iiwic2NvcGVzIjpbXX0.K8aEEEVgZOxJPxB9tyY5P5AyidMaU0_mlwr1ZVKHwoNqBG9B7NFO1VeOlCKuJpLvoEO22LWQQgjFprWnMBRuU5SQB18_9uLYquym6WYWWE0fydBQL_09TCPR7cDotFEG415n3Eda1jI7y1tqC-nE_f7rjuFOSR3EJ_kIc_5zT1jDoZrUInNpReb5r2K-4aFp-SJI53YIpVGDK-w6ABd5_qWJBaBtBcu7qjmLX64s5GCnD2kfF86eA-7OprtwZgcQsXNwvXtYEfJodzstcoAkwwgzAqlQt41Gli14-GKjF9jG5ZmLD1M28JcYRrYAtZ16JFGlBXGaFKItPZbYC076sLRKH5xlFdfyCSQJetNJWreytG-WTfo7BWqNziNjK7bY-TFwAwbSVB2tqn_YU17i27G-g5K6iorrj4J1Cpi-UuZ0EHuE818dxb20i9oPRhrpg1LkomW9B7754FHOb2Nl5I3OnTQ4o-gOf9rB8uAzF-rlcChvT9Tcvdiv4Y8GzsC7avL0abeFYNgXtNyzeDMvUQpyKKksQn_WClb0oFis1vXWGeB-crgQrfvrO7DSXXFFLiWqfE-ndz0MX0L7wr9_bD5eHBF8sWwBwv3VbCkbJQPhHqpfzClqOGAgmYl6SZB17FjhSxAt5ciPL-wj6dUhDX-fpdeTGUIzvWWy05tNAlY"; 
+                
+                const senderPayload = {
+                    email: email,
+                    firstname: firstname,
+                    lastname: lastname,
+                    fields: {
+                        city: city,
+                        state: state
+                    }
+                };
+
+                try {
+                    await fetch("https://api.sender.net/v2/subscribers", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${senderToken}`,
+                            "Content-Type": "application/json",
+                            "Accept": "application/json"
+                        },
+                        body: JSON.stringify(senderPayload)
+                    });
+                } catch(senderError) {
+                    console.error("Warning: Could not push to Sender.net", senderError);
+                }
+
+                // B. UPDATE FIREBASE VOTE TALLY
                 const locRef = ref(db, `locations/${locationId}`);
                 const snapshot = await get(locRef);
 
                 if (snapshot.exists()) {
-                    // It exists! Just increment the vote tally.
                     await update(ref(db, 'locations'), {
                         [`${locationId}/votes`]: increment(1)
                     });
                 } else {
-                    // B. It's a new city! Ask OpenStreetMap for the GPS Coordinates
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
                     const geoData = await geoRes.json();
 
                     if (geoData && geoData.length > 0) {
-                        // Create the new entry in Firebase
                         await set(locRef, {
                             city: city,
                             state: state,
@@ -345,11 +372,6 @@
                     }
                 }
 
-                // C. SENDER.NET API POST
-                // This is where we will add the code to push the fan's email to your Sender.net list!
-                // Example: fetch('YOUR_SENDER_WEBHOOK', { method: 'POST', body: ... })
-
-                // Reset Form
                 e.target.reset();
                 submitBtn.innerText = "Vote Cast! Thank You!";
                 setTimeout(() => {
