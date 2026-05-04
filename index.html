@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Impossibles - Tour Vote 2026</title>
+    
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://unpkg.com/topojson-client@3"></script>
+
     <style>
         /* BASE PAGE STYLING */
         body {
@@ -28,13 +32,23 @@
             width: 100%;
             max-width: 1000px;
             margin-bottom: 40px;
-            background-color: transparent; 
+            /* Ensures the D3 SVG scales correctly */
+            aspect-ratio: 975 / 610; 
         }
 
-        .impossibles-map-image {
+        /* The SVG map drawn by D3 */
+        .impossibles-map-wrapper svg {
             width: 100%;
-            height: auto;
+            height: 100%;
             display: block;
+        }
+
+        /* Styling for the drawn states */
+        .state-path {
+            fill: #FFFFFF;
+            stroke: #000000;
+            stroke-width: 0.5px;
+            stroke-linejoin: round;
         }
 
         @keyframes popInPin {
@@ -52,6 +66,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-end;
             z-index: 10;
             opacity: 0; 
             animation: popInPin 0.6s ease-out both;
@@ -63,11 +78,12 @@
             transition: transform 0.2s ease;
         }
 
-        /* Base Inner Elements */
-        .pin-inner-wrapper {
+        /* Re-engineered pin structure for bulletproof anchoring */
+        .pin-anchor-group {
             display: flex;
             flex-direction: column;
             align-items: center;
+            transform-origin: bottom center;
             transition: all 0.3s ease;
         }
 
@@ -85,7 +101,6 @@
             line-height: 1.1;
             box-sizing: border-box;
             padding: 4px;
-            background-color: #000033; /* Default color */
             position: relative;
             z-index: 3;
         }
@@ -97,6 +112,7 @@
             box-shadow: 2px 0 4px rgba(0,0,0,0.2);
             position: relative;
             z-index: 2;
+            margin-top: -2px; /* Pulls slightly into the circle */
         }
 
         .pin-dot {
@@ -105,8 +121,9 @@
             background-color: #FFFFFF;
             border-radius: 50%;
             box-shadow: 0 2px 4px rgba(0,0,0,0.6);
-            margin-top: -1px; 
+            margin-top: -2px; /* Pulls slightly into the line */
             z-index: 4;
+            position: relative;
         }
 
         .vote-count {
@@ -124,26 +141,29 @@
             white-space: nowrap;
         }
 
-        /* --- COLLISION AVOIDANCE CLASSES --- */
-        .diag-right .pin-inner-wrapper {
-            transform: translate(35px, -20px);
+        /* --- BULLETPROOF COLLISION CLASSES --- */
+        /* Rotates the entire upper structure around the dot */
+        .diag-right .pin-anchor-group {
+            transform: rotate(45deg);
+        }
+        /* Counter-rotates the text circle so it stays level */
+        .diag-right .pin-circle {
+            transform: rotate(-45deg);
         }
         .diag-right .pin-line {
-            height: 55px;
-            transform-origin: bottom center;
-            transform: rotate(45deg);
-            margin-top: -15px;
+            height: 45px;
         }
 
-        .diag-left .pin-inner-wrapper {
-            transform: translate(-35px, -20px);
+        .diag-left .pin-anchor-group {
+            transform: rotate(-45deg);
+        }
+        .diag-left .pin-circle {
+            transform: rotate(45deg);
         }
         .diag-left .pin-line {
-            height: 55px;
-            transform-origin: bottom center;
-            transform: rotate(-45deg);
-            margin-top: -15px;
+            height: 45px;
         }
+
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
@@ -193,7 +213,6 @@
 <body>
 
     <div class="impossibles-map-wrapper" id="dynamic-map">
-        <img src="us.png" alt="Voting Map" class="impossibles-map-image">
         </div>
 
     <div class="impossibles-form-wrapper">
@@ -241,68 +260,82 @@
 
         const mapContainer = document.getElementById('dynamic-map');
         const placedPins = [];
-        const COLLISION_THRESHOLD = 8.5; // Increased boundary to ensure bubbles clear each other
+        const COLLISION_THRESHOLD = 8.0; // Distance checking for overlap
 
-        // 2. MATHEMATICAL PROJECTION FORMULA
-        // Calibrated exactly for the Albers curve and boundaries of your us.png image
-        function getMapCoordinates(lat, lng) {
-            const minLng = -125;
-            const maxLng = -66;
-            const minLat = 24.5;
-            const maxLat = 49.5;
+        // D3 Setup configuration based on standard US TopoJSON dimensions
+        const width = 975;
+        const height = 610;
 
-            // Base linear percentages
-            let x = ((lng - minLng) / (maxLng - minLng)) * 100;
-            let y = ((maxLat - lat) / (maxLat - minLat)) * 100;
+        // Create the D3 native projection (Flawless Lat/Lng math)
+        const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
+        const path = d3.geoPath().projection(projection);
 
-            // Albers Horizontal Compression (pinches the bottom inwards)
-            const xCenter = (( -96 - minLng ) / (maxLng - minLng)) * 100; 
-            const distanceFromCenter = x - xCenter;
-            x = x - (distanceFromCenter * (50 - lat) * 0.006);
+        // 2. FETCH MAP DATA AND RENDER
+        d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
+            
+            // Draw the SVG Base Map
+            const svg = d3.select("#dynamic-map").append("svg")
+                .attr("viewBox", [0, 0, width, height])
+                .attr("preserveAspectRatio", "xMidYMid meet");
 
-            // Albers Vertical Curve (pushes edges upwards)
-            const curve = Math.pow(lng + 96, 2) * 0.015;
-            y = y - curve;
+            // Render the states
+            svg.append("g")
+                .selectAll("path")
+                .data(topojson.feature(us, us.objects.states).features)
+                .join("path")
+                .attr("class", "state-path")
+                .attr("d", path);
 
-            // Scale to fit the transparent padding inside us.png
-            x = (x * 0.90) + 4; 
-            y = (y * 0.82) + 2; 
+            // 3. PLOT THE HTML PINS OVER THE SVG
+            plotDynamicPins(databaseSubmissions);
+        });
 
-            return { x, y };
-        }
-
-        // 3. COLLISION AVOIDANCE LOGIC
         function determineDirectionClass(x, y) {
+            // Converts exact pixel values to percentages for collision checking
+            const xPct = (x / width) * 100;
+            const yPct = (y / height) * 100;
+
             for (let pin of placedPins) {
-                let dist = Math.sqrt(Math.pow(pin.x - x, 2) + Math.pow(pin.y - y, 2));
+                let dist = Math.sqrt(Math.pow(pin.x - xPct, 2) + Math.pow(pin.y - yPct, 2));
                 if (dist < COLLISION_THRESHOLD) {
-                    return (x >= pin.x) ? "diag-right" : "diag-left";
+                    return (xPct >= pin.x) ? "diag-right" : "diag-left";
                 }
             }
             return "straight"; 
         }
 
-        // 4. RENDER FUNCTION
-        function plotDynamicMap(dataArray) {
+        function plotDynamicPins(dataArray) {
             let delayCounter = 0.2;
 
             dataArray.forEach(location => {
-                const coords = getMapCoordinates(location.lat, location.lng);
-                const directionClass = determineDirectionClass(coords.x, coords.y);
+                // Let D3 convert the Lat/Lng to exact X/Y map pixels
+                const coords = projection([location.lng, location.lat]);
                 
-                placedPins.push({ x: coords.x, y: coords.y });
+                // If coordinates fall outside the map, skip it
+                if (!coords) return; 
+
+                const pixelX = coords[0];
+                const pixelY = coords[1];
+
+                // Convert pixel coordinates to percentages so HTML overlays perfectly over responsive SVG
+                const leftPct = (pixelX / width) * 100;
+                const topPct = (pixelY / height) * 100;
+
+                const directionClass = determineDirectionClass(pixelX, pixelY);
+                placedPins.push({ x: leftPct, y: topPct });
 
                 const textColor = (location.color === "#E9C46A") ? "#000033" : "#FFFFFF";
                 const textShadow = (location.color === "#E9C46A") ? "none" : "0 1px 3px rgba(0,0,0,0.3)";
 
                 const pinElement = document.createElement('div');
                 pinElement.className = `vote-pin ${directionClass}`;
-                pinElement.style.left = `${coords.x}%`;
-                pinElement.style.top = `${coords.y}%`;
+                pinElement.style.left = `${leftPct}%`;
+                pinElement.style.top = `${topPct}%`;
                 pinElement.style.animationDelay = `${delayCounter}s`;
 
+                // Render the new solid structure
                 pinElement.innerHTML = `
-                    <div class="pin-inner-wrapper">
+                    <div class="pin-anchor-group">
                         <div class="pin-circle" style="background-color: ${location.color}; color: ${textColor};">
                             <div class="vote-count" style="text-shadow: ${textShadow};">${location.votes}</div>
                             <div class="city-label">${location.city}</div>
@@ -316,10 +349,6 @@
                 delayCounter += 0.4; 
             });
         }
-
-        window.onload = () => {
-            plotDynamicMap(databaseSubmissions);
-        };
     </script>
 </body>
 </html>
