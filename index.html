@@ -26,45 +26,30 @@
             padding-bottom: 80px; 
         }
 
-        /* --- XL HEADING STYLING --- */
-        .xl-heading-container {
+        /* --- HERO LOGO STYLING --- */
+        .hero-logo-container {
             width: 100%;
             max-width: 1000px;
-            text-align: center;
             margin-bottom: 30px;
+            text-align: center;
         }
 
-        .xl-heading {
-            color: #FFFFFF;
-            font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: clamp(24px, 4vw, 42px);
-            line-height: 1.2;
-            text-transform: uppercase;
-            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .inline-logo {
-            height: clamp(24px, 4vw, 42px); 
-            width: auto;
-            vertical-align: middle;
-            filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
-            margin-top: -4px; 
+        .full-width-logo {
+            width: 100%;
+            height: auto;
+            max-height: 300px; /* Adjust based on your logo's height preferences */
+            object-fit: contain;
+            filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8));
         }
 
         /* --- BUTTON GRID STYLING --- */
         .link-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
+            gap: 12px;
             width: 100%;
             max-width: 800px;
-            margin-bottom: 30px;
+            margin-bottom: 40px;
         }
 
         .link-button {
@@ -72,18 +57,18 @@
             color: #FFFFFF;
             border: 2px solid #FFFFFF;
             border-radius: 25px;
-            padding: 12px 15px;
+            padding: 14px 15px;
             text-decoration: none;
             text-transform: uppercase;
             font-weight: bold;
-            font-size: 11px;
+            font-size: 12px;
             text-align: center;
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
             justify-content: center;
             letter-spacing: 1px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
 
         .link-button:hover {
@@ -92,9 +77,26 @@
             transform: translateY(-2px);
         }
 
-        /* Mobile Adjustments for Grid */
         @media (max-width: 600px) {
             .link-grid { grid-template-columns: 1fr; }
+        }
+
+        /* --- XL HEADING STYLING --- */
+        .xl-heading-container {
+            width: 100%;
+            max-width: 1000px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .xl-heading {
+            color: #FFFFFF;
+            font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: clamp(20px, 4vw, 36px);
+            line-height: 1.2;
+            text-transform: uppercase;
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            margin: 0;
         }
 
         /* --- THE MAP STYLING --- */
@@ -102,7 +104,7 @@
             position: relative;
             width: 100%;
             max-width: 1000px;
-            margin-bottom: 40px;
+            margin-bottom: 50px;
             aspect-ratio: 975 / 610; 
         }
 
@@ -159,12 +161,8 @@
 </head>
 <body>
 
-    <div class="xl-heading-container">
-        <h1 class="xl-heading">
-            SIGN UP FOR UPDATES AND TELL 
-            <img src="impossibles_logo.png" alt="The Impossibles" class="inline-logo"> 
-            WHERE TO PLAY NEXT!
-        </h1>
+    <div class="hero-logo-container">
+        <img src="impossibles_logo.png" alt="The Impossibles" class="full-width-logo">
     </div>
 
     <div class="link-grid">
@@ -173,9 +171,13 @@
         <a href="https://www.themagicbag.com/event-details/the-impossibles-the-boy-detective" class="link-button" target="_blank">AUG 23 DETROIT - TICKETS</a>
         <a href="https://www.supernovaska.com/tickets" class="link-button" target="_blank">SEP 12 SUPERNOVA FEST - TICKETS</a>
         <a href="https://thefestfl.com/" class="link-button" target="_blank">OCT 23-25 FEST GAINESVILLE</a>
-        <a href="https://open.spotify.com/artist/6jZ0G33zL8wZfW8uG6A2sF" class="link-button" target="_blank">LISTEN ON SPOTIFY</a>
+        <a href="https://open.spotify.com/artist/0kXU9z3XoE9VwWl2v6WwR0" class="link-button" target="_blank">LISTEN ON SPOTIFY</a>
         <a href="https://music.apple.com/us/artist/the-impossibles/2908076" class="link-button" target="_blank">LISTEN ON APPLE MUSIC</a>
         <a href="https://www.youtube.com/@TheImpossiblesAustin" class="link-button" target="_blank">THE IMPOSSIBLES YOUTUBE</a>
+    </div>
+
+    <div class="xl-heading-container">
+        <h1 class="xl-heading">SIGN UP FOR UPDATES AND TELL US WHERE TO PLAY NEXT!</h1>
     </div>
 
     <div class="impossibles-map-wrapper" id="dynamic-map"></div>
@@ -273,13 +275,11 @@
             const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
             try {
-                // Post to Make.com Webhook
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city, state })
                 });
 
-                // Update Firebase
                 const locRef = ref(db, `locations/${locationId}`);
                 const snap = await get(locRef);
                 if (snap.exists()) {
