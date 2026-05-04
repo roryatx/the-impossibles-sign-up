@@ -324,13 +324,13 @@
                     email: email,
                     firstname: firstname,
                     lastname: lastname,
+                    groups: ["axy7Bl"],
                     fields: {
                         what_city_should_we_play: city,
                         what_state_should_we_play: state
                     }
                 };
 
-                // Updated Error-Catching Fetch Block
                 try {
                     const senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
                         method: "POST",
@@ -342,7 +342,6 @@
                         body: JSON.stringify(senderPayload)
                     });
 
-                    // If Sender.net rejects the submission, this will catch the exact reason
                     if (!senderResponse.ok) {
                         const errorData = await senderResponse.json();
                         alert(`Sender.net Error: ${JSON.stringify(errorData)}`);
