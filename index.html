@@ -317,39 +317,30 @@
             const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
             try {
-                // A. SENDER.NET INTEGRATION
-                const senderToken = "eyJ0eXAiOiJKV1QiLCJhbGciOiJSUzI1NiJ9.eyJhdWQiOiIxIiwianRpIjoiNDgwYTBmNjU4MThkOWMwZmI1OTZiZjdiMjNkMDg5ZjNlMzA4NThkOTE0ODRmNjdjYmQyNjc0NDVlMjIxMWQ1NGM0OTI5ZmFlNDk1NmQwOTAiLCJpYXQiOjE3Nzc5MjQ5ODQuMzEyNzE1LCJuYmYiOjE3Nzc5MjQ5ODQuMzEyNzE5LCJleHAiOjQ5MzE1MjQ5ODQuMzEwNzY2LCJzdWIiOiIxMDY5ODc4Iiwic2NvcGVzIjpbXX0.K8aEEEVgZOxJPxB9tyY5P5AyidMaU0_mlwr1ZVKHwoNqBG9B7NFO1VeOlCKuJpLvoEO22LWQQgjFprWnMBRuU5SQB18_9uLYquym6WYWWE0fydBQL_09TCPR7cDotFEG415n3Eda1jI7y1tqC-nE_f7rjuFOSR3EJ_kIc_5zT1jDoZrUInNpReb5r2K-4aFp-SJI53YIpVGDK-w6ABd5_qWJBaBtBcu7qjmLX64s5GCnD2kfF86eA-7OprtwZgcQsXNwvXtYEfJodzstcoAkwwgzAqlQt41Gli14-GKjF9jG5ZmLD1M28JcYRrYAtZ16JFGlBXGaFKItPZbYC076sLRKH5xlFdfyCSQJetNJWreytG-WTfo7BWqNziNjK7bY-TFwAwbSVB2tqn_YU17i27G-g5K6iorrj4J1Cpi-UuZ0EHuE818dxb20i9oPRhrpg1LkomW9B7754FHOb2Nl5I3OnTQ4o-gOf9rB8uAzF-rlcChvT9Tcvdiv4Y8GzsC7avL0abeFYNgXtNyzeDMvUQpyKKksQn_WClb0oFis1vXWGeB-crgQrfvrO7DSXXFFLiWqfE-ndz0MX0L7wr9_bD5eHBF8sWwBwv3VbCkbJQPhHqpfzClqOGAgmYl6SZB17FjhSxAt5ciPL-wj6dUhDX-fpdeTGUIzvWWy05tNAlY"; 
-                
-                const senderPayload = {
+                // A. MAKE.COM SECURE WEBHOOK INTEGRATION
+                // This payload is simple, Make.com will handle mapping it to Sender.net
+                const makePayload = {
                     email: email,
                     firstname: firstname,
                     lastname: lastname,
-                    groups: ["axy7Bl"],
-                    fields: {
-                        what_city_should_we_play: city,
-                        what_state_should_we_play: state
-                    }
+                    city: city,
+                    state: state
                 };
 
                 try {
-                    const senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
+                    const makeResponse = await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
                         method: "POST",
                         headers: {
-                            "Authorization": `Bearer ${senderToken}`,
-                            "Content-Type": "application/json",
-                            "Accept": "application/json"
+                            "Content-Type": "application/json"
                         },
-                        body: JSON.stringify(senderPayload)
+                        body: JSON.stringify(makePayload)
                     });
 
-                    if (!senderResponse.ok) {
-                        const errorData = await senderResponse.json();
-                        alert(`Sender.net Error: ${JSON.stringify(errorData)}`);
-                        console.error("Sender API Error:", errorData);
+                    if (!makeResponse.ok) {
+                        console.error("Warning: Make.com webhook failed to process the request.");
                     }
-                } catch(senderError) {
-                    alert(`Network/CORS Error reaching Sender.net: ${senderError.message}`);
-                    console.error("Warning: Could not push to Sender.net", senderError);
+                } catch(makeError) {
+                    console.error("Warning: Could not reach Make.com", makeError);
                 }
 
                 // B. UPDATE FIREBASE VOTE TALLY
