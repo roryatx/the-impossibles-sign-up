@@ -330,11 +330,9 @@
                     }
                 };
 
-                // NOTE: If you need to map users to a specific group list in Sender, 
-                // you would add: groups: ["YOUR_GROUP_ID"], above the fields object.
-
+                // Updated Error-Catching Fetch Block
                 try {
-                    await fetch("https://api.sender.net/v2/subscribers", {
+                    const senderResponse = await fetch("https://api.sender.net/v2/subscribers", {
                         method: "POST",
                         headers: {
                             "Authorization": `Bearer ${senderToken}`,
@@ -343,7 +341,15 @@
                         },
                         body: JSON.stringify(senderPayload)
                     });
+
+                    // If Sender.net rejects the submission, this will catch the exact reason
+                    if (!senderResponse.ok) {
+                        const errorData = await senderResponse.json();
+                        alert(`Sender.net Error: ${JSON.stringify(errorData)}`);
+                        console.error("Sender API Error:", errorData);
+                    }
                 } catch(senderError) {
+                    alert(`Network/CORS Error reaching Sender.net: ${senderError.message}`);
                     console.error("Warning: Could not push to Sender.net", senderError);
                 }
 
