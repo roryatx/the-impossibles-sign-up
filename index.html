@@ -7,13 +7,21 @@
     <style>
         /* BASE PAGE STYLING */
         body {
-            background-color: #F4F4F9; /* Light grey background outside the form */
+            /* Background uses the newly uploaded file */
+            background-image: url('THEIMPOSSIBLES_Midwest2026_REGGIES_BG.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-repeat: no-repeat;
+            background-color: #000000; /* Fallback */
+            
             font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
             margin: 0;
             padding: 40px 20px;
             display: flex;
             flex-direction: column;
             align-items: center;
+            padding-bottom: 80px; 
         }
 
         /* --- THE MAP STYLING --- */
@@ -22,6 +30,7 @@
             width: 100%;
             max-width: 1000px;
             margin-bottom: 40px;
+            background-color: transparent; 
         }
 
         .impossibles-map-image {
@@ -30,73 +39,114 @@
             display: block;
         }
 
-        @keyframes popInBubble {
-            0% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-            50% { transform: translate(-50%, -50%) scale(1.25); opacity: 1; }
-            75% { transform: translate(-50%, -50%) scale(0.9); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        /* Pop-Up Animation scales from the bottom-center anchor */
+        @keyframes popInPin {
+            0% { transform: translate(-50%, -100%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -100%) scale(1.15); opacity: 1; }
+            75% { transform: translate(-50%, -100%) scale(0.95); opacity: 1; }
+            100% { transform: translate(-50%, -100%) scale(1); opacity: 1; }
         }
 
+        /* --- THE PIN STRUCTURE --- */
         .vote-pin {
             position: absolute;
-            opacity: 0; 
-            transform: translate(-50%, -50%) scale(0);
-            padding: 8px 14px;
-            border-radius: 24px;
-            border: 2px solid #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.35);
-            text-align: center;
-            color: #FFFFFF;
-            line-height: 1.1;
+            /* Anchors the bottom-center of the entire pin to the map coordinate */
+            transform: translate(-50%, -100%);
+            transform-origin: bottom center;
+            
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            min-width: 65px;
             z-index: 10;
-            animation-name: popInBubble;
-            animation-duration: 0.6s;
-            animation-timing-function: ease-out;
-            animation-fill-mode: both; 
+            
+            opacity: 0; 
+            animation: popInPin 0.6s ease-out both;
         }
 
         .vote-pin:hover {
             z-index: 20;
-            transform: translate(-50%, -50%) scale(1.05);
-            transition: transform 0.2s ease, z-index 0s;
+            transform: translate(-50%, -100%) scale(1.05);
+            transition: transform 0.2s ease;
         }
 
+        /* The Perfect Circle */
+        .pin-circle {
+            width: 75px;
+            height: 75px;
+            border-radius: 50%;
+            border: 2px solid #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #FFFFFF;
+            line-height: 1.1;
+            box-sizing: border-box;
+            padding: 4px;
+        }
+
+        /* The Connecting Line */
+        .pin-line {
+            width: 2px;
+            height: 25px; /* Length of the line pointing to the map */
+            background-color: #FFFFFF;
+            box-shadow: 2px 0 4px rgba(0,0,0,0.2);
+        }
+
+        /* The Exact Coordinate Dot */
+        .pin-dot {
+            width: 6px;
+            height: 6px;
+            background-color: #FFFFFF;
+            border-radius: 50%;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.4);
+            margin-top: -1px; /* Blends cleanly with the bottom of the line */
+        }
+
+        /* Text inside the circle */
         .vote-count {
-            font-size: clamp(16px, 2.5vw, 24px); 
+            font-size: 22px;
             font-weight: bold;
             text-shadow: 0 1px 3px rgba(0,0,0,0.3);
+            margin-bottom: 2px;
         }
 
         .city-label {
-            font-size: clamp(9px, 1.2vw, 12px);
+            font-size: 9px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             font-weight: bold;
-            margin-top: 3px;
             white-space: nowrap;
         }
 
-        /* Map Coordinates & Staggered Animation Delays */
-        .pin-sandiego { top: 58%; left: 18%; background-color: #D62828; animation-delay: 0.2s; }
-        .pin-austin { top: 75%; left: 49%; background-color: #2A9D8F; animation-delay: 0.6s; }
-        .pin-chicago { top: 38%; left: 60%; background-color: #F77F00; animation-delay: 1.0s; }
-        .pin-detroit { top: 27%; left: 69%; background-color: #000033; z-index: 11; animation-delay: 1.4s; }
-        .pin-pensacola { top: 75%; left: 68%; background-color: #E9C46A; color: #000033; animation-delay: 1.8s; }
+        /* Map Coordinates & Circle Colors & Animation Delays */
+        /* Coordinates adjusted to point exactly to the cities */
+        .pin-sandiego { top: 57%; left: 14.5%; animation-delay: 0.2s; }
+        .pin-sandiego .pin-circle { background-color: #D62828; }
 
+        .pin-austin { top: 82%; left: 47%; animation-delay: 0.6s; }
+        .pin-austin .pin-circle { background-color: #2A9D8F; }
+
+        .pin-chicago { top: 36%; left: 63%; animation-delay: 1.0s; }
+        .pin-chicago .pin-circle { background-color: #F77F00; }
+
+        .pin-detroit { top: 31%; left: 68.5%; animation-delay: 1.4s; z-index: 11; }
+        .pin-detroit .pin-circle { background-color: #000033; }
+
+        .pin-pensacola { top: 80%; left: 66%; animation-delay: 1.8s; }
+        .pin-pensacola .pin-circle { background-color: #E9C46A; color: #000033; }
+        .pin-pensacola .vote-count { text-shadow: none; } /* Better readability on gold */
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
             background-color: #000033;
             padding: 40px;
             border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
             width: 100%;
             max-width: 600px;
+            margin: 0 auto; 
         }
 
         .impossibles-form-wrapper h2 {
@@ -170,37 +220,56 @@
         .impossibles-submit-btn:hover {
             background-color: #E0E0E0;
         }
-
     </style>
 </head>
 <body>
 
     <div class="impossibles-map-wrapper">
-        <img src="https://cdn.sender.net/email_images/451677/images/all/us.png" alt="Voting Map" class="impossibles-map-image">
+        <img src="us.png" alt="Voting Map" class="impossibles-map-image">
 
         <div class="vote-pin pin-sandiego">
-            <div class="vote-count" id="tally-sandiego">5</div>
-            <div class="city-label">San Diego</div>
+            <div class="pin-circle">
+                <div class="vote-count" id="tally-sandiego">5</div>
+                <div class="city-label">San Diego</div>
+            </div>
+            <div class="pin-line"></div>
+            <div class="pin-dot"></div>
         </div>
 
         <div class="vote-pin pin-austin">
-            <div class="vote-count" id="tally-austin">42</div>
-            <div class="city-label">Austin</div>
+            <div class="pin-circle">
+                <div class="vote-count" id="tally-austin">42</div>
+                <div class="city-label">Austin</div>
+            </div>
+            <div class="pin-line"></div>
+            <div class="pin-dot"></div>
         </div>
 
         <div class="vote-pin pin-chicago">
-            <div class="vote-count" id="tally-chicago">18</div>
-            <div class="city-label">Chicago</div>
+            <div class="pin-circle">
+                <div class="vote-count" id="tally-chicago">18</div>
+                <div class="city-label">Chicago</div>
+            </div>
+            <div class="pin-line"></div>
+            <div class="pin-dot"></div>
         </div>
 
         <div class="vote-pin pin-detroit">
-            <div class="vote-count" id="tally-detroit">12</div>
-            <div class="city-label">Detroit</div>
+            <div class="pin-circle">
+                <div class="vote-count" id="tally-detroit">12</div>
+                <div class="city-label">Detroit</div>
+            </div>
+            <div class="pin-line"></div>
+            <div class="pin-dot"></div>
         </div>
 
         <div class="vote-pin pin-pensacola">
-            <div class="vote-count" id="tally-pensacola">1</div>
-            <div class="city-label">Pensacola</div>
+            <div class="pin-circle">
+                <div class="vote-count" id="tally-pensacola">1</div>
+                <div class="city-label">Pensacola</div>
+            </div>
+            <div class="pin-line"></div>
+            <div class="pin-dot"></div>
         </div>
     </div>
 
@@ -209,7 +278,6 @@
         <h2>Bring The Tour To You</h2>
         
         <form id="tour-vote-form">
-            
             <div class="impossibles-grid">
                 <div class="impossibles-half">
                     <label class="impossibles-label">Where Should We Play? What City?</label>
