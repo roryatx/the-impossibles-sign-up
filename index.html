@@ -36,7 +36,6 @@
 
         .xl-heading {
             color: #FFFFFF;
-            /* Using a heavy, impactful font to match the logo style */
             font-family: 'Impact', 'Arial Black', sans-serif;
             font-size: clamp(24px, 4vw, 42px);
             line-height: 1.2;
@@ -51,11 +50,11 @@
         }
 
         .inline-logo {
-            height: clamp(24px, 4vw, 42px); /* Scales exactly with the text */
+            height: clamp(24px, 4vw, 42px); 
             width: auto;
             vertical-align: middle;
             filter: drop-shadow(0 4px 10px rgba(0,0,0,0.8));
-            margin-top: -4px; /* Optical alignment adjustment */
+            margin-top: -4px; 
         }
 
         /* --- THE MAP STYLING --- */
@@ -64,11 +63,9 @@
             width: 100%;
             max-width: 1000px;
             margin-bottom: 40px;
-            /* Locks the container to the exact D3 mapping ratio */
             aspect-ratio: 975 / 610; 
         }
 
-        /* The SVG map layers */
         .impossibles-map-wrapper svg {
             position: absolute;
             top: 0;
@@ -77,7 +74,6 @@
             height: 100%;
         }
 
-        /* Styling for the drawn states */
         .state-path {
             fill: #FFFFFF;
             stroke: #000000;
@@ -85,38 +81,23 @@
             stroke-linejoin: round;
         }
 
-        /* The layer that holds the dynamic lines */
-        #lines-layer {
-            z-index: 2;
-            pointer-events: none;
-        }
+        #lines-layer { z-index: 2; pointer-events: none; }
+        .connection-line { stroke: #FFFFFF; stroke-width: 2px; filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.5)); }
 
-        .connection-line {
-            stroke: #FFFFFF;
-            stroke-width: 2px;
-            filter: drop-shadow(1px 1px 3px rgba(0,0,0,0.5));
-        }
-
-        /* The layer that holds the HTML bubbles */
         #labels-layer {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            z-index: 10;
-            pointer-events: none; /* Lets you click the map behind them if needed */
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; pointer-events: none; 
         }
 
         /* --- DYNAMIC PIN BUBBLE STYLING --- */
         .pin-circle {
             position: absolute;
-            width: 52px; /* 20% smaller */
+            width: 52px;
             height: 52px;
             border-radius: 50%;
             border: 2px solid #FFFFFF;
-            background-color: #000033; /* Locked to Navy */
-            color: #FFFFFF; /* Locked to White */
+            background-color: #000033;
+            color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6);
             display: flex;
             flex-direction: column;
@@ -125,75 +106,44 @@
             line-height: 1.1;
             box-sizing: border-box;
             padding: 4px;
-            /* Centers the div exactly on the physics engine's X/Y coordinate */
             transform: translate(-50%, -50%); 
             pointer-events: auto;
             transition: transform 0.1s ease;
         }
 
-        .pin-circle:hover {
-            transform: translate(-50%, -50%) scale(1.1);
-            z-index: 20;
-        }
-
-        .vote-count {
-            font-size: 16px; /* Adjusted for smaller bubble */
-            font-weight: bold;
-            text-shadow: 0 1px 3px rgba(0,0,0,0.5);
-            margin-bottom: 1px;
-        }
-
-        .city-label {
-            font-size: 7px; /* Adjusted for smaller bubble */
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
+        .pin-circle:hover { transform: translate(-50%, -50%) scale(1.1); z-index: 20; }
+        .vote-count { font-size: 16px; font-weight: bold; text-shadow: 0 1px 3px rgba(0,0,0,0.5); margin-bottom: 1px; }
+        .city-label { font-size: 7px; text-transform: uppercase; letter-spacing: 0.5px; font-weight: bold; white-space: nowrap; }
 
         /* --- THE FORM STYLING --- */
         .impossibles-form-wrapper {
-            background-color: #000033;
-            padding: 40px;
-            border-radius: 4px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-            width: 100%;
-            max-width: 600px;
-            margin: 0 auto; 
+            background-color: #000033; padding: 40px; border-radius: 4px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5); width: 100%; max-width: 600px; margin: 0 auto; 
         }
-
         .impossibles-form-wrapper h2 {
-            color: #FFFFFF;
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            border-bottom: 2px solid #FFFFFF;
-            padding-bottom: 10px;
-            margin-top: 0;
-            margin-bottom: 30px;
-            font-size: 24px;
-            text-align: center;
+            color: #FFFFFF; text-transform: uppercase; letter-spacing: 2px;
+            border-bottom: 2px solid #FFFFFF; padding-bottom: 10px; margin-top: 0;
+            margin-bottom: 30px; font-size: 24px; text-align: center;
         }
-
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
         .impossibles-half { flex: 1; min-width: calc(50% - 15px); }
         .impossibles-full { flex: 1 1 100%; }
-        
         .impossibles-label {
             display: block; color: #FFFFFF; font-size: 12px; font-weight: bold;
             text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
         }
-        
         .impossibles-input {
             width: 100%; padding: 14px; background-color: #FFFFFF; color: #000033;
             border: none; border-radius: 2px; font-size: 16px; box-sizing: border-box;
         }
-        
         .impossibles-submit-btn {
             width: 100%; padding: 18px; background-color: #FFFFFF; color: #000033;
             font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
             border: none; cursor: pointer; font-size: 16px; margin-top: 15px;
+            transition: background-color 0.2s ease;
         }
         .impossibles-submit-btn:hover { background-color: #E0E0E0; }
+        .impossibles-submit-btn:disabled { background-color: #999; cursor: not-allowed; }
     </style>
 </head>
 <body>
@@ -206,8 +156,7 @@
         </h1>
     </div>
 
-    <div class="impossibles-map-wrapper" id="dynamic-map">
-        </div>
+    <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="impossibles-form-wrapper">
         <h2>Bring The Tour To You</h2>
@@ -215,7 +164,7 @@
             <div class="impossibles-grid">
                 <div class="impossibles-half">
                     <label class="impossibles-label">Where Should We Play? What City?</label>
-                    <input type="text" name="what_city_should_we_play" class="impossibles-input" placeholder="Austin" required>
+                    <input type="text" name="city" class="impossibles-input" placeholder="Austin" required>
                 </div>
                 <div class="impossibles-half">
                     <label class="impossibles-label">State</label>
@@ -238,33 +187,38 @@
                     <input type="email" name="email" class="impossibles-input" placeholder="frances@theimpossibles.net" required>
                 </div>
             </div>
-            <button type="submit" class="impossibles-submit-btn">Cast Your Vote</button>
+            <button type="submit" id="submit-button" class="impossibles-submit-btn">Cast Your Vote</button>
         </form>
     </div>
 
-    <script>
-        // 1. PLACEHOLDER DATA
-        const databaseSubmissions = [
-            { city: "San Diego", votes: 5, lat: 32.7157, lng: -117.1611 },
-            { city: "Austin", votes: 42, lat: 30.2672, lng: -97.7431 },
-            { city: "Chicago", votes: 18, lat: 41.8781, lng: -87.6298 },
-            { city: "Detroit", votes: 12, lat: 42.3314, lng: -83.0458 },
-            { city: "Pensacola", votes: 1, lat: 30.4213, lng: -87.2169 }
-        ];
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, onValue, get, set, update, increment } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        // D3 Setup configuration
+        // 1. INITIALIZE FIREBASE
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUDBMlQIsRehOQFRqyoAKlWElWjox4ZOo",
+            authDomain: "the-impossibles-sign-up.firebaseapp.com",
+            databaseURL: "https://the-impossibles-sign-up-default-rtdb.firebaseio.com",
+            projectId: "the-impossibles-sign-up",
+            storageBucket: "the-impossibles-sign-up.firebasestorage.app",
+            messagingSenderId: "1060998426448",
+            appId: "1:1060998426448:web:d6e8da85edbc9cb6fa8655"
+        };
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 2. D3 MAP SETUP
         const width = 975;
         const height = 610;
-
-        // Native D3 map projection
         const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
         const path = d3.geoPath().projection(projection);
 
-        // 2. FETCH MAP DATA AND RENDER
+        let mapSvg, linesSvg, labelsLayer, simulation;
+
+        // Draw the base SVG map once
         d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
-            
-            // A. Draw the SVG Base Map
-            const mapSvg = d3.select("#dynamic-map").append("svg")
+            mapSvg = d3.select("#dynamic-map").append("svg")
                 .attr("viewBox", [0, 0, width, height])
                 .attr("preserveAspectRatio", "xMidYMid meet");
 
@@ -275,78 +229,140 @@
                 .attr("class", "state-path")
                 .attr("d", path);
 
-            // B. Create the dynamic SVG Lines Layer
-            const linesSvg = d3.select("#dynamic-map").append("svg")
+            linesSvg = d3.select("#dynamic-map").append("svg")
                 .attr("id", "lines-layer")
                 .attr("viewBox", [0, 0, width, height])
                 .attr("preserveAspectRatio", "xMidYMid meet");
 
-            // C. Create the HTML Labels Layer
-            const labelsLayer = d3.select("#dynamic-map").append("div")
-                .attr("id", "labels-layer");
+            labelsLayer = d3.select("#dynamic-map").append("div").attr("id", "labels-layer");
 
-            // 3. PREPARE PHYSICS NODES
-            const nodes = [];
-            databaseSubmissions.forEach(loc => {
-                const coords = projection([loc.lng, loc.lat]);
-                if (coords) {
-                    nodes.push({
-                        city: loc.city,
-                        votes: loc.votes,
-                        anchorX: coords[0], // The fixed dot on the map
-                        anchorY: coords[1],
-                        x: coords[0],       // The starting point for the bubble
-                        y: coords[1] - 40   // Spawns slightly above the city initially
-                    });
-                }
-            });
+            // START LISTENING TO FIREBASE
+            listenToDatabase();
+        });
 
-            // 4. DRAW FIXED CITY DOTS
-            linesSvg.selectAll(".anchor-dot")
-                .data(nodes)
-                .join("circle")
-                .attr("class", "anchor-dot")
-                .attr("cx", d => d.anchorX)
-                .attr("cy", d => d.anchorY)
-                .attr("r", 4)
-                .attr("fill", "#FFFFFF")
-                .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.6))");
+        // 3. RENDER THE DYNAMIC DATA FROM FIREBASE
+        function listenToDatabase() {
+            const locationsRef = ref(db, 'locations');
+            onValue(locationsRef, (snapshot) => {
+                const data = snapshot.val();
+                if (!data) return;
 
-            // 5. DRAW DYNAMIC LINES
-            const link = linesSvg.selectAll(".connection-line")
-                .data(nodes)
-                .join("line")
-                .attr("class", "connection-line");
-
-            // 6. DRAW HTML BUBBLES
-            const bubble = labelsLayer.selectAll(".pin-circle")
-                .data(nodes)
-                .join("div")
-                .attr("class", "pin-circle")
-                .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.city}</div>`);
-
-            // 7. THE PHYSICS ENGINE (Force Simulation)
-            // This prevents bubbles from overlapping and stretches the lines dynamically
-            const simulation = d3.forceSimulation(nodes)
-                // Force bubbles apart if they touch (26px radius + 6px padding = 32px safety zone)
-                .force("collide", d3.forceCollide().radius(32).iterations(4)) 
-                // Pull bubbles toward their specific city anchors
-                .force("x", d3.forceX(d => d.anchorX).strength(0.15))
-                .force("y", d3.forceY(d => d.anchorY - 40).strength(0.15))
-                .on("tick", () => {
-                    
-                    // Update line coordinates on every frame of the physics calculation
-                    link
-                        .attr("x1", d => d.anchorX)
-                        .attr("y1", d => d.anchorY)
-                        .attr("x2", d => d.x)
-                        .attr("y2", d => d.y);
-
-                    // Update HTML bubble positions using exact percentage mapping
-                    bubble
-                        .style("left", d => `${(d.x / width) * 100}%`)
-                        .style("top", d => `${(d.y / height) * 100}%`);
+                const nodes = [];
+                Object.keys(data).forEach(key => {
+                    const loc = data[key];
+                    const coords = projection([loc.lng, loc.lat]);
+                    if (coords) {
+                        nodes.push({
+                            city: loc.city,
+                            votes: loc.votes,
+                            anchorX: coords[0],
+                            anchorY: coords[1],
+                            x: coords[0],
+                            y: coords[1] - 40
+                        });
+                    }
                 });
+
+                // Clear previous layers
+                linesSvg.selectAll("*").remove();
+                labelsLayer.selectAll("*").remove();
+
+                // Draw Dots
+                linesSvg.selectAll(".anchor-dot")
+                    .data(nodes).join("circle")
+                    .attr("class", "anchor-dot")
+                    .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY)
+                    .attr("r", 4).attr("fill", "#FFFFFF")
+                    .style("filter", "drop-shadow(0px 2px 3px rgba(0,0,0,0.6))");
+
+                // Draw Lines
+                const link = linesSvg.selectAll(".connection-line")
+                    .data(nodes).join("line").attr("class", "connection-line");
+
+                // Draw Bubbles
+                const bubble = labelsLayer.selectAll(".pin-circle")
+                    .data(nodes).join("div").attr("class", "pin-circle")
+                    .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.city}</div>`);
+
+                // Run Physics Engine
+                if (simulation) simulation.stop();
+                simulation = d3.forceSimulation(nodes)
+                    .force("collide", d3.forceCollide().radius(28).iterations(4)) 
+                    .force("x", d3.forceX(d => d.anchorX).strength(0.15))
+                    .force("y", d3.forceY(d => d.anchorY - 40).strength(0.15))
+                    .on("tick", () => {
+                        link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY)
+                            .attr("x2", d => d.x).attr("y2", d => d.y);
+                        bubble.style("left", d => `${(d.x / width) * 100}%`)
+                              .style("top", d => `${(d.y / height) * 100}%`);
+                    });
+            });
+        }
+
+        // 4. HANDLE FORM SUBMISSION (Geocoding & Writing to Firebase)
+        document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submit-button');
+            submitBtn.disabled = true;
+            submitBtn.innerText = "Processing...";
+
+            const city = e.target.city.value.trim();
+            const state = e.target.state.value.trim().toUpperCase();
+            
+            // Create a unique ID for the database (e.g., "austin_tx")
+            const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
+
+            try {
+                // A. Check if the city already exists in Firebase
+                const locRef = ref(db, `locations/${locationId}`);
+                const snapshot = await get(locRef);
+
+                if (snapshot.exists()) {
+                    // It exists! Just increment the vote tally.
+                    await update(ref(db, 'locations'), {
+                        [`${locationId}/votes`]: increment(1)
+                    });
+                } else {
+                    // B. It's a new city! Ask OpenStreetMap for the GPS Coordinates
+                    const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
+                    const geoData = await geoRes.json();
+
+                    if (geoData && geoData.length > 0) {
+                        // Create the new entry in Firebase
+                        await set(locRef, {
+                            city: city,
+                            state: state,
+                            lat: parseFloat(geoData[0].lat),
+                            lng: parseFloat(geoData[0].lon),
+                            votes: 1
+                        });
+                    } else {
+                        alert("We couldn't find that city on the map. Please check your spelling and try again!");
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "Cast Your Vote";
+                        return;
+                    }
+                }
+
+                // C. SENDER.NET API POST
+                // This is where we will add the code to push the fan's email to your Sender.net list!
+                // Example: fetch('YOUR_SENDER_WEBHOOK', { method: 'POST', body: ... })
+
+                // Reset Form
+                e.target.reset();
+                submitBtn.innerText = "Vote Cast! Thank You!";
+                setTimeout(() => {
+                    submitBtn.disabled = false;
+                    submitBtn.innerText = "Cast Your Vote";
+                }, 3000);
+
+            } catch (error) {
+                console.error("Error casting vote:", error);
+                alert("Something went wrong. Please try again.");
+                submitBtn.disabled = false;
+                submitBtn.innerText = "Cast Your Vote";
+            }
         });
     </script>
 </body>
