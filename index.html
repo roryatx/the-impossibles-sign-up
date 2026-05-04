@@ -325,10 +325,13 @@
                     firstname: firstname,
                     lastname: lastname,
                     fields: {
-                        city: city,
-                        state: state
+                        what_city_should_we_play: city,
+                        what_state_should_we_play: state
                     }
                 };
+
+                // NOTE: If you need to map users to a specific group list in Sender, 
+                // you would add: groups: ["YOUR_GROUP_ID"], above the fields object.
 
                 try {
                     await fetch("https://api.sender.net/v2/subscribers", {
