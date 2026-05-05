@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hi, we're the Impossibles from Austin, Texas!</title>
+    <title>Hi, we’re the Impossibles from Austin, Texas!</title>
     
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
@@ -52,29 +52,40 @@
         .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; }
         #labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
 
-        /* THE BUBBLE & SQUASH ANIMATION */
+        /* THE BUBBLE & MAC-OPTIMIZED SQUASH ANIMATION */
         .pin-circle {
             position: absolute; width: 58px; height: 58px; border-radius: 50%;
             border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transform: translate(-50%, -50%); 
+            align-items: center; justify-content: center; 
+            transform: translate3d(-50%, -50%, 0); /* translate3d forces hardware acceleration in Safari */
             pointer-events: auto; text-align: center;
             transition: background-color 0.3s ease;
+            will-change: transform;
         }
-        .vote-count { font-size: 16px; font-weight: bold; }
-        .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; }
+        .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
+        .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
 
+        @-webkit-keyframes squash-stretch {
+            0% { transform: translate3d(-50%, -50%, 0) scale(1); }
+            20% { transform: translate3d(-50%, -50%, 0) scale(1.5, 0.6); }
+            40% { transform: translate3d(-50%, -50%, 0) scale(0.7, 1.4); }
+            60% { transform: translate3d(-50%, -50%, 0) scale(1.2, 0.8); }
+            80% { transform: translate3d(-50%, -50%, 0) scale(0.9, 1.1); }
+            100% { transform: translate3d(-50%, -50%, 0) scale(1); }
+        }
         @keyframes squash-stretch {
-            0% { transform: translate(-50%, -50%) scale(1); }
-            20% { transform: translate(-50%, -50%) scale(1.5, 0.6); }
-            40% { transform: translate(-50%, -50%) scale(0.7, 1.4); }
-            60% { transform: translate(-50%, -50%) scale(1.2, 0.8); }
-            80% { transform: translate(-50%, -50%) scale(0.9, 1.1); }
-            100% { transform: translate(-50%, -50%) scale(1); }
+            0% { transform: translate3d(-50%, -50%, 0) scale(1); }
+            20% { transform: translate3d(-50%, -50%, 0) scale(1.5, 0.6); }
+            40% { transform: translate3d(-50%, -50%, 0) scale(0.7, 1.4); }
+            60% { transform: translate3d(-50%, -50%, 0) scale(1.2, 0.8); }
+            80% { transform: translate3d(-50%, -50%, 0) scale(0.9, 1.1); }
+            100% { transform: translate3d(-50%, -50%, 0) scale(1); }
         }
         .just-voted { 
-            animation: squash-stretch 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            background-color: #FFFFFF !important; /* Flashes bright white */
+            -webkit-animation: squash-stretch 0.8s cubic-bezier(0.25, 1, 0.5, 1);
+            animation: squash-stretch 0.8s cubic-bezier(0.25, 1, 0.5, 1); 
+            background-color: #FFFFFF !important; 
             color: #000033 !important;
             border-color: #000033 !important;
             z-index: 100;
@@ -84,6 +95,7 @@
         .confetti {
             position: absolute; width: 10px; height: 10px; border-radius: 50%;
             pointer-events: none; z-index: 50; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+            will-change: transform, opacity;
         }
 
         .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
@@ -205,7 +217,7 @@
         let mapSvg, linesSvg, labelsLayer, simulation;
 
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
-        let pendingJackpotCity = null; // Tracks the city waiting for an animation
+        let pendingJackpotCity = null;
 
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 3958.8;
@@ -239,23 +251,29 @@
                 document.querySelector('.impossibles-map-wrapper').appendChild(particle);
                 
                 const angle = Math.random() * Math.PI * 2;
-                const velocity = 3 + Math.random() * 6;
-                const vx = Math.cos(angle) * velocity;
-                const vy = Math.sin(angle) * velocity;
+                const velocity = 4 + Math.random() * 6;
+                let vx = Math.cos(angle) * velocity;
+                let vy = Math.sin(angle) * velocity;
                 
                 let opacity = 1;
-                let curX = x, curY = y;
+                let curX = 0, curY = 0;
                 
-                const interval = setInterval(() => {
-                    curX += vx; curY += vy + 0.15; // Gravity pull
+                function animate() {
+                    curX += vx;
+                    curY += vy;
+                    vy += 0.2; // Smooth gravity pull
                     opacity -= 0.015;
-                    particle.style.transform = `translate(${curX - x}px, ${curY - y}px)`;
+                    
+                    particle.style.transform = `translate3d(${curX}px, ${curY}px, 0)`;
                     particle.style.opacity = opacity;
-                    if (opacity <= 0) {
-                        clearInterval(interval);
+                    
+                    if (opacity > 0) {
+                        requestAnimationFrame(animate);
+                    } else {
                         particle.remove();
                     }
-                }, 20);
+                }
+                requestAnimationFrame(animate);
             }
         }
 
@@ -268,7 +286,7 @@
                     for (let cluster of clusters) {
                         if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 120) {
                             cluster.votes += loc.votes;
-                            cluster.allNames.push(loc.city.toLowerCase()); // Track all sub-cities
+                            cluster.allNames.push(loc.city.toLowerCase());
                             if (loc.votes > cluster.maxVotes) {
                                 cluster.name = loc.city; cluster.maxVotes = loc.votes;
                                 cluster.lat = loc.lat; cluster.lng = loc.lng;
@@ -294,14 +312,25 @@
                 linesSvg.selectAll(".anchor-dot").data(nodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
                 const link = linesSvg.selectAll(".connection-line").data(nodes).join("line").attr("class", "connection-line");
                 
-                // Keyed data join ensures bubbles don't get deleted and recreated during animation
+                // CRITICAL SAFARI FIX: We use a specific enter/update join so the div elements aren't destroyed/recreated.
+                // This ensures the CSS animation won't get interrupted.
                 const bubble = labelsLayer.selectAll(".pin-circle").data(nodes, d => d.name)
-                    .join("div")
-                    .attr("class", "pin-circle")
-                    .attr("data-names", d => d.allNames.join('|')) // Embed sub-cities for searching
-                    .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.name}</div>`);
+                    .join(
+                        enter => {
+                            const div = enter.append("div").attr("class", "pin-circle");
+                            div.append("div").attr("class", "vote-count");
+                            div.append("div").attr("class", "city-label");
+                            return div;
+                        },
+                        update => update,
+                        exit => exit.remove()
+                    )
+                    .attr("data-names", d => d.allNames.join('|'));
+                
+                // Only update text values safely inside the existing DOM nodes
+                bubble.select(".vote-count").text(d => d.votes);
+                bubble.select(".city-label").text(d => d.name);
 
-                // Trigger Jackpot if pending
                 if (pendingJackpotCity) {
                     const targetNode = nodes.find(n => n.allNames.includes(pendingJackpotCity));
                     if (targetNode) {
@@ -310,7 +339,7 @@
                             domBubbles.forEach(b => {
                                 if (b.getAttribute('data-names').includes(pendingJackpotCity)) {
                                     b.classList.remove('just-voted');
-                                    void b.offsetWidth; // Force reflow
+                                    void b.offsetWidth; // Force a Safari reflow to ensure the animation fires
                                     b.classList.add('just-voted');
                                     
                                     const wrapper = document.querySelector('.impossibles-map-wrapper');
@@ -321,7 +350,7 @@
                             });
                         }, 100);
                     }
-                    pendingJackpotCity = null; // Clear the queue
+                    pendingJackpotCity = null;
                 }
 
                 if (simulation) simulation.stop();
@@ -348,7 +377,6 @@
             const submitBtn = document.getElementById('submit-button');
             submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
             
-            // Immediately smooth scroll to the map
             document.getElementById('dynamic-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             const cityInput = e.target.city.value.trim();
@@ -368,7 +396,6 @@
                     return;
                 }
 
-                // Set the pending city so the map knows to animate it when it redraws
                 pendingJackpotCity = cityInput.toLowerCase();
 
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
