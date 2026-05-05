@@ -66,21 +66,24 @@
 
         @keyframes squash-stretch {
             0% { transform: translate(-50%, -50%) scale(1); }
-            30% { transform: translate(-50%, -50%) scale(1.6, 0.7); }
-            50% { transform: translate(-50%, -50%) scale(0.8, 1.3); }
-            70% { transform: translate(-50%, -50%) scale(1.1, 0.9); }
+            20% { transform: translate(-50%, -50%) scale(1.5, 0.6); }
+            40% { transform: translate(-50%, -50%) scale(0.7, 1.4); }
+            60% { transform: translate(-50%, -50%) scale(1.2, 0.8); }
+            80% { transform: translate(-50%, -50%) scale(0.9, 1.1); }
             100% { transform: translate(-50%, -50%) scale(1); }
         }
         .just-voted { 
-            animation: squash-stretch 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            background-color: #333399 !important;
+            animation: squash-stretch 0.7s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            background-color: #FFFFFF !important; /* Flashes bright white */
+            color: #000033 !important;
+            border-color: #000033 !important;
             z-index: 100;
         }
 
         /* CONFETTI PARTICLES */
         .confetti {
-            position: absolute; width: 8px; height: 8px; border-radius: 50%;
-            pointer-events: none; z-index: 50;
+            position: absolute; width: 10px; height: 10px; border-radius: 50%;
+            pointer-events: none; z-index: 50; box-shadow: 0 2px 5px rgba(0,0,0,0.5);
         }
 
         .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
@@ -142,7 +145,7 @@
         <h1 class="xl-heading">SIGN UP, TELL US WHERE TO PLAY NEXT, AND YOU’LL BE THE FIRST TO KNOW THE LATEST INFO!</h1>
     </div>
 
-    <div class="impossibles-form-wrapper">
+    <div class="impossibles-form-wrapper" id="signup-form-section">
         <form id="tour-vote-form">
             <div class="impossibles-grid">
                 <div class="impossibles-half field-container">
@@ -202,7 +205,7 @@
         let mapSvg, linesSvg, labelsLayer, simulation;
 
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
-        let lastVotedCityName = null;
+        let pendingJackpotCity = null; // Tracks the city waiting for an animation
 
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 3958.8;
@@ -225,8 +228,8 @@
         });
 
         function createConfetti(x, y) {
-            const colors = ['#FFFFFF', '#333399', '#FFFF00', '#FF00FF', '#00FFFF'];
-            for (let i = 0; i < 30; i++) {
+            const colors = ['#FFFFFF', '#FFCC00', '#00FFFF', '#FF00FF', '#333399'];
+            for (let i = 0; i < 40; i++) {
                 const particle = document.createElement('div');
                 particle.className = 'confetti';
                 particle.style.left = x + 'px';
@@ -236,7 +239,7 @@
                 document.querySelector('.impossibles-map-wrapper').appendChild(particle);
                 
                 const angle = Math.random() * Math.PI * 2;
-                const velocity = 2 + Math.random() * 5;
+                const velocity = 3 + Math.random() * 6;
                 const vx = Math.cos(angle) * velocity;
                 const vy = Math.sin(angle) * velocity;
                 
@@ -244,10 +247,9 @@
                 let curX = x, curY = y;
                 
                 const interval = setInterval(() => {
-                    curX += vx; curY += vy + 0.1; // Add gravity
-                    opacity -= 0.02;
-                    particle.style.left = curX + 'px';
-                    particle.style.top = curY + 'px';
+                    curX += vx; curY += vy + 0.15; // Gravity pull
+                    opacity -= 0.015;
+                    particle.style.transform = `translate(${curX - x}px, ${curY - y}px)`;
                     particle.style.opacity = opacity;
                     if (opacity <= 0) {
                         clearInterval(interval);
@@ -266,6 +268,7 @@
                     for (let cluster of clusters) {
                         if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 120) {
                             cluster.votes += loc.votes;
+                            cluster.allNames.push(loc.city.toLowerCase()); // Track all sub-cities
                             if (loc.votes > cluster.maxVotes) {
                                 cluster.name = loc.city; cluster.maxVotes = loc.votes;
                                 cluster.lat = loc.lat; cluster.lng = loc.lng;
@@ -274,7 +277,11 @@
                         }
                     }
                     if (!added) {
-                        clusters.push({ name: loc.city, votes: loc.votes, maxVotes: loc.votes, lat: loc.lat, lng: loc.lng, centerLat: loc.lat, centerLng: loc.lng });
+                        clusters.push({ 
+                            name: loc.city, votes: loc.votes, maxVotes: loc.votes, 
+                            lat: loc.lat, lng: loc.lng, centerLat: loc.lat, centerLng: loc.lng,
+                            allNames: [loc.city.toLowerCase()] 
+                        });
                     }
                 });
 
@@ -283,23 +290,38 @@
                     return coords ? { ...c, anchorX: coords[0], anchorY: coords[1], x: coords[0], y: coords[1] - 50 } : null;
                 }).filter(n => n);
 
-                linesSvg.selectAll("*").remove(); labelsLayer.selectAll("*").remove();
+                linesSvg.selectAll("*").remove();
                 linesSvg.selectAll(".anchor-dot").data(nodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
                 const link = linesSvg.selectAll(".connection-line").data(nodes).join("line").attr("class", "connection-line");
                 
-                const bubble = labelsLayer.selectAll(".pin-circle").data(nodes).join("div")
-                    .attr("class", d => `pin-circle ${d.name === lastVotedCityName ? 'just-voted' : ''}`)
+                // Keyed data join ensures bubbles don't get deleted and recreated during animation
+                const bubble = labelsLayer.selectAll(".pin-circle").data(nodes, d => d.name)
+                    .join("div")
+                    .attr("class", "pin-circle")
+                    .attr("data-names", d => d.allNames.join('|')) // Embed sub-cities for searching
                     .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.name}</div>`);
 
-                // Confetti trigger for new winner
-                if (lastVotedCityName) {
-                    const winner = nodes.find(n => n.name === lastVotedCityName);
-                    if (winner) {
-                        const wrapper = document.querySelector('.impossibles-map-wrapper');
-                        const x = (winner.x / width) * wrapper.offsetWidth;
-                        const y = (winner.y / height) * wrapper.offsetHeight;
-                        createConfetti(x, y);
+                // Trigger Jackpot if pending
+                if (pendingJackpotCity) {
+                    const targetNode = nodes.find(n => n.allNames.includes(pendingJackpotCity));
+                    if (targetNode) {
+                        setTimeout(() => {
+                            const domBubbles = document.querySelectorAll('.pin-circle');
+                            domBubbles.forEach(b => {
+                                if (b.getAttribute('data-names').includes(pendingJackpotCity)) {
+                                    b.classList.remove('just-voted');
+                                    void b.offsetWidth; // Force reflow
+                                    b.classList.add('just-voted');
+                                    
+                                    const wrapper = document.querySelector('.impossibles-map-wrapper');
+                                    const x = (targetNode.x / width) * wrapper.offsetWidth;
+                                    const y = (targetNode.y / height) * wrapper.offsetHeight;
+                                    createConfetti(x, y);
+                                }
+                            });
+                        }, 100);
                     }
+                    pendingJackpotCity = null; // Clear the queue
                 }
 
                 if (simulation) simulation.stop();
@@ -325,6 +347,10 @@
             e.preventDefault();
             const submitBtn = document.getElementById('submit-button');
             submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
+            
+            // Immediately smooth scroll to the map
+            document.getElementById('dynamic-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
+            
             const cityInput = e.target.city.value.trim();
             const state = e.target.state.value.trim().toUpperCase();
             const email = e.target.email.value.trim().toLowerCase();
@@ -342,6 +368,9 @@
                     return;
                 }
 
+                // Set the pending city so the map knows to animate it when it redraws
+                pendingJackpotCity = cityInput.toLowerCase();
+
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city: cityInput, state })
@@ -352,19 +381,28 @@
                 const snap = await get(ref(db, `locations/${locationId}`));
                 if (snap.exists()) {
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
-                    lastVotedCityName = cityInput;
                 } else {
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityInput)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
                     const geoData = await geoRes.json();
-                    if (geoData.length > 0) {
+                    if (geoData && geoData.length > 0) {
                         await set(ref(db, `locations/${locationId}`), { city: cityInput, state, lat: parseFloat(geoData[0].lat), lng: parseFloat(geoData[0].lon), votes: 1 });
-                        lastVotedCityName = cityInput;
+                    } else {
+                        alert("We couldn't find that city on the map. Check your spelling!");
+                        pendingJackpotCity = null;
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "SIGN UP";
+                        return;
                     }
                 }
                 
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
-                setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; lastVotedCityName = null; }, 3000);
-            } catch (err) { console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }
+                setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
+            } catch (err) { 
+                console.error("Submission Error Details:", err); 
+                alert("Something went wrong with the database. Check your Firebase Rules!");
+                pendingJackpotCity = null;
+                submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; 
+            }
         });
     </script>
 </body>
