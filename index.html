@@ -7,8 +7,6 @@
     
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://unpkg.com/topojson-client@3"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
 
     <style>
         body {
@@ -60,29 +58,32 @@
             border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
             align-items: center; justify-content: center; 
-            transform: translate3d(-50%, -50%, 0); 
+            transform: translate(-50%, -50%) scale(1); 
             pointer-events: auto; text-align: center;
             will-change: transform, left, top;
+            transition: background-color 0.3s ease;
         }
         .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
 
-        /* NEW AGGRESSIVE JACKPOT POP */
-        @keyframes jackpot-pop {
-            0% { transform: translate3d(-50%, -50%, 0) scale(1); filter: brightness(1); }
-            15% { transform: translate3d(-50%, -50%, 0) scale(1.8); filter: brightness(1.5) drop-shadow(0 0 15px rgba(255,255,255,0.8)); }
-            35% { transform: translate3d(-50%, -50%, 0) scale(0.85); }
-            55% { transform: translate3d(-50%, -50%, 0) scale(1.15); }
-            75% { transform: translate3d(-50%, -50%, 0) scale(0.95); }
-            100% { transform: translate3d(-50%, -50%, 0) scale(1); filter: brightness(1); }
+        /* THE MASSIVE SQUASH AND STRETCH */
+        @keyframes massive-squash-stretch {
+            0%   { transform: translate(-50%, -50%) scale(1); }
+            15%  { transform: translate(-50%, -50%) scale(2.5, 1.2); } /* Extremely Wide & Flat */
+            30%  { transform: translate(-50%, -50%) scale(1.2, 2.5); } /* Extremely Tall & Thin */
+            50%  { transform: translate(-50%, -50%) scale(2.0, 1.5); }
+            70%  { transform: translate(-50%, -50%) scale(1.5, 2.0); }
+            85%  { transform: translate(-50%, -50%) scale(1.1, 0.9); }
+            100% { transform: translate(-50%, -50%) scale(1); }
         }
         
         .just-voted { 
-            animation: jackpot-pop 0.8s ease-out forwards; 
-            background-color: #000033 !important; 
-            border-color: #FFCC00 !important; /* Gold Border */
-            color: #FFCC00 !important; /* Gold Text */
-            z-index: 999 !important;
+            animation: massive-squash-stretch 1s ease-in-out forwards !important; 
+            background-color: #FFFFFF !important; 
+            border-color: #FFCC00 !important; 
+            color: #000033 !important;
+            box-shadow: 0 0 40px rgba(255, 204, 0, 1) !important; /* Huge Gold Glow */
+            z-index: 9999 !important;
         }
 
         .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
@@ -201,7 +202,16 @@
         const width = 975, height = 610;
         const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
         const path = d3.geoPath().projection(projection);
-        let mapSvg, linesSvg, labelsLayer, simulation;
+        
+        let mapSvg, linesSvg, labelsLayer;
+        
+        // PERSISTENT PHYSICS ENGINE VARIABLES
+        let currentNodes = [];
+        let simulation = d3.forceSimulation()
+            .force("collide", d3.forceCollide().radius(45).strength(1.2))
+            .force("x", d3.forceX(d => d.anchorX).strength(0.12))
+            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12))
+            .alphaDecay(0.04);
 
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
         let pendingJackpotCity = null;
@@ -223,7 +233,7 @@
 
         window.addEventListener('scroll', () => {
             scrollY = window.scrollY; scrollVelocity = scrollY - lastScrollY; lastScrollY = scrollY;
-            if (simulation) simulation.alphaTarget(0.2).restart();
+            simulation.alphaTarget(0.2).restart();
         });
 
         function listenToDatabase() {
@@ -252,16 +262,29 @@
                     }
                 });
 
-                const nodes = clusters.map(c => {
+                // PRESERVE EXISTING X/Y COORDINATES TO STOP THE "JERKY" TELEPORTING
+                const newNodes = clusters.map(c => {
                     const coords = projection([c.lng, c.lat]);
-                    return coords ? { ...c, anchorX: coords[0], anchorY: coords[1], x: coords[0], y: coords[1] - 50 } : null;
+                    if (!coords) return null;
+                    const existingNode = currentNodes.find(n => n.name === c.name);
+                    return { 
+                        ...c, 
+                        anchorX: coords[0], 
+                        anchorY: coords[1], 
+                        x: existingNode ? existingNode.x : coords[0], 
+                        y: existingNode ? existingNode.y : coords[1] - 50,
+                        vx: existingNode ? existingNode.vx : 0,
+                        vy: existingNode ? existingNode.vy : 0
+                    };
                 }).filter(n => n);
+                
+                currentNodes = newNodes;
 
                 linesSvg.selectAll("*").remove();
-                linesSvg.selectAll(".anchor-dot").data(nodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
-                const link = linesSvg.selectAll(".connection-line").data(nodes).join("line").attr("class", "connection-line");
+                linesSvg.selectAll(".anchor-dot").data(currentNodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
+                const link = linesSvg.selectAll(".connection-line").data(currentNodes, d => d.name).join("line").attr("class", "connection-line");
                 
-                const bubble = labelsLayer.selectAll(".pin-circle").data(nodes, d => d.name)
+                const bubble = labelsLayer.selectAll(".pin-circle").data(currentNodes, d => d.name)
                     .join(
                         enter => {
                             const div = enter.append("div").attr("class", "pin-circle");
@@ -277,57 +300,38 @@
                 bubble.select(".vote-count").text(d => d.votes);
                 bubble.select(".city-label").text(d => d.name);
 
-                // FIRE JACKPOT EFFECT
+                // FIRE MASSIVE JACKPOT CSS ANIMATION
                 if (pendingJackpotCity) {
-                    const targetNode = nodes.find(n => n.allNames.includes(pendingJackpotCity));
-                    if (targetNode) {
-                        setTimeout(() => {
-                            const domBubbles = document.querySelectorAll('.pin-circle');
-                            domBubbles.forEach(b => {
-                                if (b.getAttribute('data-names').includes(pendingJackpotCity)) {
-                                    
-                                    // 1. Fire the CSS Pop Animation
-                                    b.classList.remove('just-voted');
-                                    void b.offsetWidth; // Safari Reflow
-                                    b.classList.add('just-voted');
-                                    
-                                    // 2. Fire the Hardware Accelerated Canvas Confetti
-                                    const rect = b.getBoundingClientRect();
-                                    const xOffset = (rect.left + (rect.width / 2)) / window.innerWidth;
-                                    const yOffset = (rect.top + (rect.height / 2)) / window.innerHeight;
-                                    
-                                    confetti({
-                                        particleCount: 100,
-                                        spread: 80,
-                                        startVelocity: 40,
-                                        origin: { x: xOffset, y: yOffset },
-                                        colors: ['#FFFFFF', '#FFCC00', '#00FFFF', '#FF00FF'],
-                                        zIndex: 9999,
-                                        disableForReducedMotion: true
-                                    });
-                                }
-                            });
-                        }, 100);
-                    }
+                    setTimeout(() => {
+                        const domBubbles = document.querySelectorAll('.pin-circle');
+                        domBubbles.forEach(b => {
+                            if (b.getAttribute('data-names').includes(pendingJackpotCity)) {
+                                b.classList.remove('just-voted');
+                                void b.offsetWidth; // Safari Reflow Override
+                                b.classList.add('just-voted');
+                            }
+                        });
+                    }, 100);
                     pendingJackpotCity = null;
                 }
 
-                if (simulation) simulation.stop();
-                simulation = d3.forceSimulation(nodes)
-                    .force("collide", d3.forceCollide().radius(45).strength(1.2))
-                    .force("x", d3.forceX(d => d.anchorX).strength(0.12))
-                    .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12))
-                    .alphaDecay(0.04)
-                    .on("tick", () => {
-                        nodes.forEach(d => {
-                            let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
-                            d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15;
-                            scrollVelocity *= 0.85;
-                        });
-                        link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
-                        bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
-                        if (Math.abs(scrollVelocity) < 0.05) simulation.alphaTarget(0);
+                // APPLY FORCES TO THE PERSISTENT SIMULATION
+                simulation.nodes(currentNodes).on("tick", () => {
+                    currentNodes.forEach(d => {
+                        let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
+                        d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15;
                     });
+                    
+                    scrollVelocity *= 0.85; // Decay scroll velocity properly
+
+                    link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
+                    bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
+                    
+                    if (Math.abs(scrollVelocity) < 0.05) simulation.alphaTarget(0);
+                });
+                
+                // Gently restart simulation without tearing it down
+                simulation.alpha(0.3).restart(); 
             });
         }
 
@@ -336,7 +340,6 @@
             const submitBtn = document.getElementById('submit-button');
             submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
             
-            // Auto-scroll up to Map so fan can watch the jackpot
             document.getElementById('dynamic-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
             
             const cityInput = e.target.city.value.trim();
