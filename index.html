@@ -196,8 +196,16 @@
         const path = d3.geoPath().projection(projection);
         
         let currentNodes = [];
-        let simulation = d3.forceSimulation().force("collide", d3.forceCollide().radius(45)).force("x", d3.forceX(d => d.anchorX).strength(0.12)).force("y", d3.forceY(d => d.anchorY - 50).strength(0.12)).alphaDecay(0.04);
-        let labelsLayer;
+        let simulation = d3.forceSimulation()
+            .force("collide", d3.forceCollide().radius(45).strength(1.2))
+            .force("x", d3.forceX(d => d.anchorX).strength(0.12))
+            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12))
+            .alphaDecay(0.04);
+            
+        let labelsLayer, linesSvg;
+
+        // SCROLL STATE (RESTORED)
+        let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
 
         /* --- 8-BIT AUDIO ENGINE --- */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -233,9 +241,15 @@
         d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
             const mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
             mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
-            d3.select("#dynamic-map").append("svg").attr("id", "lines-layer").attr("viewBox", [0, 0, width, height]);
+            linesSvg = d3.select("#dynamic-map").append("svg").attr("id", "lines-layer").attr("viewBox", [0, 0, width, height]);
             labelsLayer = d3.select("#dynamic-map").append("div").attr("id", "labels-layer");
             listenToDatabase();
+        });
+
+        // PARALLAX SCROLL LISTENER (RESTORED)
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY; scrollVelocity = scrollY - lastScrollY; lastScrollY = scrollY;
+            simulation.alphaTarget(0.2).restart();
         });
 
         function listenToDatabase() {
@@ -270,6 +284,10 @@
                     return { ...c, anchorX: coords[0], anchorY: coords[1], x: existing ? existing.x : coords[0], y: existing ? existing.y : coords[1]-50 };
                 }).filter(n => n);
 
+                linesSvg.selectAll("*").remove();
+                linesSvg.selectAll(".anchor-dot").data(currentNodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
+                const link = linesSvg.selectAll(".connection-line").data(currentNodes, d => d.name).join("line").attr("class", "connection-line");
+
                 const bubble = labelsLayer.selectAll(".pin-wrapper").data(currentNodes, d => d.name)
                     .join(enter => {
                         const w = enter.append("div").attr("class", "pin-wrapper");
@@ -283,9 +301,21 @@
                 bubble.select(".vote-count").text(d => d.votes);
                 bubble.select(".city-label").text(d => d.name);
 
+                // PHYSICS TICK (RESTORED DRIFT & FLOATING)
                 simulation.nodes(currentNodes).on("tick", () => {
+                    currentNodes.forEach(d => {
+                        // Apply inertia from scrolling (or the artificial map ping)
+                        let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
+                        d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15;
+                    });
+                    scrollVelocity *= 0.85;
+
+                    link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
                     bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
+                    
+                    if (Math.abs(scrollVelocity) < 0.05) simulation.alphaTarget(0);
                 });
+                
                 simulation.alpha(0.3).restart();
             });
         }
@@ -318,9 +348,14 @@
                 }
             }, 1200);
 
-            // Phase 3: Settle
+            // Phase 3: Impact! (Settle & Screen Ping)
             setTimeout(() => {
                 play8Bit('settle');
+                
+                // INJECT ARTIFICIAL VELOCITY TO PING THE WHOLE MAP
+                scrollVelocity = -45; 
+                simulation.alpha(0.5).restart();
+                
                 bigB.style.opacity = '0';
                 setTimeout(() => bigB.remove(), 500);
             }, 2000);
