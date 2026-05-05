@@ -39,12 +39,12 @@
         /* SCROLLING INFINITE MAP TRACK */
         .impossibles-map-wrapper { 
             position: relative; width: 100%; max-width: 1000px; 
-            margin-top: -40px; margin-bottom: 10px; /* Counters track padding to keep layout identical */
-            overflow: hidden; /* Masks the infinite pan tunnel safely */
+            margin-top: -40px; margin-bottom: 10px; 
+            overflow: hidden; 
         }
         .map-pan-track { 
             display: flex; flex-direction: row; width: 100%; will-change: transform; 
-            padding: 40px 0; /* Creates 40px of vertical bleed zone so Seattle doesn't clip */
+            padding: 40px 0; 
         }
         .map-instance { 
             width: 100%; flex-shrink: 0; position: relative; aspect-ratio: 975 / 610; 
@@ -66,10 +66,11 @@
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
         .lines-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
         .labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
-        .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; }
+        .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; transition: opacity 0.3s; }
+        .anchor-dot { transition: opacity 0.3s; }
 
         /* BUBBLE WRAPPERS */
-        .pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10; }
+        .pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10; transition: opacity 0.3s; }
         .pin-circle {
             position: absolute; width: 58px; height: 58px; border-radius: 50%;
             border: 2px solid #FFFFFF; color: #FFFFFF;
@@ -234,14 +235,26 @@
             
         let labelsLayer, linesSvg;
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
+        
+        // Handoff state for hiding completely new cities during animation
+        let hiddenNewCityId = null;
 
-        // MS. PACMAN INFINITE SWIPE
+        // MS. PACMAN INFINITE SWIPE + NATIVE INERTIA
         let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
+        let touchVelocity = 0, lastTouchX = 0, isInertia = false;
         const autoPanSpeed = 0.5;
 
         function panLoop() {
             if (window.innerWidth <= 700) {
-                if (!isDragging && !isJackpotPlaying) currentPan -= autoPanSpeed;
+                if (isDragging) {
+                    // Handled inside touchmove
+                } else if (isInertia && !isJackpotPlaying) {
+                    currentPan += touchVelocity;
+                    touchVelocity *= 0.95; // Physical friction decay
+                    if (Math.abs(touchVelocity) < 0.2) isInertia = false;
+                } else if (!isJackpotPlaying) {
+                    currentPan -= autoPanSpeed; // Resume idle pan
+                }
                 
                 const track = document.getElementById('map-track');
                 const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
@@ -260,13 +273,24 @@
         const track = document.getElementById('map-track');
         track.addEventListener('touchstart', (e) => {
             if (window.innerWidth > 700 || isJackpotPlaying) return;
-            isDragging = true; startX = e.touches[0].clientX - currentPan;
+            isDragging = true;
+            isInertia = false;
+            touchVelocity = 0;
+            lastTouchX = e.touches[0].clientX;
+            startX = e.touches[0].clientX - currentPan;
         });
         track.addEventListener('touchmove', (e) => {
             if (window.innerWidth > 700 || !isDragging || isJackpotPlaying) return;
-            currentPan = e.touches[0].clientX - startX;
+            const currentTouchX = e.touches[0].clientX;
+            touchVelocity = currentTouchX - lastTouchX; // Captures momentum
+            lastTouchX = currentTouchX;
+            currentPan = currentTouchX - startX;
         }, { passive: true });
-        track.addEventListener('touchend', () => { isDragging = false; });
+        track.addEventListener('touchend', () => { 
+            isDragging = false; 
+            // Only trigger inertia if the finger had enough swiping velocity
+            if (Math.abs(touchVelocity) > 0.5) isInertia = true;
+        });
 
         /* --- 8-BIT AUDIO ENGINE --- */
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
@@ -353,18 +377,19 @@
                     return { ...c, anchorX: coords[0], anchorY: coords[1], x: existing ? existing.x : coords[0], y: existing ? existing.y : coords[1]-50 };
                 }).filter(n => n);
 
-                // DYNAMIC COLOR MAP (Navy to Royal Blue based on Fan Population/Votes)
                 const maxVotes = Math.max(...currentNodes.map(n => n.votes), 1);
                 window.bubbleColorScale = d3.scaleLinear().domain([1, maxVotes]).range(["#1a1a4d", "#4169e1"]);
 
                 linesSvg.selectAll(".anchor-dot").data(currentNodes, d => d.name)
                     .join("circle").attr("class", "anchor-dot").attr("r", 3).attr("fill", "#cccccc")
-                    .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY);
+                    .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY)
+                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1);
 
                 const link = linesSvg.selectAll(".connection-line").data(currentNodes, d => d.name)
                     .join("line").attr("class", "connection-line")
                     .attr("x1", d => d.anchorX).attr("y1", d => d.anchorY)
-                    .attr("x2", d => d.x).attr("y2", d => d.y);
+                    .attr("x2", d => d.x).attr("y2", d => d.y)
+                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 0.8);
 
                 const bubble = labelsLayer.selectAll(".pin-wrapper").data(currentNodes, d => d.name)
                     .join(enter => {
@@ -374,12 +399,12 @@
                         c.append("div").attr("class", "city-label");
                         return w;
                     }, update => update, exit => exit.remove())
-                    .attr("data-names", d => d.allNames.join('|'));
+                    .attr("data-names", d => d.allNames.join('|'))
+                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1);
                 
                 bubble.select(".vote-count").text(d => d.votes);
                 bubble.select(".city-label").text(d => d.name);
                 
-                // Color scaling dynamically applied to the live map bubbles
                 bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes));
 
                 simulation.nodes(currentNodes).on("tick", () => {
@@ -399,19 +424,17 @@
             });
         }
 
-        async function triggerJackpot(city, votes, lat, lng) {
+        async function triggerJackpot(city, votes, lat, lng, isNewCity) {
             isJackpotPlaying = true; 
             const layer = document.getElementById('jackpot-layer');
             const mapInner = document.getElementById('dynamic-map');
 
-            // Find Exact Gradient Color mathematically
             const targetColor = window.bubbleColorScale ? window.bubbleColorScale(votes) : "#1a1a4d";
 
             const bigB = document.createElement('div');
             bigB.className = 'anim-bubble';
             bigB.style.left = '50%'; bigB.style.top = '50%';
             
-            // Set spawn color scheme mathematically to match the destination bubble
             bigB.style.backgroundColor = targetColor;
             bigB.style.color = '#FFFFFF';
             bigB.style.borderColor = '#FFFFFF';
@@ -447,7 +470,7 @@
                 }
             }, 1000); 
 
-            // Impact
+            // Impact and Handoff
             setTimeout(() => {
                 play8Bit('settle');
                 
@@ -455,6 +478,14 @@
                 simulation.alpha(0.5).restart();
                 
                 bigB.style.opacity = '0';
+
+                // If it was a new city, it is now safe to un-hide the real map bubble underneath
+                if (isNewCity) {
+                    hiddenNewCityId = null;
+                    labelsLayer.selectAll(".pin-wrapper").style("opacity", 1);
+                    linesSvg.selectAll(".anchor-dot").style("opacity", 1);
+                    linesSvg.selectAll(".connection-line").style("opacity", 0.8);
+                }
                 
                 setTimeout(() => {
                     bigB.remove();
@@ -502,15 +533,21 @@
 
                 const locRef = ref(db, `locations/${locationId}`);
                 const snap = await get(locRef);
+                
                 let finalVotes = 1;
+                let isNewCity = false;
+                
                 if (snap.exists()) {
                     finalVotes = snap.val().votes + 1;
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
+                    isNewCity = true;
+                    hiddenNewCityId = cityInput.toLowerCase(); // Masks this city in D3 temporarily
                     await set(locRef, { city: cityInput, state, lat, lng, votes: 1 });
                 }
 
-                triggerJackpot(cityInput, finalVotes, lat, lng);
+                // Pass the flag to the jackpot logic
+                triggerJackpot(cityInput, finalVotes, lat, lng, isNewCity);
                 
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
                 setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
