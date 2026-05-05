@@ -227,16 +227,19 @@
         const path = d3.geoPath().projection(projection);
         
         let currentNodes = [];
+        
+        // RELAXED PHYSICS: Dropped anchor return strength by 200% (from 0.12 down to 0.04)
         let simulation = d3.forceSimulation()
             .force("collide", d3.forceCollide().radius(45).strength(1.2))
-            .force("x", d3.forceX(d => d.anchorX).strength(0.12))
-            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12))
-            .alphaDecay(0.04);
+            .force("x", d3.forceX(d => d.anchorX).strength(0.04)) 
+            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.04)) 
+            .alphaDecay(0.02); // Slower energy decay allows for looser floating
             
         let labelsLayer, linesSvg;
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
         
         let hiddenNewCityId = null;
+        let pendingJackpotUpdate = { city: null, oldVotes: 0 }; // Freezes the map numbers
 
         // SCROLL STATE & INERTIA VARIABLES
         let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
@@ -254,7 +257,6 @@
                 if (isJackpotPanning) {
                     let elapsed = performance.now() - jackpotPanStartTime;
                     let progress = Math.min(elapsed / 800, 1);
-                    // Smooth easeInOutQuad equation
                     let ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
                     currentPan = jackpotStartPan + (jackpotTargetPan - jackpotStartPan) * ease;
                     
@@ -272,7 +274,6 @@
                 const track = document.getElementById('map-track');
                 const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
 
-                // Portal wrap logic
                 if (currentPan <= -instanceWidth) {
                     currentPan += instanceWidth;
                     if (isJackpotPanning) {
@@ -398,7 +399,15 @@
                     const coords = projection([c.lng, c.lat]);
                     if (!coords) return null;
                     const existing = currentNodes.find(n => n.name === c.name);
-                    return { ...c, anchorX: coords[0], anchorY: coords[1], x: existing ? existing.x : coords[0], y: existing ? existing.y : coords[1]-50 };
+                    return { 
+                        ...c, 
+                        anchorX: coords[0], anchorY: coords[1], 
+                        x: existing ? existing.x : coords[0], 
+                        y: existing ? existing.y : coords[1]-50,
+                        // Assings permanent, random gravity weights so they float individually
+                        parallaxY: existing ? existing.parallaxY : (0.5 + Math.random()),
+                        parallaxX: existing ? existing.parallaxX : ((Math.random() - 0.5) * 0.5)
+                    };
                 }).filter(n => n);
 
                 const maxVotes = Math.max(...currentNodes.map(n => n.votes), 1);
@@ -426,22 +435,32 @@
                     .attr("data-names", d => d.allNames.join('|'))
                     .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1);
                 
-                bubble.select(".vote-count").text(d => d.votes);
-                bubble.select(".city-label").text(d => d.name);
+                // RENDER FREEZE LOGIC: 
+                // Only renders the new D3 data if it is not currently the subject of an incoming ghost bubble
+                bubble.select(".vote-count").text(d => {
+                    if (pendingJackpotUpdate.city === d.name.toLowerCase()) {
+                        return pendingJackpotUpdate.oldVotes;
+                    }
+                    return d.votes;
+                });
                 
+                bubble.select(".city-label").text(d => d.name);
                 bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes));
 
                 simulation.nodes(currentNodes).on("tick", () => {
+                    let baseDrift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
+                    
                     currentNodes.forEach(d => {
-                        let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
-                        d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15;
+                        // Applies the unique, randomized float physics directly based on scroll
+                        d.y += baseDrift * d.parallaxY * 0.15;
+                        d.x += baseDrift * d.parallaxX * 0.15;
                     });
                     scrollVelocity *= 0.85;
 
                     link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
                     bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
                     
-                    if (Math.abs(scrollVelocity) < 0.05) simulation.alphaTarget(0);
+                    if (Math.abs(scrollVelocity) > 0.05) simulation.alpha(0.3).restart();
                 });
                 
                 simulation.alpha(0.3).restart();
@@ -456,7 +475,6 @@
             const coords = projection([lng, lat]);
             const targetColor = window.bubbleColorScale ? window.bubbleColorScale(votes) : "#1a1a4d";
             
-            // MATH FOR CENTERING THE DESTINATION BEFORE FLIGHT
             if (window.innerWidth <= 700 && coords) {
                 const instanceWidth = mapInner.offsetWidth;
                 const intrinsicCityX = (coords[0] / width) * instanceWidth;
@@ -529,7 +547,10 @@
                 
                 bigB.style.opacity = '0';
 
-                // Hand-off complete, reveal the invisible underlying city map features
+                // THE NUMBER HANDOFF: Removes the freeze and renders real DB data
+                pendingJackpotUpdate.city = null;
+                labelsLayer.selectAll(".vote-count").text(d => d.votes);
+
                 if (isNewCity) {
                     hiddenNewCityId = null;
                     labelsLayer.selectAll(".pin-wrapper").style("opacity", 1);
@@ -545,7 +566,7 @@
             }, 1800); 
         }
 
-                document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
+        document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-button');
             submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
@@ -581,24 +602,28 @@
 
                 await set(ref(db, `signups/${emailId}`), { timestamp: Date.now() });
 
-                // --- NEW CLUSTER AWARENESS LOGIC ---
+                // Cluster Inheritance Math
                 let finalVotes = 1;
+                let oldVotes = 0;
                 let isNewCity = true;
                 let destLat = lat;
                 let destLng = lng;
                 let displayCity = cityInput;
 
-                // Loop through the live D3 map to check for existing clusters nearby
                 for (let node of currentNodes) {
                     if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 120) {
-                        finalVotes = node.votes + 1; // Inherit the total cluster sum!
+                        oldVotes = node.votes;
+                        finalVotes = oldVotes + 1; 
                         isNewCity = false;
-                        destLat = node.centerLat;    // Fly to the cluster center, not the suburb
+                        destLat = node.centerLat;    
                         destLng = node.centerLng;
-                        displayCity = node.name;     // Inherit the primary cluster name
+                        displayCity = node.name;     
                         break;
                     }
                 }
+
+                // Locks the destination bubble so it won't render the new count until impact
+                pendingJackpotUpdate = { city: displayCity.toLowerCase(), oldVotes: oldVotes };
 
                 const locRef = ref(db, `locations/${locationId}`);
                 const snap = await get(locRef);
@@ -610,7 +635,6 @@
                     await set(locRef, { city: cityInput, state, lat, lng, votes: 1 });
                 }
 
-                // Trigger animation using the clustered data
                 triggerJackpot(displayCity, finalVotes, destLat, destLng, isNewCity);
                 
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
@@ -618,8 +642,6 @@
             } catch (err) { 
                 console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; 
             }
-        });
-    </script>
         });
     </script>
 </body>
