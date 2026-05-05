@@ -236,31 +236,56 @@
         let labelsLayer, linesSvg;
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
         
-        // Handoff state for hiding completely new cities during animation
         let hiddenNewCityId = null;
 
-        // MS. PACMAN INFINITE SWIPE + NATIVE INERTIA
+        // SCROLL STATE & INERTIA VARIABLES
         let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
         let touchVelocity = 0, lastTouchX = 0, isInertia = false;
         const autoPanSpeed = 0.5;
 
+        // JACKPOT PANNING TWEEN VARIABLES
+        let isJackpotPanning = false;
+        let jackpotStartPan = 0;
+        let jackpotTargetPan = 0;
+        let jackpotPanStartTime = 0;
+
         function panLoop() {
             if (window.innerWidth <= 700) {
-                if (isDragging) {
-                    // Handled inside touchmove
+                if (isJackpotPanning) {
+                    let elapsed = performance.now() - jackpotPanStartTime;
+                    let progress = Math.min(elapsed / 800, 1);
+                    // Smooth easeInOutQuad equation
+                    let ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+                    currentPan = jackpotStartPan + (jackpotTargetPan - jackpotStartPan) * ease;
+                    
+                    if (progress === 1) isJackpotPanning = false;
+                } else if (isDragging) {
+                    // CurrentPan is driven safely by touchmove
                 } else if (isInertia && !isJackpotPlaying) {
                     currentPan += touchVelocity;
-                    touchVelocity *= 0.95; // Physical friction decay
+                    touchVelocity *= 0.95; 
                     if (Math.abs(touchVelocity) < 0.2) isInertia = false;
                 } else if (!isJackpotPlaying) {
-                    currentPan -= autoPanSpeed; // Resume idle pan
+                    currentPan -= autoPanSpeed; 
                 }
                 
                 const track = document.getElementById('map-track');
                 const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
 
-                if (currentPan <= -instanceWidth) currentPan += instanceWidth;
-                else if (currentPan > 0) currentPan -= instanceWidth;
+                // Portal wrap logic
+                if (currentPan <= -instanceWidth) {
+                    currentPan += instanceWidth;
+                    if (isJackpotPanning) {
+                        jackpotStartPan += instanceWidth;
+                        jackpotTargetPan += instanceWidth;
+                    }
+                } else if (currentPan > 0) {
+                    currentPan -= instanceWidth;
+                    if (isJackpotPanning) {
+                        jackpotStartPan -= instanceWidth;
+                        jackpotTargetPan -= instanceWidth;
+                    }
+                }
                 
                 track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
             } else {
@@ -282,13 +307,12 @@
         track.addEventListener('touchmove', (e) => {
             if (window.innerWidth > 700 || !isDragging || isJackpotPlaying) return;
             const currentTouchX = e.touches[0].clientX;
-            touchVelocity = currentTouchX - lastTouchX; // Captures momentum
+            touchVelocity = currentTouchX - lastTouchX; 
             lastTouchX = currentTouchX;
             currentPan = currentTouchX - startX;
         }, { passive: true });
         track.addEventListener('touchend', () => { 
             isDragging = false; 
-            // Only trigger inertia if the finger had enough swiping velocity
             if (Math.abs(touchVelocity) > 0.5) isInertia = true;
         });
 
@@ -429,7 +453,28 @@
             const layer = document.getElementById('jackpot-layer');
             const mapInner = document.getElementById('dynamic-map');
 
+            const coords = projection([lng, lat]);
             const targetColor = window.bubbleColorScale ? window.bubbleColorScale(votes) : "#1a1a4d";
+            
+            // MATH FOR CENTERING THE DESTINATION BEFORE FLIGHT
+            if (window.innerWidth <= 700 && coords) {
+                const instanceWidth = mapInner.offsetWidth;
+                const intrinsicCityX = (coords[0] / width) * instanceWidth;
+                
+                let targetPan = (window.innerWidth / 2) - intrinsicCityX;
+                
+                while (targetPan > 0) targetPan -= instanceWidth;
+                while (targetPan <= -instanceWidth) targetPan += instanceWidth;
+                
+                let diff = targetPan - currentPan;
+                if (diff > instanceWidth / 2) targetPan -= instanceWidth;
+                if (diff < -instanceWidth / 2) targetPan += instanceWidth;
+                
+                jackpotStartPan = currentPan;
+                jackpotTargetPan = targetPan;
+                jackpotPanStartTime = performance.now();
+                isJackpotPanning = true;
+            }
 
             const bigB = document.createElement('div');
             bigB.className = 'anim-bubble';
@@ -449,9 +494,14 @@
             // Glide Phase
             setTimeout(() => {
                 const mapRect = mapInner.getBoundingClientRect();
-                const coords = projection([lng, lat]);
                 if (coords) {
-                    const destX = mapRect.left + (coords[0] / width) * mapRect.width + currentPan; 
+                    let destX = mapRect.left + (coords[0] / width) * mapRect.width; 
+                    
+                    if (window.innerWidth <= 700) {
+                        while (destX < -50) destX += mapRect.width;
+                        while (destX > window.innerWidth + 50) destX -= mapRect.width;
+                    }
+                    
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
                     bigB.style.width = '58px'; 
@@ -479,7 +529,7 @@
                 
                 bigB.style.opacity = '0';
 
-                // If it was a new city, it is now safe to un-hide the real map bubble underneath
+                // Hand-off complete, reveal the invisible underlying city map features
                 if (isNewCity) {
                     hiddenNewCityId = null;
                     labelsLayer.selectAll(".pin-wrapper").style("opacity", 1);
@@ -542,11 +592,10 @@
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
                     isNewCity = true;
-                    hiddenNewCityId = cityInput.toLowerCase(); // Masks this city in D3 temporarily
+                    hiddenNewCityId = cityInput.toLowerCase(); 
                     await set(locRef, { city: cityInput, state, lat, lng, votes: 1 });
                 }
 
-                // Pass the flag to the jackpot logic
                 triggerJackpot(cityInput, finalVotes, lat, lng, isNewCity);
                 
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
