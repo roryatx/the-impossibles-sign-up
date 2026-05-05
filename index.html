@@ -38,27 +38,25 @@
 
         /* SCROLLING INFINITE MAP TRACK */
         .impossibles-map-wrapper { 
-            position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; 
-            /* Fixed Bug: Allows Seattle bubble to poke out the top without clipping */
-            overflow-x: visible; overflow-y: visible; 
+            position: relative; width: 100%; max-width: 1000px; 
+            margin-top: -40px; margin-bottom: 10px; /* Counters track padding to keep layout identical */
+            overflow: hidden; /* Masks the infinite pan tunnel safely */
         }
         .map-pan-track { 
             display: flex; flex-direction: row; width: 100%; will-change: transform; 
+            padding: 40px 0; /* Creates 40px of vertical bleed zone so Seattle doesn't clip */
         }
         .map-instance { 
             width: 100%; flex-shrink: 0; position: relative; aspect-ratio: 975 / 610; 
         }
-        #map-clone { display: none; } /* Hidden entirely on desktop */
+        #map-clone { display: none; } 
 
         @media (max-width: 700px) {
             .impossibles-map-wrapper {
                 width: 100vw; margin-left: calc(-50vw + 50%);
-                /* Masks horizontal scrolling edge, allows top to poke out safely */
-                overflow-x: hidden; overflow-y: visible; 
             }
             .map-pan-track { 
-                width: 500vw; /* Track holds two 250vw maps */
-                touch-action: pan-y; /* Tells browsers not to navigate back/forward on horizontal swipes */
+                width: 500vw; touch-action: pan-y; 
             } 
             .map-instance { width: 250vw; }
             #map-clone { display: block; }
@@ -74,10 +72,10 @@
         .pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10; }
         .pin-circle {
             position: absolute; width: 58px; height: 58px; border-radius: 50%;
-            border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
+            border: 2px solid #FFFFFF; color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
             align-items: center; justify-content: center; transform: translate(-50%, -50%); 
-            pointer-events: auto; text-align: center; transition: background-color 0.5s;
+            pointer-events: auto; text-align: center; transition: background-color 1s ease;
         }
         .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
@@ -90,10 +88,10 @@
 
         .anim-bubble {
             position: absolute; width: 220px; height: 220px; border-radius: 50%;
-            background-color: #FFFFFF; color: #000033; border: 6px solid #000033;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: 0 0 100px rgba(255,255,255,0.5); font-weight: 900;
             transform: translate(-50%, -50%) scale(0); opacity: 0;
+            border-style: solid;
             transition: all 0.8s ease-in-out; 
             will-change: top, left, width, height, background-color, transform;
         }
@@ -235,32 +233,21 @@
             .alphaDecay(0.04);
             
         let labelsLayer, linesSvg;
-
-        // SCROLL STATE 
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
 
-        // MS. PACMAN INFINITE SWIPE VARIABLES
-        let currentPan = 0;
-        let isDragging = false;
-        let startX = 0;
-        let isJackpotPlaying = false;
+        // MS. PACMAN INFINITE SWIPE
+        let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
         const autoPanSpeed = 0.5;
 
         function panLoop() {
             if (window.innerWidth <= 700) {
-                if (!isDragging && !isJackpotPlaying) {
-                    currentPan -= autoPanSpeed;
-                }
+                if (!isDragging && !isJackpotPlaying) currentPan -= autoPanSpeed;
                 
                 const track = document.getElementById('map-track');
                 const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
 
-                // The portal wrap logic
-                if (currentPan <= -instanceWidth) {
-                    currentPan += instanceWidth;
-                } else if (currentPan > 0) {
-                    currentPan -= instanceWidth;
-                }
+                if (currentPan <= -instanceWidth) currentPan += instanceWidth;
+                else if (currentPan > 0) currentPan -= instanceWidth;
                 
                 track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
             } else {
@@ -270,12 +257,10 @@
         }
         panLoop();
 
-        // TOUCH DRAG LISTENERS
         const track = document.getElementById('map-track');
         track.addEventListener('touchstart', (e) => {
             if (window.innerWidth > 700 || isJackpotPlaying) return;
-            isDragging = true;
-            startX = e.touches[0].clientX - currentPan;
+            isDragging = true; startX = e.touches[0].clientX - currentPan;
         });
         track.addEventListener('touchmove', (e) => {
             if (window.innerWidth > 700 || !isDragging || isJackpotPlaying) return;
@@ -321,7 +306,6 @@
             linesSvg = d3.select("#dynamic-map").append("svg").attr("class", "lines-layer").attr("viewBox", [0, 0, width, height]);
             labelsLayer = d3.select("#dynamic-map").append("div").attr("class", "labels-layer");
             
-            // MutationObserver silently keeps the clone identical to the main map for the infinite loop
             const cloneObserver = new MutationObserver(() => {
                 if (window.innerWidth <= 700) {
                     document.getElementById('map-clone').innerHTML = document.getElementById('dynamic-map').innerHTML;
@@ -369,8 +353,11 @@
                     return { ...c, anchorX: coords[0], anchorY: coords[1], x: existing ? existing.x : coords[0], y: existing ? existing.y : coords[1]-50 };
                 }).filter(n => n);
 
-                // FIXED MISSING PINS: Initialize attributes instantly on the .join()
-                const dots = linesSvg.selectAll(".anchor-dot").data(currentNodes, d => d.name)
+                // DYNAMIC COLOR MAP (Navy to Royal Blue based on Fan Population/Votes)
+                const maxVotes = Math.max(...currentNodes.map(n => n.votes), 1);
+                window.bubbleColorScale = d3.scaleLinear().domain([1, maxVotes]).range(["#1a1a4d", "#4169e1"]);
+
+                linesSvg.selectAll(".anchor-dot").data(currentNodes, d => d.name)
                     .join("circle").attr("class", "anchor-dot").attr("r", 3).attr("fill", "#cccccc")
                     .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY);
 
@@ -391,6 +378,9 @@
                 
                 bubble.select(".vote-count").text(d => d.votes);
                 bubble.select(".city-label").text(d => d.name);
+                
+                // Color scaling dynamically applied to the live map bubbles
+                bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes));
 
                 simulation.nodes(currentNodes).on("tick", () => {
                     currentNodes.forEach(d => {
@@ -410,26 +400,35 @@
         }
 
         async function triggerJackpot(city, votes, lat, lng) {
-            isJackpotPlaying = true; // Locks mobile pan perfectly in place
+            isJackpotPlaying = true; 
             const layer = document.getElementById('jackpot-layer');
             const mapInner = document.getElementById('dynamic-map');
+
+            // Find Exact Gradient Color mathematically
+            const targetColor = window.bubbleColorScale ? window.bubbleColorScale(votes) : "#1a1a4d";
 
             const bigB = document.createElement('div');
             bigB.className = 'anim-bubble';
             bigB.style.left = '50%'; bigB.style.top = '50%';
+            
+            // Set spawn color scheme mathematically to match the destination bubble
+            bigB.style.backgroundColor = targetColor;
+            bigB.style.color = '#FFFFFF';
+            bigB.style.borderColor = '#FFFFFF';
+            bigB.style.borderWidth = '6px';
+            
             bigB.innerHTML = `<div class="v-big">${votes}</div><div class="c-big">${city}</div>`;
             layer.appendChild(bigB);
 
-            // Phase 1: Appear Center
             play8Bit('spawn');
             requestAnimationFrame(() => bigB.classList.add('show'));
 
-            // Phase 2: State Morph & Glide 
+            // Glide Phase
             setTimeout(() => {
                 const mapRect = mapInner.getBoundingClientRect();
                 const coords = projection([lng, lat]);
                 if (coords) {
-                    const destX = mapRect.left + (coords[0] / width) * mapRect.width + currentPan; // Adjusts glide tracking for panning
+                    const destX = mapRect.left + (coords[0] / width) * mapRect.width + currentPan; 
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
                     bigB.style.width = '58px'; 
@@ -437,9 +436,8 @@
                     bigB.style.left = destX + 'px'; 
                     bigB.style.top = destY + 'px';
                     
-                    bigB.style.backgroundColor = '#1a1a4d';
+                    bigB.style.backgroundColor = targetColor;
                     bigB.style.color = '#FFFFFF';
-                    bigB.style.borderColor = '#FFFFFF';
                     bigB.style.borderWidth = '2px';
                     bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
                     
@@ -449,7 +447,7 @@
                 }
             }, 1000); 
 
-            // Phase 3: Impact
+            // Impact
             setTimeout(() => {
                 play8Bit('settle');
                 
@@ -460,7 +458,7 @@
                 
                 setTimeout(() => {
                     bigB.remove();
-                    isJackpotPlaying = false; // Resumes panning
+                    isJackpotPlaying = false; 
                 }, 500);
                 
             }, 1800); 
