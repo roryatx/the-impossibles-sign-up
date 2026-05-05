@@ -36,12 +36,34 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* MAP AREA */
-        .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; aspect-ratio: 975 / 610; }
-        .impossibles-map-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        /* SCROLLING MOBILE MAP AREA */
+        .impossibles-map-wrapper { 
+            position: relative; width: 100%; max-width: 1000px; 
+            margin-bottom: 50px; overflow: hidden; 
+        }
+        .map-inner { 
+            position: relative; width: 100%; aspect-ratio: 975 / 610; 
+        }
+        
+        @media (max-width: 700px) {
+            .impossibles-map-wrapper { width: 100vw; margin-left: calc(-50vw + 50%); } /* Full screen bleed */
+            .map-inner { 
+                width: 250%; /* Blows the map up */
+                animation: panMapMobile 20s linear infinite; 
+            }
+        }
+
+        @keyframes panMapMobile {
+            0% { transform: translateX(0); opacity: 1; }
+            85% { transform: translateX(calc(-100% + 100vw)); opacity: 1; }
+            90% { transform: translateX(calc(-100% + 100vw)); opacity: 0; }
+            95% { transform: translateX(0); opacity: 0; }
+            100% { transform: translateX(0); opacity: 1; }
+        }
+
+        .map-inner svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
         #lines-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-        .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; }
         #labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
 
         /* BUBBLE WRAPPERS */
@@ -68,12 +90,15 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: 0 0 100px rgba(255,255,255,0.5); font-weight: 900;
             transform: translate(-50%, -50%) scale(0); opacity: 0;
-            transition: all 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); /* Glide effect */
+            
+            /* Precision ease-in-out ensures color morphing finishes exactly as it lands */
+            transition: all 0.8s ease-in-out; 
+            will-change: top, left, width, height, background-color, transform;
         }
 
         .anim-bubble.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        .anim-bubble .v-big { font-size: 64px; }
-        .anim-bubble .c-big { font-size: 18px; text-transform: uppercase; margin-top: -10px; }
+        .anim-bubble .v-big { font-size: 64px; transition: font-size 0.8s ease-in-out; }
+        .anim-bubble .c-big { font-size: 18px; text-transform: uppercase; margin-top: -10px; transition: all 0.8s ease-in-out; }
 
         /* FORM */
         .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
@@ -131,7 +156,9 @@
         <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> YOUTUBE</a>
     </div>
 
-    <div class="impossibles-map-wrapper" id="dynamic-map"></div>
+    <div class="impossibles-map-wrapper">
+        <div class="map-inner" id="dynamic-map"></div>
+    </div>
 
     <div class="xl-heading-container">
         <h1 class="xl-heading">SIGN UP, TELL US WHERE TO PLAY NEXT, AND YOU’LL BE THE FIRST TO KNOW THE LATEST INFO!</h1>
@@ -196,15 +223,9 @@
         const path = d3.geoPath().projection(projection);
         
         let currentNodes = [];
-        let simulation = d3.forceSimulation()
-            .force("collide", d3.forceCollide().radius(45).strength(1.2))
-            .force("x", d3.forceX(d => d.anchorX).strength(0.12))
-            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12))
-            .alphaDecay(0.04);
-            
+        let simulation = d3.forceSimulation().force("collide", d3.forceCollide().radius(45)).force("x", d3.forceX(d => d.anchorX).strength(0.12)).force("y", d3.forceY(d => d.anchorY - 50).strength(0.12)).alphaDecay(0.04);
         let labelsLayer, linesSvg;
 
-        // SCROLL STATE (RESTORED)
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
 
         /* --- 8-BIT AUDIO ENGINE --- */
@@ -246,7 +267,6 @@
             listenToDatabase();
         });
 
-        // PARALLAX SCROLL LISTENER (RESTORED)
         window.addEventListener('scroll', () => {
             scrollY = window.scrollY; scrollVelocity = scrollY - lastScrollY; lastScrollY = scrollY;
             simulation.alphaTarget(0.2).restart();
@@ -301,10 +321,8 @@
                 bubble.select(".vote-count").text(d => d.votes);
                 bubble.select(".city-label").text(d => d.name);
 
-                // PHYSICS TICK (RESTORED DRIFT & FLOATING)
                 simulation.nodes(currentNodes).on("tick", () => {
                     currentNodes.forEach(d => {
-                        // Apply inertia from scrolling (or the artificial map ping)
                         let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
                         d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15;
                     });
@@ -322,6 +340,11 @@
 
         async function triggerJackpot(city, votes, lat, lng) {
             const layer = document.getElementById('jackpot-layer');
+            const mapInner = document.getElementById('dynamic-map');
+            
+            // Pauses the map panning on mobile so the target stands still
+            mapInner.style.animationPlayState = 'paused';
+
             const bigB = document.createElement('div');
             bigB.className = 'anim-bubble';
             bigB.style.left = '50%'; bigB.style.top = '50%';
@@ -332,33 +355,50 @@
             play8Bit('spawn');
             requestAnimationFrame(() => bigB.classList.add('show'));
 
-            // Phase 2: Calculate landing spot relative to fixed screen
+            // Phase 2: State Morph & Glide 
             setTimeout(() => {
-                const mapRect = document.getElementById('dynamic-map').getBoundingClientRect();
+                const mapRect = mapInner.getBoundingClientRect();
                 const coords = projection([lng, lat]);
                 if (coords) {
                     const destX = mapRect.left + (coords[0] / width) * mapRect.width;
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
-                    bigB.style.width = '60px'; bigB.style.height = '60px';
-                    bigB.style.left = destX + 'px'; bigB.style.top = destY + 'px';
-                    bigB.style.fontSize = '8px';
+                    // The Ghost Bubble dynamically mimics the regular bubble's CSS mid-flight
+                    bigB.style.width = '58px'; 
+                    bigB.style.height = '58px';
+                    bigB.style.left = destX + 'px'; 
+                    bigB.style.top = destY + 'px';
+                    
+                    bigB.style.backgroundColor = '#1a1a4d';
+                    bigB.style.color = '#FFFFFF';
+                    bigB.style.borderColor = '#FFFFFF';
+                    bigB.style.borderWidth = '2px';
+                    bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
+                    
                     bigB.querySelector('.v-big').style.fontSize = '16px';
-                    bigB.querySelector('.c-big').style.fontSize = '6px';
+                    bigB.querySelector('.c-big').style.fontSize = '8px';
+                    bigB.querySelector('.c-big').style.marginTop = '0px';
                 }
-            }, 1200);
+            }, 1000); 
 
-            // Phase 3: Impact! (Settle & Screen Ping)
+            // Phase 3: Impact Handoff
             setTimeout(() => {
                 play8Bit('settle');
                 
-                // INJECT ARTIFICIAL VELOCITY TO PING THE WHOLE MAP
+                // Pings the underlying map's physics engine for visual impact
                 scrollVelocity = -45; 
                 simulation.alpha(0.5).restart();
                 
+                // Drops ghost opacity, revealing the identical real bubble beneath it
                 bigB.style.opacity = '0';
-                setTimeout(() => bigB.remove(), 500);
-            }, 2000);
+                
+                setTimeout(() => {
+                    bigB.remove();
+                    // Resumes the mobile map panning
+                    mapInner.style.animationPlayState = 'running'; 
+                }, 500);
+                
+            }, 1800); 
         }
 
         document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
@@ -381,15 +421,13 @@
                     return;
                 }
 
-                // GPS LOOKUP FIRST
                 const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityInput)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
                 const geoData = await geoRes.json();
                 if (!geoData || geoData.length === 0) {
-                    alert("City not found!"); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; return;
+                    alert("City not found! Check spelling."); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; return;
                 }
                 const lat = parseFloat(geoData[0].lat), lng = parseFloat(geoData[0].lon);
 
-                // Start Visuals
                 document.getElementById('dynamic-map').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
