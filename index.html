@@ -22,7 +22,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            padding-bottom: 80px; 
+            padding-bottom: 40px; 
             overflow-x: hidden;
         }
 
@@ -69,7 +69,7 @@
             letter-spacing: 1px; text-align: justify; margin: 0;
         }
 
-        .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; }
+        .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; margin-bottom: 60px;}
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
         .impossibles-half { flex: 1; min-width: 250px; }
         .field-container { position: relative; margin-top: 20px; }
@@ -91,13 +91,25 @@
             font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
         .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
-        
-        /* NEW STYLING FOR ERROR STATE */
-        .impossibles-submit-btn.error {
-            background-color: #ff3333;
-            border-color: #ff3333;
-            color: #FFFFFF;
+        .impossibles-submit-btn.error { background-color: #ff3333; border-color: #ff3333; color: #FFFFFF; }
+
+        /* --- SOCIAL FOOTER STYLING --- */
+        .social-footer {
+            display: flex;
+            justify-content: center;
+            gap: 25px;
+            padding: 40px 0;
+            width: 100%;
         }
+
+        .social-icon {
+            width: 30px;
+            height: 30px;
+            transition: opacity 0.2s ease;
+            filter: brightness(0) invert(1); /* Forces icons to white on transparent background */
+        }
+
+        .social-icon:hover { opacity: 0.7; }
     </style>
 </head>
 <body>
@@ -153,6 +165,18 @@
             </div>
             <button type="submit" id="submit-button" class="impossibles-submit-btn">SIGN UP</button>
         </form>
+    </div>
+
+    <div class="social-footer">
+        <a href="https://www.facebook.com/TheImpossibles/" target="_blank">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/facebook.svg" alt="Facebook" class="social-icon">
+        </a>
+        <a href="https://www.instagram.com/theimpossibles/" target="_blank">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg" alt="Instagram" class="social-icon">
+        </a>
+        <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank">
+            <img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon">
+        </a>
     </div>
 
     <script type="module">
@@ -264,11 +288,10 @@
             const city = e.target.city.value.trim();
             const state = e.target.state.value.trim().toUpperCase();
             const email = e.target.email.value.trim().toLowerCase();
-            const emailId = email.replace(/[^a-z0-9]/g, ''); // Clean ID for Firebase
+            const emailId = email.replace(/[^a-z0-9]/g, '');
             const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
             try {
-                // 1. CHECK FOR DUPLICATE EMAIL IN FIREBASE
                 const emailRef = ref(db, `signups/${emailId}`);
                 const emailSnap = await get(emailRef);
 
@@ -280,21 +303,17 @@
                         submitBtn.innerText = "SIGN UP";
                         submitBtn.classList.remove('error');
                     }, 4000);
-                    return; // STOP HERE - No Sender.net, No Map Update
+                    return;
                 }
 
-                // 2. IF NOT DUPLICATE, PROCEED WITH MAKE.COM (SENDER)
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city, state })
                 });
 
-                // 3. LOG EMAIL IN SIGNUPS TO PREVENT FUTURE ENTRIES
                 await set(emailRef, { timestamp: Date.now() });
 
-                // 4. UPDATE FIREBASE MAP VOTE
-                const locRef = ref(db, `locations/${locationId}`);
-                const snap = await get(locRef);
+                const snap = await get(ref(db, `locations/${locationId}`));
                 if (snap.exists()) {
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
