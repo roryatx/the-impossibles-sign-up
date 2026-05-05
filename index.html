@@ -63,17 +63,23 @@
         .vote-count { font-size: 16px; font-weight: bold; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; }
 
-        /* UPDATED HEADING SECTION - 25% LARGER & JUSTIFIED */
-        .xl-heading-container { width: 100%; max-width: 1000px; margin-bottom: 50px; padding: 0 20px; }
+        /* CONSTRAINED & JUSTIFIED HEADING */
+        .xl-heading-container { 
+            width: 100%; 
+            max-width: 600px; /* Constrained to form width */
+            margin-bottom: 50px; 
+            padding: 0; 
+        }
         .xl-heading { 
             color: #FFFFFF; 
             font-family: 'Impact', 'Arial Black', sans-serif; 
-            font-size: clamp(22px, 4.5vw, 40px); /* Increased size */
-            line-height: 1.2; 
+            font-size: clamp(22px, 4.5vw, 40px);
+            line-height: 1.1; 
             text-transform: uppercase; 
             text-shadow: 0 4px 15px rgba(0,0,0,0.8);
             letter-spacing: 1px;
-            text-align: justify; /* Justified text */
+            text-align: justify; 
+            margin: 0;
         }
 
         /* SLEEK FORM */
@@ -202,7 +208,7 @@
             scrollY = window.scrollY;
             scrollVelocity = scrollY - lastScrollY;
             lastScrollY = scrollY;
-            if (simulation) simulation.alphaTarget(0.2).restart(); // High start alpha for elasticity
+            if (simulation) simulation.alphaTarget(0.2).restart();
         });
 
         function listenToDatabase() {
@@ -238,17 +244,16 @@
                     .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.name}</div>`);
 
                 if (simulation) simulation.stop();
-                // Increased elasticity through higher strength and lower decay
                 simulation = d3.forceSimulation(nodes)
-                    .force("collide", d3.forceCollide().radius(45).strength(1.2)) // 20% higher collision strength
-                    .force("x", d3.forceX(d => d.anchorX).strength(0.12)) // Higher restoring force
+                    .force("collide", d3.forceCollide().radius(45).strength(1.2))
+                    .force("x", d3.forceX(d => d.anchorX).strength(0.12))
                     .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12))
-                    .alphaDecay(0.04) // Lower decay = more wobble
+                    .alphaDecay(0.04)
                     .on("tick", () => {
                         nodes.forEach(d => {
                             let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
-                            d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15; // Snappier drift response
-                            scrollVelocity *= 0.85; // Faster decay for the velocity itself
+                            d.y += (drift - (d.y - (d.anchorY - 50))) * 0.15;
+                            scrollVelocity *= 0.85;
                         });
 
                         link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
