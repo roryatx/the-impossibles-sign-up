@@ -23,50 +23,29 @@
             flex-direction: column;
             align-items: center;
             padding-bottom: 80px; 
+            overflow-x: hidden;
         }
 
         .hero-logo-container { width: 100%; max-width: 1000px; margin-bottom: 30px; text-align: center; }
         .full-width-logo { width: 100%; height: auto; max-height: 300px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
 
-        /* --- MODERN NESTED BUTTONS --- */
         .link-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 850px; margin-bottom: 40px; }
-        
         .link-button {
-            background-color: #000033;
-            color: #FFFFFF;
-            border: 2px solid #FFFFFF;
-            border-radius: 40px;
-            padding: 6px 20px 6px 8px; /* Flipped padding */
-            text-decoration: none;
-            text-transform: uppercase;
-            font-weight: 900;
-            font-size: 16px; /* Bigger font */
-            transition: all 0.2s ease;
-            display: flex;
-            align-items: center;
-            justify-content: flex-start;
-            letter-spacing: 1px;
+            background-color: #000033; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 40px;
+            padding: 6px 20px 6px 8px; text-decoration: none; text-transform: uppercase;
+            font-weight: 900; font-size: 16px; transition: all 0.2s ease;
+            display: flex; align-items: center; justify-content: flex-start; letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-
         .status-bubble {
-            background-color: #FFFFFF;
-            color: #000033;
-            padding: 8px 18px;
-            border-radius: 25px;
-            font-size: 12px;
-            font-weight: 900;
-            margin-right: 15px; /* Flipped margin */
-            min-width: 70px;
-            text-align: center;
+            background-color: #FFFFFF; color: #000033; padding: 8px 18px; border-radius: 25px;
+            font-size: 12px; font-weight: 900; margin-right: 15px; min-width: 70px; text-align: center;
         }
-
         .link-button:hover { background-color: #1a1a4d; transform: scale(1.02); }
-        .link-button:hover .status-bubble { background-color: #E0E0E0; }
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* --- MAP & LAYOUT --- */
+        /* MAP AREA */
         .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; aspect-ratio: 975 / 610; }
         .impossibles-map-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
@@ -84,55 +63,40 @@
         .vote-count { font-size: 16px; font-weight: bold; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; }
 
-        .xl-heading-container { width: 100%; max-width: 1000px; text-align: center; margin-bottom: 40px; }
-        .xl-heading { color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(24px, 4vw, 42px); line-height: 1.2; text-transform: uppercase; }
+        /* UPDATED HEADING SECTION */
+        .xl-heading-container { width: 100%; max-width: 1000px; text-align: center; margin-bottom: 40px; padding: 0 20px; }
+        .xl-heading { 
+            color: #FFFFFF; 
+            font-family: 'Impact', 'Arial Black', sans-serif; 
+            font-size: clamp(18px, 3.5vw, 32px); 
+            line-height: 1.4; 
+            text-transform: uppercase; 
+            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            letter-spacing: 1px;
+        }
 
-        /* --- SLEEK MINIMALIST FORM --- */
+        /* SLEEK FORM */
         .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; }
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
         .impossibles-half { flex: 1; min-width: 250px; }
         .impossibles-full { flex: 1 1 100%; }
-        
         .field-container { position: relative; margin-top: 20px; }
-        
         .impossibles-input {
-            width: 100%;
-            padding: 10px 0;
-            background: transparent;
-            border: none;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
-            color: #FFFFFF;
-            font-size: 18px;
-            transition: border-color 0.3s ease;
+            width: 100%; padding: 10px 0; background: transparent; border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5); color: #FFFFFF; font-size: 18px;
         }
-
         .impossibles-input:focus { outline: none; border-bottom: 2px solid #FFFFFF; }
-        
         .impossibles-label {
-            position: absolute;
-            top: 10px;
-            left: 0;
-            color: rgba(255, 255, 255, 0.6);
-            font-size: 12px;
-            font-weight: bold;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            pointer-events: none;
-            transition: all 0.3s ease;
+            position: absolute; top: 10px; left: 0; color: rgba(255, 255, 255, 0.6);
+            font-size: 12px; font-weight: bold; text-transform: uppercase; pointer-events: none; transition: 0.3s;
         }
-
-        /* Float label logic */
         .impossibles-input:focus + .impossibles-label,
-        .impossibles-input:not(:placeholder-shown) + .impossibles-label {
-            top: -15px;
-            font-size: 10px;
-            color: #FFFFFF;
-        }
+        .impossibles-input:not(:placeholder-shown) + .impossibles-label { top: -15px; font-size: 10px; color: #FFFFFF; }
 
         .impossibles-submit-btn {
             display: block; width: 40%; margin: 20px auto 0; padding: 15px;
             background-color: transparent; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 40px;
-            font-weight: 900; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;
+            font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
         .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
     </style>
@@ -157,7 +121,7 @@
     <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="xl-heading-container">
-        <h1 class="xl-heading">SIGN UP FOR UPDATES & VOTE FOR THE NEXT TOUR CITY</h1>
+        <h1 class="xl-heading">SIGN UP, TELL US WHERE TO PLAY NEXT, AND YOU’LL BE THE FIRST TO KNOW THE LATEST INFO!</h1>
     </div>
 
     <div class="impossibles-form-wrapper">
@@ -213,6 +177,11 @@
         const path = d3.geoPath().projection(projection);
         let mapSvg, linesSvg, labelsLayer, simulation;
 
+        // PARALLAX STATE
+        let scrollY = window.scrollY;
+        let lastScrollY = window.scrollY;
+        let scrollVelocity = 0;
+
         function getDistance(lat1, lon1, lat2, lon2) {
             const R = 3958.8;
             const dLat = (lat2 - lat1) * Math.PI / 180;
@@ -227,6 +196,14 @@
             linesSvg = d3.select("#dynamic-map").append("svg").attr("id", "lines-layer").attr("viewBox", [0, 0, width, height]);
             labelsLayer = d3.select("#dynamic-map").append("div").attr("id", "labels-layer");
             listenToDatabase();
+        });
+
+        // SCROLL LISTENER FOR PARALLAX
+        window.addEventListener('scroll', () => {
+            scrollY = window.scrollY;
+            scrollVelocity = scrollY - lastScrollY;
+            lastScrollY = scrollY;
+            if (simulation) simulation.alphaTarget(0.1).restart();
         });
 
         function listenToDatabase() {
@@ -262,10 +239,25 @@
                     .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.name}</div>`);
 
                 if (simulation) simulation.stop();
-                simulation = d3.forceSimulation(nodes).force("collide", d3.forceCollide().radius(35)).force("x", d3.forceX(d => d.anchorX).strength(0.2)).force("y", d3.forceY(d => d.anchorY - 50).strength(0.2))
+                simulation = d3.forceSimulation(nodes)
+                    .force("collide", d3.forceCollide().radius(40))
+                    .force("x", d3.forceX(d => d.anchorX).strength(0.1))
+                    .force("y", d3.forceY(d => d.anchorY - 50).strength(0.1))
+                    .alphaDecay(0.05)
                     .on("tick", () => {
+                        nodes.forEach(d => {
+                            // APPLY PARALLAX DRIFT
+                            let drift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
+                            d.y += (drift - (d.y - (d.anchorY - 50))) * 0.1;
+                            
+                            // Slow velocity decay so it returns to normal
+                            scrollVelocity *= 0.9;
+                        });
+
                         link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
                         bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
+                        
+                        if (Math.abs(scrollVelocity) < 0.1) simulation.alphaTarget(0);
                     });
             });
         }
