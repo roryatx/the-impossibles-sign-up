@@ -45,7 +45,6 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* MAP AREA */
         .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; aspect-ratio: 975 / 610; }
         .impossibles-map-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
@@ -63,30 +62,16 @@
         .vote-count { font-size: 16px; font-weight: bold; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; }
 
-        /* CONSTRAINED & JUSTIFIED HEADING */
-        .xl-heading-container { 
-            width: 100%; 
-            max-width: 600px; /* Constrained to form width */
-            margin-bottom: 50px; 
-            padding: 0; 
-        }
+        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
         .xl-heading { 
-            color: #FFFFFF; 
-            font-family: 'Impact', 'Arial Black', sans-serif; 
-            font-size: clamp(22px, 4.5vw, 40px);
-            line-height: 1.1; 
-            text-transform: uppercase; 
-            text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            letter-spacing: 1px;
-            text-align: justify; 
-            margin: 0;
+            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(22px, 4.5vw, 40px);
+            line-height: 1.1; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            letter-spacing: 1px; text-align: justify; margin: 0;
         }
 
-        /* SLEEK FORM */
         .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; }
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
         .impossibles-half { flex: 1; min-width: 250px; }
-        .impossibles-full { flex: 1 1 100%; }
         .field-container { position: relative; margin-top: 20px; }
         .impossibles-input {
             width: 100%; padding: 10px 0; background: transparent; border: none;
@@ -106,6 +91,13 @@
             font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s;
         }
         .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
+        
+        /* NEW STYLING FOR ERROR STATE */
+        .impossibles-submit-btn.error {
+            background-color: #ff3333;
+            border-color: #ff3333;
+            color: #FFFFFF;
+        }
     </style>
 </head>
 <body>
@@ -268,17 +260,41 @@
             e.preventDefault();
             const submitBtn = document.getElementById('submit-button');
             submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
+            
             const city = e.target.city.value.trim();
             const state = e.target.state.value.trim().toUpperCase();
+            const email = e.target.email.value.trim().toLowerCase();
+            const emailId = email.replace(/[^a-z0-9]/g, ''); // Clean ID for Firebase
             const locationId = `${city.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
             try {
+                // 1. CHECK FOR DUPLICATE EMAIL IN FIREBASE
+                const emailRef = ref(db, `signups/${emailId}`);
+                const emailSnap = await get(emailRef);
+
+                if (emailSnap.exists()) {
+                    submitBtn.innerText = "ALREADY SIGNED UP!";
+                    submitBtn.classList.add('error');
+                    setTimeout(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerText = "SIGN UP";
+                        submitBtn.classList.remove('error');
+                    }, 4000);
+                    return; // STOP HERE - No Sender.net, No Map Update
+                }
+
+                // 2. IF NOT DUPLICATE, PROCEED WITH MAKE.COM (SENDER)
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
                     method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email: e.target.email.value, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city, state })
+                    body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city, state })
                 });
 
-                const snap = await get(ref(db, `locations/${locationId}`));
+                // 3. LOG EMAIL IN SIGNUPS TO PREVENT FUTURE ENTRIES
+                await set(emailRef, { timestamp: Date.now() });
+
+                // 4. UPDATE FIREBASE MAP VOTE
+                const locRef = ref(db, `locations/${locationId}`);
+                const snap = await get(locRef);
                 if (snap.exists()) {
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
@@ -288,9 +304,14 @@
                         await set(ref(db, `locations/${locationId}`), { city, state, lat: parseFloat(geoData[0].lat), lng: parseFloat(geoData[0].lon), votes: 1 });
                     }
                 }
+                
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
                 setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
-            } catch (err) { console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }
+            } catch (err) { 
+                console.error(err); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = "SIGN UP"; 
+            }
         });
     </script>
 </body>
