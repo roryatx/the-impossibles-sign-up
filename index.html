@@ -545,7 +545,7 @@
             }, 1800); 
         }
 
-        document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
+                document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-button');
             submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
@@ -581,28 +581,45 @@
 
                 await set(ref(db, `signups/${emailId}`), { timestamp: Date.now() });
 
+                // --- NEW CLUSTER AWARENESS LOGIC ---
+                let finalVotes = 1;
+                let isNewCity = true;
+                let destLat = lat;
+                let destLng = lng;
+                let displayCity = cityInput;
+
+                // Loop through the live D3 map to check for existing clusters nearby
+                for (let node of currentNodes) {
+                    if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 120) {
+                        finalVotes = node.votes + 1; // Inherit the total cluster sum!
+                        isNewCity = false;
+                        destLat = node.centerLat;    // Fly to the cluster center, not the suburb
+                        destLng = node.centerLng;
+                        displayCity = node.name;     // Inherit the primary cluster name
+                        break;
+                    }
+                }
+
                 const locRef = ref(db, `locations/${locationId}`);
                 const snap = await get(locRef);
                 
-                let finalVotes = 1;
-                let isNewCity = false;
-                
                 if (snap.exists()) {
-                    finalVotes = snap.val().votes + 1;
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
-                    isNewCity = true;
-                    hiddenNewCityId = cityInput.toLowerCase(); 
+                    if (isNewCity) hiddenNewCityId = cityInput.toLowerCase(); 
                     await set(locRef, { city: cityInput, state, lat, lng, votes: 1 });
                 }
 
-                triggerJackpot(cityInput, finalVotes, lat, lng, isNewCity);
+                // Trigger animation using the clustered data
+                triggerJackpot(displayCity, finalVotes, destLat, destLng, isNewCity);
                 
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
                 setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
             } catch (err) { 
                 console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; 
             }
+        });
+    </script>
         });
     </script>
 </body>
