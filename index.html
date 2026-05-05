@@ -28,43 +28,69 @@
         .hero-logo-container { width: 100%; max-width: 1000px; margin-bottom: 30px; text-align: center; }
         .full-width-logo { width: 100%; height: auto; max-height: 300px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
 
-        .link-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; width: 100%; max-width: 800px; margin-bottom: 40px; }
+        /* --- NESTED BUTTON STYLING --- */
+        .link-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 850px; margin-bottom: 40px; }
+        
         .link-button {
-            background-color: #000033; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 25px; padding: 14px 15px;
-            text-decoration: none; text-transform: uppercase; font-weight: bold; font-size: 12px; text-align: center;
-            transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; letter-spacing: 1px;
+            background-color: #000033;
+            color: #FFFFFF;
+            border: 2px solid #FFFFFF;
+            border-radius: 40px;
+            padding: 8px 10px 8px 20px;
+            text-decoration: none;
+            text-transform: uppercase;
+            font-weight: 900;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        .link-button:hover { background-color: #FFFFFF; color: #000033; }
 
-        @media (max-width: 600px) { .link-grid { grid-template-columns: 1fr; } }
+        .status-bubble {
+            background-color: #FFFFFF;
+            color: #000033;
+            padding: 6px 15px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 800;
+            margin-left: 10px;
+        }
 
-        .xl-heading-container { width: 100%; max-width: 1000px; text-align: center; margin-bottom: 20px; }
-        .xl-heading { color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(20px, 4vw, 36px); line-height: 1.2; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+        .link-button:hover { background-color: #1a1a4d; transform: scale(1.02); }
+        .link-button:hover .status-bubble { background-color: #E0E0E0; }
 
+        @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
+
+        /* --- LAYOUT WRAPPERS --- */
         .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; aspect-ratio: 975 / 610; }
         .impossibles-map-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
 
+        .xl-heading-container { width: 100%; max-width: 1000px; text-align: center; margin-bottom: 25px; }
+        .xl-heading { color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(24px, 4vw, 42px); line-height: 1.2; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8); }
+
+        /* --- MAP ELEMENTS --- */
         #lines-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
         .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; }
         #labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
 
         .pin-circle {
-            position: absolute; width: 56px; height: 56px; border-radius: 50%;
-            border: 2px solid #FFFFFF; background-color: #1a1a4d; /* 10% lighter navy */
-            color: #FFFFFF; box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
+            position: absolute; width: 58px; height: 58px; border-radius: 50%;
+            border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
             align-items: center; justify-content: center; line-height: 1;
-            box-sizing: border-box; padding: 2px; transform: translate(-50%, -50%); 
+            box-sizing: border-box; padding: 4px; transform: translate(-50%, -50%); 
             pointer-events: auto; text-align: center;
         }
 
         .vote-count { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
-        .city-label { 
-            font-size: 8px; text-transform: uppercase; font-weight: bold; width: 90%;
-            overflow: hidden; text-overflow: ellipsis; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; 
-        }
+        .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; width: 100%; overflow: hidden; }
 
-        .impossibles-form-wrapper { background-color: #000033; padding: 40px; border-radius: 4px; width: 100%; max-width: 600px; margin: 0 auto; }
+        /* --- FORM STYLING --- */
+        .impossibles-form-wrapper { background-color: #000033; padding: 40px; border-radius: 4px; width: 100%; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         .impossibles-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
         .impossibles-half { flex: 1; min-width: calc(50% - 15px); }
         .impossibles-full { flex: 1 1 100%; }
@@ -74,7 +100,7 @@
         .impossibles-submit-btn {
             display: block; width: 50%; margin: 15px auto 0; padding: 18px;
             background-color: #000033; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 30px;
-            font-weight: bold; text-transform: uppercase; letter-spacing: 2px;
+            font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
             cursor: pointer; font-size: 16px; transition: all 0.2s ease;
         }
         .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
@@ -87,21 +113,21 @@
     </div>
 
     <div class="link-grid">
-        <a href="https://www.etix.com/ticket/p/32114610/the-impossibles-stlouis-blueberry-hill-duck-room" class="link-button" target="_blank">AUG 21 ST. LOUIS</a>
-        <a href="https://www.ticketweb.com/event/the-impossibles-space-monkey-mafia-reggies-rock-club-tickets/14894673" class="link-button" target="_blank">AUG 22 CHICAGO</a>
-        <a href="https://www.ticketweb.com/event/magic-bag-presents-the-impossibles-the-magic-bag-tickets/14818043?pl=magicbag" class="link-button" target="_blank">AUG 23 DETROIT</a>
-        <a href="https://www.tixr.com/groups/supernovaska/events/supernovaska-2026-supernova-international-ska-festival-158685" class="link-button" target="_blank">SEP 12 SUPERNOVA</a>
-        <a href="https://thefestfl.com/ticket-info/" class="link-button" target="_blank">OCT 23-25 FEST</a>
-        <a href="https://open.spotify.com/artist/6Pb60Ybf9HbyRRQ2ygmeNX" class="link-button" target="_blank">SPOTIFY</a>
-        <a href="https://music.apple.com/us/artist/the-impossibles/4620137" class="link-button" target="_blank">APPLE MUSIC</a>
-        <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank">YOUTUBE</a>
+        <a href="https://www.etix.com/ticket/p/32114610/the-impossibles-stlouis-blueberry-hill-duck-room" class="link-button" target="_blank">AUG 21 ST. LOUIS <span class="status-bubble">TICKETS</span></a>
+        <a href="https://www.ticketweb.com/event/the-impossibles-space-monkey-mafia-reggies-rock-club-tickets/14894673" class="link-button" target="_blank">AUG 22 CHICAGO <span class="status-bubble">TICKETS</span></a>
+        <a href="https://www.ticketweb.com/event/magic-bag-presents-the-impossibles-the-magic-bag-tickets/14818043?pl=magicbag" class="link-button" target="_blank">AUG 23 DETROIT <span class="status-bubble">TICKETS</span></a>
+        <a href="https://www.tixr.com/groups/supernovaska/events/supernovaska-2026-supernova-international-ska-festival-158685" class="link-button" target="_blank">SEP 12 SUPERNOVA <span class="status-bubble">TICKETS</span></a>
+        <a href="https://thefestfl.com/ticket-info/" class="link-button" target="_blank">OCT 23-25 FEST GAINESVILLE <span class="status-bubble">TICKETS</span></a>
+        <a href="https://open.spotify.com/artist/6Pb60Ybf9HbyRRQ2ygmeNX" class="link-button" target="_blank">SPOTIFY <span class="status-bubble">MUSIC</span></a>
+        <a href="https://music.apple.com/us/artist/the-impossibles/4620137" class="link-button" target="_blank">APPLE MUSIC <span class="status-bubble">MUSIC</span></a>
+        <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank">YOUTUBE <span class="status-bubble">VIDEOS</span></a>
     </div>
+
+    <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="xl-heading-container">
         <h1 class="xl-heading">SIGN UP FOR UPDATES AND TELL US WHERE TO PLAY NEXT!</h1>
     </div>
-
-    <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="impossibles-form-wrapper">
         <form id="tour-vote-form">
@@ -143,7 +169,7 @@
         let mapSvg, linesSvg, labelsLayer, simulation;
 
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 3958.8; // Radius of Earth in miles
+            const R = 3958.8;
             const dLat = (lat2 - lat1) * Math.PI / 180;
             const dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
@@ -169,11 +195,8 @@
                     for (let cluster of clusters) {
                         if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 120) {
                             cluster.votes += loc.votes;
-                            cluster.subCities.push(loc);
-                            // Flip name if this sub-city has more votes
                             if (loc.votes > cluster.maxVotes) {
-                                cluster.name = loc.city;
-                                cluster.maxVotes = loc.votes;
+                                cluster.name = loc.city; cluster.maxVotes = loc.votes;
                                 cluster.lat = loc.lat; cluster.lng = loc.lng;
                             }
                             added = true; break;
@@ -182,8 +205,7 @@
                     if (!added) {
                         clusters.push({
                             name: loc.city, votes: loc.votes, maxVotes: loc.votes,
-                            lat: loc.lat, lng: loc.lng, centerLat: loc.lat, centerLng: loc.lng,
-                            subCities: [loc]
+                            lat: loc.lat, lng: loc.lng, centerLat: loc.lat, centerLng: loc.lng
                         });
                     }
                 });
@@ -194,17 +216,14 @@
                 }).filter(n => n);
 
                 linesSvg.selectAll("*").remove(); labelsLayer.selectAll("*").remove();
-                
-                linesSvg.selectAll(".anchor-dot").data(nodes).join("circle")
-                    .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
-
+                linesSvg.selectAll(".anchor-dot").data(nodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
                 const link = linesSvg.selectAll(".connection-line").data(nodes).join("line").attr("class", "connection-line");
                 const bubble = labelsLayer.selectAll(".pin-circle").data(nodes).join("div").attr("class", "pin-circle")
                     .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.name}</div>`);
 
                 if (simulation) simulation.stop();
                 simulation = d3.forceSimulation(nodes)
-                    .force("collide", d3.forceCollide().radius(32).strength(1))
+                    .force("collide", d3.forceCollide().radius(35))
                     .force("x", d3.forceX(d => d.anchorX).strength(0.2))
                     .force("y", d3.forceY(d => d.anchorY - 50).strength(0.2))
                     .on("tick", () => {
