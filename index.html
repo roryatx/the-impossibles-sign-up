@@ -28,7 +28,7 @@
         .hero-logo-container { width: 100%; max-width: 1000px; margin-bottom: 30px; text-align: center; }
         .full-width-logo { width: 100%; height: auto; max-height: 300px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
 
-        /* --- NESTED BUTTON STYLING --- */
+        /* --- MODERN NESTED BUTTONS --- */
         .link-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; width: 100%; max-width: 850px; margin-bottom: 40px; }
         
         .link-button {
@@ -36,15 +36,15 @@
             color: #FFFFFF;
             border: 2px solid #FFFFFF;
             border-radius: 40px;
-            padding: 8px 10px 8px 20px;
+            padding: 6px 20px 6px 8px; /* Flipped padding */
             text-decoration: none;
             text-transform: uppercase;
             font-weight: 900;
-            font-size: 14px;
+            font-size: 16px; /* Bigger font */
             transition: all 0.2s ease;
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: flex-start;
             letter-spacing: 1px;
             box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
@@ -52,11 +52,13 @@
         .status-bubble {
             background-color: #FFFFFF;
             color: #000033;
-            padding: 6px 15px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 800;
-            margin-left: 10px;
+            padding: 8px 18px;
+            border-radius: 25px;
+            font-size: 12px;
+            font-weight: 900;
+            margin-right: 15px; /* Flipped margin */
+            min-width: 70px;
+            text-align: center;
         }
 
         .link-button:hover { background-color: #1a1a4d; transform: scale(1.02); }
@@ -64,15 +66,10 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* --- LAYOUT WRAPPERS --- */
+        /* --- MAP & LAYOUT --- */
         .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; aspect-ratio: 975 / 610; }
         .impossibles-map-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
-
-        .xl-heading-container { width: 100%; max-width: 1000px; text-align: center; margin-bottom: 25px; }
-        .xl-heading { color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(24px, 4vw, 42px); line-height: 1.2; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8); }
-
-        /* --- MAP ELEMENTS --- */
         #lines-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
         .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; }
         #labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
@@ -81,27 +78,61 @@
             position: absolute; width: 58px; height: 58px; border-radius: 50%;
             border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; line-height: 1;
-            box-sizing: border-box; padding: 4px; transform: translate(-50%, -50%); 
+            align-items: center; justify-content: center; transform: translate(-50%, -50%); 
             pointer-events: auto; text-align: center;
         }
+        .vote-count { font-size: 16px; font-weight: bold; }
+        .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; }
 
-        .vote-count { font-size: 16px; font-weight: bold; margin-bottom: 2px; }
-        .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; width: 100%; overflow: hidden; }
+        .xl-heading-container { width: 100%; max-width: 1000px; text-align: center; margin-bottom: 40px; }
+        .xl-heading { color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(24px, 4vw, 42px); line-height: 1.2; text-transform: uppercase; }
 
-        /* --- FORM STYLING --- */
-        .impossibles-form-wrapper { background-color: #000033; padding: 40px; border-radius: 4px; width: 100%; max-width: 600px; margin: 0 auto; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        .impossibles-grid { display: flex; flex-wrap: wrap; gap: 15px; margin-bottom: 20px; }
-        .impossibles-half { flex: 1; min-width: calc(50% - 15px); }
+        /* --- SLEEK MINIMALIST FORM --- */
+        .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; }
+        .impossibles-grid { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
+        .impossibles-half { flex: 1; min-width: 250px; }
         .impossibles-full { flex: 1 1 100%; }
-        .impossibles-label { display: block; color: #FFFFFF; font-size: 12px; font-weight: bold; text-transform: uppercase; margin-bottom: 6px; }
-        .impossibles-input { width: 100%; padding: 14px; background-color: #FFFFFF; color: #000033; border: none; border-radius: 2px; font-size: 16px; box-sizing: border-box; }
         
+        .field-container { position: relative; margin-top: 20px; }
+        
+        .impossibles-input {
+            width: 100%;
+            padding: 10px 0;
+            background: transparent;
+            border: none;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.5);
+            color: #FFFFFF;
+            font-size: 18px;
+            transition: border-color 0.3s ease;
+        }
+
+        .impossibles-input:focus { outline: none; border-bottom: 2px solid #FFFFFF; }
+        
+        .impossibles-label {
+            position: absolute;
+            top: 10px;
+            left: 0;
+            color: rgba(255, 255, 255, 0.6);
+            font-size: 12px;
+            font-weight: bold;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            pointer-events: none;
+            transition: all 0.3s ease;
+        }
+
+        /* Float label logic */
+        .impossibles-input:focus + .impossibles-label,
+        .impossibles-input:not(:placeholder-shown) + .impossibles-label {
+            top: -15px;
+            font-size: 10px;
+            color: #FFFFFF;
+        }
+
         .impossibles-submit-btn {
-            display: block; width: 50%; margin: 15px auto 0; padding: 18px;
-            background-color: #000033; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 30px;
-            font-weight: 900; text-transform: uppercase; letter-spacing: 2px;
-            cursor: pointer; font-size: 16px; transition: all 0.2s ease;
+            display: block; width: 40%; margin: 20px auto 0; padding: 15px;
+            background-color: transparent; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 40px;
+            font-weight: 900; text-transform: uppercase; cursor: pointer; transition: all 0.2s ease;
         }
         .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
     </style>
@@ -113,34 +144,49 @@
     </div>
 
     <div class="link-grid">
-        <a href="https://www.etix.com/ticket/p/32114610/the-impossibles-stlouis-blueberry-hill-duck-room" class="link-button" target="_blank">AUG 21 ST. LOUIS <span class="status-bubble">TICKETS</span></a>
-        <a href="https://www.ticketweb.com/event/the-impossibles-space-monkey-mafia-reggies-rock-club-tickets/14894673" class="link-button" target="_blank">AUG 22 CHICAGO <span class="status-bubble">TICKETS</span></a>
-        <a href="https://www.ticketweb.com/event/magic-bag-presents-the-impossibles-the-magic-bag-tickets/14818043?pl=magicbag" class="link-button" target="_blank">AUG 23 DETROIT <span class="status-bubble">TICKETS</span></a>
-        <a href="https://www.tixr.com/groups/supernovaska/events/supernovaska-2026-supernova-international-ska-festival-158685" class="link-button" target="_blank">SEP 12 SUPERNOVA <span class="status-bubble">TICKETS</span></a>
-        <a href="https://thefestfl.com/ticket-info/" class="link-button" target="_blank">OCT 23-25 FEST GAINESVILLE <span class="status-bubble">TICKETS</span></a>
-        <a href="https://open.spotify.com/artist/6Pb60Ybf9HbyRRQ2ygmeNX" class="link-button" target="_blank">SPOTIFY <span class="status-bubble">MUSIC</span></a>
-        <a href="https://music.apple.com/us/artist/the-impossibles/4620137" class="link-button" target="_blank">APPLE MUSIC <span class="status-bubble">MUSIC</span></a>
-        <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank">YOUTUBE <span class="status-bubble">VIDEOS</span></a>
+        <a href="https://www.etix.com/ticket/p/32114610/the-impossibles-stlouis-blueberry-hill-duck-room" class="link-button" target="_blank"><span class="status-bubble">TICKETS</span> AUG 21 ST. LOUIS @ DUCK ROOM</a>
+        <a href="https://www.ticketweb.com/event/the-impossibles-space-monkey-mafia-reggies-rock-club-tickets/14894673" class="link-button" target="_blank"><span class="status-bubble">TICKETS</span> AUG 22 CHICAGO @ REGGIES</a>
+        <a href="https://www.ticketweb.com/event/magic-bag-presents-the-impossibles-the-magic-bag-tickets/14818043?pl=magicbag" class="link-button" target="_blank"><span class="status-bubble">TICKETS</span> AUG 23 DETROIT @ MAGIC BAG</a>
+        <a href="https://www.tixr.com/groups/supernovaska/events/supernovaska-2026-supernova-international-ska-festival-158685" class="link-button" target="_blank"><span class="status-bubble">TICKETS</span> SEP 12 SUPERNOVA FEST</a>
+        <a href="https://thefestfl.com/ticket-info/" class="link-button" target="_blank"><span class="status-bubble">TICKETS</span> OCT 23-25 FEST GAINESVILLE</a>
+        <a href="https://open.spotify.com/artist/6Pb60Ybf9HbyRRQ2ygmeNX" class="link-button" target="_blank"><span class="status-bubble">MUSIC</span> SPOTIFY</a>
+        <a href="https://music.apple.com/us/artist/the-impossibles/4620137" class="link-button" target="_blank"><span class="status-bubble">MUSIC</span> APPLE MUSIC</a>
+        <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> YOUTUBE</a>
     </div>
 
     <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="xl-heading-container">
-        <h1 class="xl-heading">SIGN UP FOR UPDATES AND TELL US WHERE TO PLAY NEXT!</h1>
+        <h1 class="xl-heading">SIGN UP FOR UPDATES & VOTE FOR THE NEXT TOUR CITY</h1>
     </div>
 
     <div class="impossibles-form-wrapper">
         <form id="tour-vote-form">
             <div class="impossibles-grid">
-                <div class="impossibles-half"><label class="impossibles-label">City</label><input type="text" name="city" class="impossibles-input" placeholder="Austin" required></div>
-                <div class="impossibles-half"><label class="impossibles-label">State</label><input type="text" name="state" class="impossibles-input" placeholder="TX" maxlength="2" required></div>
+                <div class="impossibles-half field-container">
+                    <input type="text" name="city" id="f-city" class="impossibles-input" placeholder=" " required>
+                    <label for="f-city" class="impossibles-label">City</label>
+                </div>
+                <div class="impossibles-half field-container">
+                    <input type="text" name="state" id="f-state" class="impossibles-input" maxlength="2" placeholder=" " required>
+                    <label for="f-state" class="impossibles-label">State</label>
+                </div>
             </div>
             <div class="impossibles-grid">
-                <div class="impossibles-half"><label class="impossibles-label">First Name</label><input type="text" name="firstname" class="impossibles-input" placeholder="Frances" required></div>
-                <div class="impossibles-half"><label class="impossibles-label">Last Name</label><input type="text" name="lastname" class="impossibles-input" placeholder="T. Bear" required></div>
+                <div class="impossibles-half field-container">
+                    <input type="text" name="firstname" id="f-first" class="impossibles-input" placeholder=" " required>
+                    <label for="f-first" class="impossibles-label">First Name</label>
+                </div>
+                <div class="impossibles-half field-container">
+                    <input type="text" name="lastname" id="f-last" class="impossibles-input" placeholder=" " required>
+                    <label for="f-last" class="impossibles-label">Last Name</label>
+                </div>
             </div>
             <div class="impossibles-grid">
-                <div class="impossibles-full"><label class="impossibles-label">Email Address *</label><input type="email" name="email" class="impossibles-input" placeholder="frances@theimpossibles.net" required></div>
+                <div class="impossibles-full field-container">
+                    <input type="email" name="email" id="f-email" class="impossibles-input" placeholder=" " required>
+                    <label for="f-email" class="impossibles-label">Email Address</label>
+                </div>
             </div>
             <button type="submit" id="submit-button" class="impossibles-submit-btn">SIGN UP</button>
         </form>
@@ -165,7 +211,6 @@
         const width = 975, height = 610;
         const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
         const path = d3.geoPath().projection(projection);
-
         let mapSvg, linesSvg, labelsLayer, simulation;
 
         function getDistance(lat1, lon1, lat2, lon2) {
@@ -187,10 +232,8 @@
         function listenToDatabase() {
             onValue(ref(db, 'locations'), (snapshot) => {
                 const data = snapshot.val(); if (!data) return;
-                const rawLocations = Object.values(data);
                 const clusters = [];
-
-                rawLocations.forEach(loc => {
+                Object.values(data).forEach(loc => {
                     let added = false;
                     for (let cluster of clusters) {
                         if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 120) {
@@ -203,10 +246,7 @@
                         }
                     }
                     if (!added) {
-                        clusters.push({
-                            name: loc.city, votes: loc.votes, maxVotes: loc.votes,
-                            lat: loc.lat, lng: loc.lng, centerLat: loc.lat, centerLng: loc.lng
-                        });
+                        clusters.push({ name: loc.city, votes: loc.votes, maxVotes: loc.votes, lat: loc.lat, lng: loc.lng, centerLat: loc.lat, centerLng: loc.lng });
                     }
                 });
 
@@ -222,10 +262,7 @@
                     .html(d => `<div class="vote-count">${d.votes}</div><div class="city-label">${d.name}</div>`);
 
                 if (simulation) simulation.stop();
-                simulation = d3.forceSimulation(nodes)
-                    .force("collide", d3.forceCollide().radius(35))
-                    .force("x", d3.forceX(d => d.anchorX).strength(0.2))
-                    .force("y", d3.forceY(d => d.anchorY - 50).strength(0.2))
+                simulation = d3.forceSimulation(nodes).force("collide", d3.forceCollide().radius(35)).force("x", d3.forceX(d => d.anchorX).strength(0.2)).force("y", d3.forceY(d => d.anchorY - 50).strength(0.2))
                     .on("tick", () => {
                         link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
                         bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
@@ -247,15 +284,14 @@
                     body: JSON.stringify({ email: e.target.email.value, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city, state })
                 });
 
-                const locRef = ref(db, `locations/${locationId}`);
-                const snap = await get(locRef);
+                const snap = await get(ref(db, `locations/${locationId}`));
                 if (snap.exists()) {
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) });
                 } else {
                     const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(city)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
                     const geoData = await geoRes.json();
                     if (geoData.length > 0) {
-                        await set(locRef, { city, state, lat: parseFloat(geoData[0].lat), lng: parseFloat(geoData[0].lon), votes: 1 });
+                        await set(ref(db, `locations/${locationId}`), { city, state, lat: parseFloat(geoData[0].lat), lng: parseFloat(geoData[0].lon), votes: 1 });
                     }
                 }
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
