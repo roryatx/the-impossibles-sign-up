@@ -62,47 +62,30 @@
             z-index: 10;
         }
 
-        /* THE ART: Visible bubble CSS animates */
+        /* THE ART: Visible bubble */
         .pin-circle {
             position: absolute; width: 58px; height: 58px; border-radius: 50%;
             border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
             box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
             align-items: center; justify-content: center; 
-            transform: translate(-50%, -50%) scale(1); 
+            transform: translate(-50%, -50%); 
             pointer-events: auto; text-align: center;
-            will-change: transform;
-            transition: background-color 0.3s ease;
+            
+            /* The 1.5s ease dictates the smooth fade back to normal */
+            transition: background-color 1.5s ease, color 1.5s ease, border-color 1.5s ease, box-shadow 1.5s ease;
         }
         .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
 
-        /* JACKPOT ANIMATION */
-        @-webkit-keyframes massive-squash-stretch {
-            0%   { transform: translate(-50%, -50%) scale(1); }
-            15%  { transform: translate(-50%, -50%) scale(2.5, 1.2); }
-            30%  { transform: translate(-50%, -50%) scale(1.2, 2.5); }
-            50%  { transform: translate(-50%, -50%) scale(2.0, 1.5); }
-            70%  { transform: translate(-50%, -50%) scale(1.5, 2.0); }
-            85%  { transform: translate(-50%, -50%) scale(1.1, 0.9); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-        @keyframes massive-squash-stretch {
-            0%   { transform: translate(-50%, -50%) scale(1); }
-            15%  { transform: translate(-50%, -50%) scale(2.5, 1.2); }
-            30%  { transform: translate(-50%, -50%) scale(1.2, 2.5); }
-            50%  { transform: translate(-50%, -50%) scale(2.0, 1.5); }
-            70%  { transform: translate(-50%, -50%) scale(1.5, 2.0); }
-            85%  { transform: translate(-50%, -50%) scale(1.1, 0.9); }
-            100% { transform: translate(-50%, -50%) scale(1); }
-        }
-        
-        .just-voted { 
-            -webkit-animation: massive-squash-stretch 1s ease-in-out forwards !important;
-            animation: massive-squash-stretch 1s ease-in-out forwards !important; 
+        /* THE COLOR INVERSION (Triggered by adding class to the wrapper) */
+        .just-voted .pin-circle { 
             background-color: #FFFFFF !important; 
-            border-color: #FFCC00 !important; 
-            color: #000033 !important;
-            box-shadow: 0 0 40px rgba(255, 204, 0, 1) !important; 
+            color: #1a1a4d !important; 
+            border-color: #1a1a4d !important; 
+            box-shadow: 0 0 20px rgba(255, 255, 255, 0.8) !important; 
+            
+            /* Instantly snap to these inverted colors without transitioning */
+            transition: none !important; 
         }
 
         /* FORM */
@@ -300,7 +283,6 @@
                 linesSvg.selectAll(".anchor-dot").data(currentNodes).join("circle").attr("cx", d => d.anchorX).attr("cy", d => d.anchorY).attr("r", 3).attr("fill", "#cccccc");
                 const link = linesSvg.selectAll(".connection-line").data(currentNodes, d => d.name).join("line").attr("class", "connection-line");
                 
-                // MATH VS ART: JOIN THE WRAPPER, NOT THE CIRCLE
                 const bubble = labelsLayer.selectAll(".pin-wrapper").data(currentNodes, d => d.name)
                     .join(
                         enter => {
@@ -318,21 +300,21 @@
                 bubble.select(".vote-count").text(d => d.votes);
                 bubble.select(".city-label").text(d => d.name);
 
-                // ANIMATION TRIGGER
+                // SIMPLE COLOR INVERT & FADE LOGIC
                 if (pendingJackpotCity) {
                     setTimeout(() => {
                         const domWrappers = document.querySelectorAll('.pin-wrapper');
                         domWrappers.forEach(wrapper => {
                             const namesAttr = wrapper.getAttribute('data-names');
                             if (namesAttr && namesAttr.includes(pendingJackpotCity)) {
-                                const targetBubble = wrapper.querySelector('.pin-circle'); 
                                 
-                                requestAnimationFrame(() => {
-                                    targetBubble.classList.remove('just-voted');
-                                    requestAnimationFrame(() => {
-                                        targetBubble.classList.add('just-voted');
-                                    });
-                                });
+                                // Instantly snap to white/navy inverted scheme
+                                wrapper.classList.add('just-voted');
+                                
+                                // Remove the class 2 seconds later to trigger the smooth CSS fade back
+                                setTimeout(() => {
+                                    wrapper.classList.remove('just-voted');
+                                }, 2000);
                             }
                         });
                     }, 50);
@@ -347,8 +329,6 @@
                     scrollVelocity *= 0.85; 
 
                     link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
-                    
-                    // Move the wrapper, leaving the bubble free to animate scale
                     bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
                     
                     if (Math.abs(scrollVelocity) < 0.05) simulation.alphaTarget(0);
