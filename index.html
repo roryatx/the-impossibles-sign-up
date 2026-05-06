@@ -228,11 +228,15 @@
         
         let currentNodes = [];
         
+        // TIGHTENED PHYSICS
         let simulation = d3.forceSimulation()
-            .force("collide", d3.forceCollide().radius(45).strength(1.2))
-            .force("x", d3.forceX(d => d.anchorX).strength(0.04)) 
-            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.04)) 
-            .alphaDecay(0.02); 
+            // Relaxed collision so bubbles can almost touch (radius 30px for 58px bubbles)
+            .force("collide", d3.forceCollide().radius(30).strength(0.8))
+            // Stronger magnetic return to exact anchors
+            .force("x", d3.forceX(d => d.anchorX).strength(0.08)) 
+            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.08)) 
+            // Extended cooldown so it always completes the journey home
+            .alphaDecay(0.025); 
             
         let labelsLayer, linesSvg;
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
@@ -243,7 +247,7 @@
         // SCROLL STATE & INERTIA VARIABLES
         let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
         let touchVelocity = 0, lastTouchX = 0, isInertia = false;
-        let panVelocity = 0, lastPan = 0; // Tracks horizontal speed for parallax
+        let panVelocity = 0, lastPan = 0;
         const autoPanSpeed = 0.5;
 
         // JACKPOT PANNING TWEEN VARIABLES
@@ -290,7 +294,6 @@
                 
                 track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
                 
-                // Track horizontal velocity for physics engine
                 panVelocity = currentPan - lastPan;
                 lastPan = currentPan;
                 
@@ -412,7 +415,7 @@
                         x: existing ? existing.x : coords[0], 
                         y: existing ? existing.y : coords[1]-50,
                         parallaxY: existing ? existing.parallaxY : (0.5 + Math.random()),
-                        parallaxX: existing ? existing.parallaxX : (0.5 + Math.random()) // Soft X parallax coefficient
+                        parallaxX: existing ? existing.parallaxX : (0.5 + Math.random())
                     };
                 }).filter(n => n);
 
@@ -452,17 +455,13 @@
                 bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes));
 
                 simulation.nodes(currentNodes).on("tick", () => {
-                    // Softened the base scroll inputs heavily
                     let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8));
                     let driftX = Math.max(-20, Math.min(20, panVelocity * 0.8));
                     
                     currentNodes.forEach(d => {
-                        // Gently push the bubbles on both axes
                         d.y += driftY * d.parallaxY * 0.1;
                         d.x -= driftX * d.parallaxX * 0.1; 
 
-                        // HARD CONSTRAINT (THE LEASH)
-                        // Ensures the bubble is never more than 1.5x width away (87px)
                         const maxDist = 87; 
                         const targetY = d.anchorY - 50;
                         const dx = d.x - d.anchorX;
