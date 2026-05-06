@@ -246,9 +246,7 @@
         
         let currentNodes = [];
         
-        // PHYSICS ENGINE 
         let simulation = d3.forceSimulation()
-            // Relaxed to 26px to prevent bubbles from permanently displacing each other
             .force("collide", d3.forceCollide().radius(26).strength(0.4))
             .force("x", d3.forceX(d => d.anchorX).strength(0.12)) 
             .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12)) 
@@ -294,18 +292,21 @@
                 const track = document.getElementById('map-track');
                 const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
 
+                // BUG FIX: Prevents the scrolling freeze by updating startX when the map loops!
                 if (currentPan <= -instanceWidth) {
                     currentPan += instanceWidth;
                     if (isJackpotPanning) {
                         jackpotStartPan += instanceWidth;
                         jackpotTargetPan += instanceWidth;
                     }
+                    startX -= instanceWidth; 
                 } else if (currentPan > 0) {
                     currentPan -= instanceWidth;
                     if (isJackpotPanning) {
                         jackpotStartPan -= instanceWidth;
                         jackpotTargetPan -= instanceWidth;
                     }
+                    startX += instanceWidth; 
                 }
                 
                 track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
@@ -339,6 +340,12 @@
             currentPan = currentTouchX - startX;
         }, { passive: true });
         track.addEventListener('touchend', () => { 
+            isDragging = false; 
+            if (Math.abs(touchVelocity) > 0.5) isInertia = true;
+        });
+        
+        // Failsafe in case a system popup interrupts the touch drag
+        track.addEventListener('touchcancel', () => { 
             isDragging = false; 
             if (Math.abs(touchVelocity) > 0.5) isInertia = true;
         });
@@ -403,7 +410,8 @@
                 Object.values(data).forEach(loc => {
                     let added = false;
                     for (let cluster of clusters) {
-                        if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 120) {
+                        // TIGHTENED CLUSTER DISTANCE: Now set to 50 miles instead of 120
+                        if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 50) {
                             cluster.votes += loc.votes;
                             cluster.allNames.push(loc.city.toLowerCase());
                             if (loc.votes > cluster.maxVotes) {
@@ -478,7 +486,6 @@
                         const targetY = d.anchorY - 50;
                         const targetX = d.anchorX;
 
-                        // TRUE NORTH RETURN FORCE: If the screen is still, gently pull them exactly home 
                         if (Math.abs(scrollVelocity) < 1 && Math.abs(panVelocity) < 1) {
                             d.x += (targetX - d.x) * 0.03;
                             d.y += (targetY - d.y) * 0.03;
@@ -487,7 +494,6 @@
                         d.y += driftY * d.parallaxY * 0.1;
                         d.x -= driftX * d.parallaxX * 0.1; 
 
-                        // 87px Leash
                         const maxDist = 87; 
                         const dx = d.x - targetX;
                         const dy = d.y - targetY;
@@ -556,7 +562,6 @@
             play8Bit('spawn');
             requestAnimationFrame(() => bigB.classList.add('show'));
 
-            // Glide Phase
             setTimeout(() => {
                 const mapRect = mapInner.getBoundingClientRect();
                 if (coords) {
@@ -585,7 +590,6 @@
                 }
             }, 1000); 
 
-            // Impact and Handoff
             setTimeout(() => {
                 play8Bit('settle');
                 
@@ -656,7 +660,8 @@
                 let displayCity = cityInput;
 
                 for (let node of currentNodes) {
-                    if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 120) {
+                    // TIGHTENED CLUSTER DISTANCE check updated here as well
+                    if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 50) {
                         oldVotes = node.votes;
                         finalVotes = oldVotes + 1; 
                         isNewCity = false;
