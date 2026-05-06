@@ -77,7 +77,7 @@
         .anchor-dot { transition: opacity 0.3s; }
 
         /* BUBBLE WRAPPERS */
-        .pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; z-index: 10; transition: opacity 0.3s; }
+        .pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; transition: opacity 0.3s; }
         .pin-circle {
             position: absolute; width: 58px; height: 58px; border-radius: 50%;
             border: 2px solid #FFFFFF; color: #FFFFFF;
@@ -85,8 +85,9 @@
             align-items: center; justify-content: center; transform: translate(-50%, -50%); 
             pointer-events: auto; text-align: center; transition: background-color 1s ease, transform 0.5s ease;
         }
-        /* Solo bubble scaling */
-        .pin-circle.solo { transform: translate(-50%, -50%) scale(0.75); }
+        
+        /* Single Digit bubble scaling */
+        .pin-circle.small-bubble { transform: translate(-50%, -50%) scale(0.75); }
         
         .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
@@ -383,10 +384,9 @@
                 }).filter(n => n);
 
                 const maxVotes = Math.max(...currentNodes.map(n => n.votes), 1);
-                window.bubbleColorScale = d3.scaleLinear().domain([1, maxVotes]).range(["#1a1a4d", "#4169e1"]);
-
-                // LAYER SORTING: Higher votes move to the front
-                labelsLayer.selectAll(".pin-wrapper").sort((a, b) => d3.ascending(a.votes, b.votes));
+                
+                // LIGHTNESS SCALE UPDATE: Dark navy to bright sky blue
+                window.bubbleColorScale = d3.scaleLinear().domain([1, maxVotes]).range(["#1a1a4d", "#7ca6ff"]);
 
                 linesSvg.selectAll(".anchor-dot").data(currentNodes, d => d.name)
                     .join("circle").attr("class", "anchor-dot").attr("r", 3).attr("fill", "#cccccc")
@@ -406,12 +406,14 @@
                         c.append("div").attr("class", "city-label");
                         return w;
                     }, update => update, exit => exit.remove())
-                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1);
+                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1)
+                    // Z-INDEX FIX: Explicitly binds the exact vote count to the z-index so highest is ALWAYS on top
+                    .style("z-index", d => d.votes + 10); 
                 
                 bubble.select(".vote-count").text(d => (pendingJackpotUpdate.city === d.name.toLowerCase()) ? pendingJackpotUpdate.oldVotes : d.votes);
                 bubble.select(".city-label").text(d => d.name);
                 bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes))
-                    .classed("solo", d => d.votes === 1); // Apply 75% scale to solo entries
+                    .classed("small-bubble", d => d.votes < 10); // Now applies to any city with less than 10 votes
 
                 simulation.nodes(currentNodes).on("tick", () => {
                     let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8));
@@ -421,13 +423,11 @@
                         if (Math.abs(scrollVelocity) < 1 && Math.abs(panVelocity) < 1) { d.x += (targetX - d.x) * 0.03; d.y += (targetY - d.y) * 0.03; }
                         d.y += driftY * d.parallaxY * 0.1; d.x -= driftX * d.parallaxX * 0.1; 
                         
-                        // Edge-aware leash to prevent San Francisco clip
                         const maxDist = 87; 
                         const dx = d.x - targetX; const dy = d.y - targetY;
                         const dist = Math.sqrt(dx * dx + dy * dy);
                         if (dist > maxDist) { d.x = targetX + (dx / dist) * maxDist; d.y = targetY + (dy / dist) * maxDist; }
                         
-                        // Hard screen bounds
                         if (d.x < 30) d.x = 30; if (d.x > width - 30) d.x = width - 30;
                     });
                     scrollVelocity *= 0.85;
@@ -473,32 +473,30 @@
                     if (window.innerWidth <= 700) { while (destX < -50) destX += mapRect.width; while (destX > window.innerWidth + 50) destX -= mapRect.width; }
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
-                    // SCALE SYNC: If new city (1 vote), shrink ghost to 75% of 58px (43.5px)
-                    const targetSize = (votes === 1) ? 43.5 : 58;
+                    // SCALE SYNC: If city has less than 10 votes, shrink ghost to 75% size during flight
+                    const targetSize = (votes < 10) ? 43.5 : 58;
                     bigB.style.width = targetSize + 'px'; bigB.style.height = targetSize + 'px';
                     bigB.style.left = destX + 'px'; bigB.style.top = destY + 'px';
                     bigB.style.borderWidth = '2px'; bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
-                    bigB.querySelector('.v-big').style.fontSize = (votes === 1) ? '12px' : '16px';
-                    bigB.querySelector('.c-big').style.fontSize = (votes === 1) ? '6px' : '8px';
+                    bigB.querySelector('.v-big').style.fontSize = (votes < 10) ? '12px' : '16px';
+                    bigB.querySelector('.c-big').style.fontSize = (votes < 10) ? '6px' : '8px';
                     bigB.querySelector('.c-big').style.marginTop = '0px';
                 }
             }, 1000); 
 
-            // IMPACT & CONFETTI BURST
             setTimeout(() => {
                 play8Bit('settle');
                 
-                // Spawn Confetti GIF
                 const confetti = document.createElement('img');
-                confetti.src = 'confetti.gif?a=' + Math.random(); // Cache-bust ensures the GIF starts at frame 1
+                confetti.src = 'confetti.gif?a=' + Math.random(); 
                 confetti.style.position = 'fixed';
                 confetti.style.left = bigB.style.left;
                 confetti.style.top = bigB.style.top;
-                confetti.style.width = '300px'; // Sized to burst around the bubble
+                confetti.style.width = '300px'; 
                 confetti.style.height = '300px';
                 confetti.style.transform = 'translate(-50%, -50%)';
                 confetti.style.pointerEvents = 'none';
-                confetti.style.zIndex = '9999'; // Just behind the ghost bubble (10000)
+                confetti.style.zIndex = '9999'; 
                 confetti.style.transition = 'opacity 1s ease';
                 layer.appendChild(confetti);
 
@@ -514,7 +512,6 @@
                     linesSvg.selectAll(".connection-line").style("opacity", 0.8);
                 }
 
-                // Fade and Cleanup Confetti
                 setTimeout(() => {
                     confetti.style.opacity = '0';
                     setTimeout(() => { confetti.remove(); }, 1000);
