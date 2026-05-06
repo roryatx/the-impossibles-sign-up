@@ -228,22 +228,22 @@
         
         let currentNodes = [];
         
-        // RELAXED PHYSICS: Dropped anchor return strength by 200% (from 0.12 down to 0.04)
         let simulation = d3.forceSimulation()
             .force("collide", d3.forceCollide().radius(45).strength(1.2))
             .force("x", d3.forceX(d => d.anchorX).strength(0.04)) 
             .force("y", d3.forceY(d => d.anchorY - 50).strength(0.04)) 
-            .alphaDecay(0.02); // Slower energy decay allows for looser floating
+            .alphaDecay(0.02); 
             
         let labelsLayer, linesSvg;
         let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
         
         let hiddenNewCityId = null;
-        let pendingJackpotUpdate = { city: null, oldVotes: 0 }; // Freezes the map numbers
+        let pendingJackpotUpdate = { city: null, oldVotes: 0 }; 
 
         // SCROLL STATE & INERTIA VARIABLES
         let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
         let touchVelocity = 0, lastTouchX = 0, isInertia = false;
+        let panVelocity = 0, lastPan = 0; // Tracks horizontal speed for parallax
         const autoPanSpeed = 0.5;
 
         // JACKPOT PANNING TWEEN VARIABLES
@@ -289,8 +289,15 @@
                 }
                 
                 track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
+                
+                // Track horizontal velocity for physics engine
+                panVelocity = currentPan - lastPan;
+                lastPan = currentPan;
+                
+                if (Math.abs(panVelocity) > 0.5) simulation.alphaTarget(0.1).restart();
             } else {
                 document.getElementById('map-track').style.transform = `translate3d(0, 0, 0)`;
+                panVelocity = 0;
             }
             requestAnimationFrame(panLoop);
         }
@@ -404,9 +411,8 @@
                         anchorX: coords[0], anchorY: coords[1], 
                         x: existing ? existing.x : coords[0], 
                         y: existing ? existing.y : coords[1]-50,
-                        // Assings permanent, random gravity weights so they float individually
                         parallaxY: existing ? existing.parallaxY : (0.5 + Math.random()),
-                        parallaxX: existing ? existing.parallaxX : ((Math.random() - 0.5) * 0.5)
+                        parallaxX: existing ? existing.parallaxX : (0.5 + Math.random()) // Soft X parallax coefficient
                     };
                 }).filter(n => n);
 
@@ -435,8 +441,6 @@
                     .attr("data-names", d => d.allNames.join('|'))
                     .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1);
                 
-                // RENDER FREEZE LOGIC: 
-                // Only renders the new D3 data if it is not currently the subject of an incoming ghost bubble
                 bubble.select(".vote-count").text(d => {
                     if (pendingJackpotUpdate.city === d.name.toLowerCase()) {
                         return pendingJackpotUpdate.oldVotes;
@@ -448,19 +452,38 @@
                 bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes));
 
                 simulation.nodes(currentNodes).on("tick", () => {
-                    let baseDrift = Math.max(-60, Math.min(60, scrollVelocity * 1.5));
+                    // Softened the base scroll inputs heavily
+                    let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8));
+                    let driftX = Math.max(-20, Math.min(20, panVelocity * 0.8));
                     
                     currentNodes.forEach(d => {
-                        // Applies the unique, randomized float physics directly based on scroll
-                        d.y += baseDrift * d.parallaxY * 0.15;
-                        d.x += baseDrift * d.parallaxX * 0.15;
+                        // Gently push the bubbles on both axes
+                        d.y += driftY * d.parallaxY * 0.1;
+                        d.x -= driftX * d.parallaxX * 0.1; 
+
+                        // HARD CONSTRAINT (THE LEASH)
+                        // Ensures the bubble is never more than 1.5x width away (87px)
+                        const maxDist = 87; 
+                        const targetY = d.anchorY - 50;
+                        const dx = d.x - d.anchorX;
+                        const dy = d.y - targetY;
+                        const dist = Math.sqrt(dx * dx + dy * dy);
+                        
+                        if (dist > maxDist) {
+                            d.x = d.anchorX + (dx / dist) * maxDist;
+                            d.y = targetY + (dy / dist) * maxDist;
+                        }
                     });
                     scrollVelocity *= 0.85;
 
                     link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
                     bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
                     
-                    if (Math.abs(scrollVelocity) > 0.05) simulation.alpha(0.3).restart();
+                    if (Math.abs(scrollVelocity) > 0.05 || Math.abs(panVelocity) > 0.05) {
+                        simulation.alphaTarget(0.1);
+                    } else {
+                        simulation.alphaTarget(0);
+                    }
                 });
                 
                 simulation.alpha(0.3).restart();
@@ -547,7 +570,6 @@
                 
                 bigB.style.opacity = '0';
 
-                // THE NUMBER HANDOFF: Removes the freeze and renders real DB data
                 pendingJackpotUpdate.city = null;
                 labelsLayer.selectAll(".vote-count").text(d => d.votes);
 
@@ -602,7 +624,6 @@
 
                 await set(ref(db, `signups/${emailId}`), { timestamp: Date.now() });
 
-                // Cluster Inheritance Math
                 let finalVotes = 1;
                 let oldVotes = 0;
                 let isNewCity = true;
@@ -622,7 +643,6 @@
                     }
                 }
 
-                // Locks the destination bubble so it won't render the new count until impact
                 pendingJackpotUpdate = { city: displayCity.toLowerCase(), oldVotes: oldVotes };
 
                 const locRef = ref(db, `locations/${locationId}`);
