@@ -354,7 +354,8 @@
                 Object.values(data).forEach(loc => {
                     let added = false;
                     for (let cluster of clusters) {
-                        if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 120) {
+                        // ADJUSTED CLUSTERING PROXIMITY DOWN TO 45 MILES
+                        if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 45) {
                             cluster.votes += loc.votes;
                             cluster.allNames.push(loc.city.toLowerCase());
                             if (loc.votes > cluster.maxVotes) {
@@ -385,7 +386,6 @@
 
                 const maxVotes = Math.max(...currentNodes.map(n => n.votes), 1);
                 
-                // LIGHTNESS SCALE UPDATE: Dark navy to bright sky blue
                 window.bubbleColorScale = d3.scaleLinear().domain([1, maxVotes]).range(["#1a1a4d", "#7ca6ff"]);
 
                 linesSvg.selectAll(".anchor-dot").data(currentNodes, d => d.name)
@@ -407,13 +407,12 @@
                         return w;
                     }, update => update, exit => exit.remove())
                     .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1)
-                    // Z-INDEX FIX: Explicitly binds the exact vote count to the z-index so highest is ALWAYS on top
                     .style("z-index", d => d.votes + 10); 
                 
                 bubble.select(".vote-count").text(d => (pendingJackpotUpdate.city === d.name.toLowerCase()) ? pendingJackpotUpdate.oldVotes : d.votes);
                 bubble.select(".city-label").text(d => d.name);
                 bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes))
-                    .classed("small-bubble", d => d.votes < 10); // Now applies to any city with less than 10 votes
+                    .classed("small-bubble", d => d.votes < 10);
 
                 simulation.nodes(currentNodes).on("tick", () => {
                     let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8));
@@ -473,7 +472,6 @@
                     if (window.innerWidth <= 700) { while (destX < -50) destX += mapRect.width; while (destX > window.innerWidth + 50) destX -= mapRect.width; }
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
-                    // SCALE SYNC: If city has less than 10 votes, shrink ghost to 75% size during flight
                     const targetSize = (votes < 10) ? 43.5 : 58;
                     bigB.style.width = targetSize + 'px'; bigB.style.height = targetSize + 'px';
                     bigB.style.left = destX + 'px'; bigB.style.top = destY + 'px';
@@ -550,7 +548,8 @@
 
                 let finalVotes = 1, oldVotes = 0, isNewCity = true, destLat = lat, destLng = lng, displayCity = cityInput;
                 for (let node of currentNodes) {
-                    if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 120) {
+                    // ADJUSTED CLUSTERING PROXIMITY DOWN TO 45 MILES
+                    if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 45) {
                         oldVotes = node.votes; finalVotes = oldVotes + 1; isNewCity = false; destLat = node.centerLat; destLng = node.centerLng; displayCity = node.name; break;
                     }
                 }
