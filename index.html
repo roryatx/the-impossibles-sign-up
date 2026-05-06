@@ -86,8 +86,10 @@
             pointer-events: auto; text-align: center; transition: background-color 1s ease, transform 0.5s ease;
         }
         
-        /* Single Digit bubble scaling */
-        .pin-circle.small-bubble { transform: translate(-50%, -50%) scale(0.75); }
+        /* TIERED SCALING CLASSES */
+        .pin-circle.size-sm { transform: translate(-50%, -50%) scale(0.50); }
+        .pin-circle.size-md { transform: translate(-50%, -50%) scale(0.75); }
+        .pin-circle.size-lg { transform: translate(-50%, -50%) scale(1.0); }
         
         .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
         .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
@@ -250,6 +252,25 @@
         let panVelocity = 0, lastPan = 0;
         const autoPanSpeed = 0.5;
 
+        // ACCELEROMETER VARIABLES
+        let lastBeta = 0, lastGamma = 0;
+        let tiltDriftX = 0, tiltDriftY = 0;
+
+        window.addEventListener('deviceorientation', (e) => {
+            if (!e.gamma || !e.beta) return;
+            let dGamma = e.gamma - lastGamma;
+            let dBeta = e.beta - lastBeta;
+            
+            // If the phone tilted enough, convert angle to velocity and wake the physics engine
+            if (Math.abs(dGamma) > 0.5 || Math.abs(dBeta) > 0.5) {
+                tiltDriftX = dGamma * 1.5; 
+                tiltDriftY = dBeta * 1.5;
+                lastGamma = e.gamma;
+                lastBeta = e.beta;
+                simulation.alpha(0.15).restart(); 
+            }
+        });
+
         let isJackpotPanning = false;
         let jackpotStartPan = 0;
         let jackpotTargetPan = 0;
@@ -354,7 +375,6 @@
                 Object.values(data).forEach(loc => {
                     let added = false;
                     for (let cluster of clusters) {
-                        // ADJUSTED CLUSTERING PROXIMITY DOWN TO 45 MILES
                         if (getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng) <= 45) {
                             cluster.votes += loc.votes;
                             cluster.allNames.push(loc.city.toLowerCase());
@@ -411,15 +431,28 @@
                 
                 bubble.select(".vote-count").text(d => (pendingJackpotUpdate.city === d.name.toLowerCase()) ? pendingJackpotUpdate.oldVotes : d.votes);
                 bubble.select(".city-label").text(d => d.name);
-                bubble.select(".pin-circle").style("background-color", d => window.bubbleColorScale(d.votes))
-                    .classed("small-bubble", d => d.votes < 10);
+                
+                // APPLY TIERED SIZING CLASSES
+                bubble.select(".pin-circle")
+                    .style("background-color", d => window.bubbleColorScale(d.votes))
+                    .classed("size-sm", d => d.votes <= 10)
+                    .classed("size-md", d => d.votes > 10 && d.votes <= 25)
+                    .classed("size-lg", d => d.votes > 25);
 
                 simulation.nodes(currentNodes).on("tick", () => {
-                    let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8));
-                    let driftX = Math.max(-20, Math.min(20, panVelocity * 0.8));
+                    // Added gyroscopic tilt drift to the base velocity
+                    let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8)) + tiltDriftY;
+                    let driftX = Math.max(-20, Math.min(20, panVelocity * 0.8)) + tiltDriftX;
+                    
+                    // Friction to decay the tilt momentum
+                    tiltDriftX *= 0.92;
+                    tiltDriftY *= 0.92;
+
                     currentNodes.forEach(d => {
                         const targetY = d.anchorY - 50; const targetX = d.anchorX;
-                        if (Math.abs(scrollVelocity) < 1 && Math.abs(panVelocity) < 1) { d.x += (targetX - d.x) * 0.03; d.y += (targetY - d.y) * 0.03; }
+                        if (Math.abs(scrollVelocity) < 1 && Math.abs(panVelocity) < 1 && Math.abs(tiltDriftX) < 1 && Math.abs(tiltDriftY) < 1) { 
+                            d.x += (targetX - d.x) * 0.03; d.y += (targetY - d.y) * 0.03; 
+                        }
                         d.y += driftY * d.parallaxY * 0.1; d.x -= driftX * d.parallaxX * 0.1; 
                         
                         const maxDist = 87; 
@@ -432,7 +465,12 @@
                     scrollVelocity *= 0.85;
                     link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
                     bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
-                    if (Math.abs(scrollVelocity) > 0.05 || Math.abs(panVelocity) > 0.05) simulation.alphaTarget(0.1); else simulation.alphaTarget(0);
+                    
+                    if (Math.abs(scrollVelocity) > 0.05 || Math.abs(panVelocity) > 0.05 || Math.abs(tiltDriftX) > 0.5) {
+                        simulation.alphaTarget(0.1); 
+                    } else {
+                        simulation.alphaTarget(0);
+                    }
                 });
                 simulation.alpha(0.3).restart();
             });
@@ -472,12 +510,29 @@
                     if (window.innerWidth <= 700) { while (destX < -50) destX += mapRect.width; while (destX > window.innerWidth + 50) destX -= mapRect.width; }
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
-                    const targetSize = (votes < 10) ? 43.5 : 58;
-                    bigB.style.width = targetSize + 'px'; bigB.style.height = targetSize + 'px';
-                    bigB.style.left = destX + 'px'; bigB.style.top = destY + 'px';
-                    bigB.style.borderWidth = '2px'; bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
-                    bigB.querySelector('.v-big').style.fontSize = (votes < 10) ? '12px' : '16px';
-                    bigB.querySelector('.c-big').style.fontSize = (votes < 10) ? '6px' : '8px';
+                    // TIERED SIZING FOR JACKPOT BUBBLE
+                    let targetSize = 58;
+                    let vFontSize = '16px';
+                    let cFontSize = '8px';
+                    
+                    if (votes <= 10) {
+                        targetSize = 29; // 50%
+                        vFontSize = '10px';
+                        cFontSize = '5px';
+                    } else if (votes <= 25) {
+                        targetSize = 43.5; // 75%
+                        vFontSize = '12px';
+                        cFontSize = '6px';
+                    }
+
+                    bigB.style.width = targetSize + 'px'; 
+                    bigB.style.height = targetSize + 'px';
+                    bigB.style.left = destX + 'px'; 
+                    bigB.style.top = destY + 'px';
+                    bigB.style.borderWidth = '2px'; 
+                    bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
+                    bigB.querySelector('.v-big').style.fontSize = vFontSize;
+                    bigB.querySelector('.c-big').style.fontSize = cFontSize;
                     bigB.querySelector('.c-big').style.marginTop = '0px';
                 }
             }, 1000); 
@@ -548,7 +603,6 @@
 
                 let finalVotes = 1, oldVotes = 0, isNewCity = true, destLat = lat, destLng = lng, displayCity = cityInput;
                 for (let node of currentNodes) {
-                    // ADJUSTED CLUSTERING PROXIMITY DOWN TO 45 MILES
                     if (getDistance(lat, lng, node.centerLat, node.centerLng) <= 45) {
                         oldVotes = node.votes; finalVotes = oldVotes + 1; isNewCity = false; destLat = node.centerLat; destLng = node.centerLng; displayCity = node.name; break;
                     }
