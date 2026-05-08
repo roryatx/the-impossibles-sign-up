@@ -36,7 +36,7 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* SCROLLING MOBILE MAP AREA */
+        /* MAP AREA (Restored exactly to pre-leaderboard state with scroll fix) */
         .impossibles-map-wrapper { 
             position: relative; width: 100%; max-width: 1000px; 
             margin-bottom: 50px; overflow: hidden; 
@@ -46,7 +46,10 @@
         }
         
         @media (max-width: 700px) {
-            .impossibles-map-wrapper { width: 100vw; margin-left: calc(-50vw + 50%); } /* Full screen bleed */
+            .impossibles-map-wrapper { 
+                width: calc(100% + 40px); /* Safely breaks out of padding without causing page scroll */
+                margin-left: -20px; 
+            }
             .map-inner { 
                 width: 250%; /* Blows the map up */
                 animation: panMapMobile 20s linear infinite; 
@@ -90,8 +93,6 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: 0 0 100px rgba(255,255,255,0.5); font-weight: 900;
             transform: translate(-50%, -50%) scale(0); opacity: 0;
-            
-            /* Precision ease-in-out ensures color morphing finishes exactly as it lands */
             transition: all 0.8s ease-in-out; 
             will-change: top, left, width, height, background-color, transform;
         }
@@ -101,11 +102,11 @@
         .anim-bubble .c-big { font-size: 18px; text-transform: uppercase; margin-top: -10px; transition: all 0.8s ease-in-out; }
 
         /* FORM */
-        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
+        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; text-align: center; }
         .xl-heading { 
             color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(22px, 4.5vw, 40px);
             line-height: 1.1; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            letter-spacing: 1px; text-align: justify; margin: 0;
+            letter-spacing: 1px; margin: 0;
         }
 
         .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; margin-bottom: 60px;}
@@ -132,6 +133,64 @@
         .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
         .impossibles-submit-btn.error { background-color: #ff3333; border-color: #ff3333; color: #FFFFFF; }
 
+        /* --- LEADERBOARD CSS --- */
+        .leaderboard-wrapper { width: 100%; max-width: 600px; margin: 0 auto 50px auto; }
+        
+        .leaderboard-header {
+            background-color: #000033; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 40px;
+            padding: 12px 20px; font-family: 'Impact', 'Arial Black', sans-serif; font-size: 28px;
+            text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 30px;
+            position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5); overflow: hidden;
+        }
+        
+        /* Racing Stripes Edge to Edge (Top to Bottom) */
+        .leaderboard-header::before, .leaderboard-header::after {
+            content: ""; position: absolute; top: 0; bottom: 0; width: 14px;
+        }
+        .leaderboard-header::before {
+            left: 20px; 
+            /* 2px thin, 2px space, 6px thick, 2px space, 2px thin */
+            background: linear-gradient(to right, #FFFFFF 0px, #FFFFFF 2px, transparent 2px, transparent 4px, #FFFFFF 4px, #FFFFFF 10px, transparent 10px, transparent 12px, #FFFFFF 12px, #FFFFFF 14px);
+        }
+        .leaderboard-header::after {
+            right: 20px; 
+            background: linear-gradient(to right, #FFFFFF 0px, #FFFFFF 2px, transparent 2px, transparent 4px, #FFFFFF 4px, #FFFFFF 10px, transparent 10px, transparent 12px, #FFFFFF 12px, #FFFFFF 14px);
+        }
+
+        .lb-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 15px; }
+        
+        .lb-rank {
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid #FFFFFF; background-color: #1a1a4d; color: #FFFFFF;
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 18px; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+
+        .lb-count {
+            width: 50px; height: 50px; border-radius: 50%;
+            border: 2px solid #1a1a4d; background-color: #FFFFFF; color: #1a1a4d; /* Inverted Colors */
+            display: flex; align-items: center; justify-content: center;
+            font-weight: bold; font-size: 18px; flex-shrink: 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+        }
+        
+        .lb-city {
+            flex-grow: 1; background-color: #1a1a4d; color: #FFFFFF; border: 2px solid #FFFFFF;
+            border-radius: 30px; padding: 12px 20px; font-weight: 900; font-size: 18px;
+            text-transform: uppercase; letter-spacing: 1px; box-shadow: 0 4px 12px rgba(0,0,0,0.6);
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;
+        }
+
+        @media (max-width: 500px) {
+            .leaderboard-header { font-size: 22px; padding: 10px 15px; }
+            .lb-rank, .lb-count { width: 40px; height: 40px; font-size: 14px; }
+            .lb-city { font-size: 14px; padding: 10px 15px; }
+            .leaderboard-header::before { left: 15px; }
+            .leaderboard-header::after { right: 15px; }
+        }
+
+        /* FOOTER */
         .social-footer { display: flex; justify-content: center; gap: 25px; padding: 40px 0; width: 100%; }
         .social-icon { width: 30px; height: 30px; transition: opacity 0.2s ease; filter: brightness(0) invert(1); }
         .social-icon:hover { opacity: 0.7; }
@@ -194,6 +253,12 @@
             </div>
             <button type="submit" id="submit-button" class="impossibles-submit-btn">SIGN UP</button>
         </form>
+    </div>
+
+    <div class="leaderboard-wrapper" id="leaderboard-section">
+        <div class="leaderboard-header">LEADERBOARD</div>
+        <div id="leaderboard-list">
+            </div>
     </div>
 
     <div class="social-footer">
@@ -283,7 +348,9 @@
                             cluster.votes += loc.votes;
                             cluster.allNames.push(loc.city.toLowerCase());
                             if (loc.votes > cluster.maxVotes) {
-                                cluster.name = loc.city; cluster.maxVotes = loc.votes;
+                                cluster.name = loc.city; 
+                                cluster.state = loc.state; 
+                                cluster.maxVotes = loc.votes;
                                 cluster.lat = loc.lat; cluster.lng = loc.lng;
                             }
                             added = true; break;
@@ -291,10 +358,28 @@
                     }
                     if (!added) {
                         clusters.push({ 
-                            name: loc.city, votes: loc.votes, maxVotes: loc.votes, lat: loc.lat, lng: loc.lng, 
+                            name: loc.city, state: loc.state, votes: loc.votes, maxVotes: loc.votes, lat: loc.lat, lng: loc.lng, 
                             centerLat: loc.lat, centerLng: loc.lng, allNames: [loc.city.toLowerCase()] 
                         });
                     }
+                });
+
+                // LEADERBOARD RENDERER
+                const sortedClusters = [...clusters].sort((a, b) => b.votes - a.votes).slice(0, 10);
+                const lbContainer = document.getElementById('leaderboard-list');
+                lbContainer.innerHTML = '';
+                sortedClusters.forEach((cluster, index) => {
+                    const row = document.createElement('div');
+                    row.className = 'lb-row';
+                    
+                    let stateStr = cluster.state ? `, ${cluster.state}` : '';
+                    
+                    row.innerHTML = `
+                        <div class="lb-rank">${index + 1}</div>
+                        <div class="lb-city">${cluster.name}${stateStr}</div>
+                        <div class="lb-count">${cluster.votes}</div>
+                    `;
+                    lbContainer.appendChild(row);
                 });
 
                 currentNodes = clusters.map(c => {
@@ -342,7 +427,6 @@
             const layer = document.getElementById('jackpot-layer');
             const mapInner = document.getElementById('dynamic-map');
             
-            // Pauses the map panning on mobile so the target stands still
             mapInner.style.animationPlayState = 'paused';
 
             const bigB = document.createElement('div');
@@ -351,11 +435,9 @@
             bigB.innerHTML = `<div class="v-big">${votes}</div><div class="c-big">${city}</div>`;
             layer.appendChild(bigB);
 
-            // Phase 1: Appear Center
             play8Bit('spawn');
             requestAnimationFrame(() => bigB.classList.add('show'));
 
-            // Phase 2: State Morph & Glide 
             setTimeout(() => {
                 const mapRect = mapInner.getBoundingClientRect();
                 const coords = projection([lng, lat]);
@@ -363,7 +445,6 @@
                     const destX = mapRect.left + (coords[0] / width) * mapRect.width;
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
-                    // The Ghost Bubble dynamically mimics the regular bubble's CSS mid-flight
                     bigB.style.width = '58px'; 
                     bigB.style.height = '58px';
                     bigB.style.left = destX + 'px'; 
@@ -381,20 +462,16 @@
                 }
             }, 1000); 
 
-            // Phase 3: Impact Handoff
             setTimeout(() => {
                 play8Bit('settle');
                 
-                // Pings the underlying map's physics engine for visual impact
                 scrollVelocity = -45; 
                 simulation.alpha(0.5).restart();
                 
-                // Drops ghost opacity, revealing the identical real bubble beneath it
                 bigB.style.opacity = '0';
                 
                 setTimeout(() => {
                     bigB.remove();
-                    // Resumes the mobile map panning
                     mapInner.style.animationPlayState = 'running'; 
                 }, 500);
                 
