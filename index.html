@@ -36,32 +36,24 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* SCROLLING MOBILE MAP AREA */
-        .impossibles-map-wrapper { 
-            position: relative; width: 100%; max-width: 1000px; 
-            margin-bottom: 50px; overflow: hidden; 
-        }
-        .map-inner { 
-            position: relative; width: 100%; aspect-ratio: 975 / 610; 
-        }
+        /* MAP AREA (Restored original HTML structure, updated mobile logic) */
+        .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 50px; aspect-ratio: 975 / 610; }
+        .impossibles-map-wrapper svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         
         @media (max-width: 700px) {
-            .impossibles-map-wrapper { width: 100vw; margin-left: calc(-50vw + 50%); } 
-            .map-inner { 
-                width: 250%; 
-                animation: panMapMobile 20s linear infinite; 
+            .impossibles-map-wrapper { 
+                width: 250vw; /* Blows the map up */
+                max-width: none;
+                align-self: flex-start; /* Stops flexbox from centering it, keeping Seattle on screen */
+                animation: panMapMobile 25s ease-in-out infinite alternate; /* Smooth ping-pong loop */
             }
         }
 
         @keyframes panMapMobile {
-            0% { transform: translateX(0); opacity: 1; }
-            85% { transform: translateX(calc(-100% + 100vw)); opacity: 1; }
-            90% { transform: translateX(calc(-100% + 100vw)); opacity: 0; }
-            95% { transform: translateX(0); opacity: 0; }
-            100% { transform: translateX(0); opacity: 1; }
+            0% { transform: translateX(0); } /* Locked to West Coast */
+            100% { transform: translateX(calc(-100% + 100vw)); } /* Glides to East Coast */
         }
 
-        .map-inner svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
         #lines-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
         #labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
@@ -139,15 +131,18 @@
             text-transform: uppercase; letter-spacing: 2px; text-align: center; margin-bottom: 30px;
             position: relative; box-shadow: 0 4px 15px rgba(0,0,0,0.5);
         }
-        /* Racing Stripes */
+        
+        /* Precision Thick Center / Thin Sides Racing Stripes (Total width: 14px) */
         .leaderboard-header::before, .leaderboard-header::after {
-            content: ""; position: absolute; top: 10px; bottom: 10px; width: 6px;
+            content: ""; position: absolute; top: 10px; bottom: 10px; width: 14px;
         }
         .leaderboard-header::before {
-            left: 20px; border-left: 2px solid #FFFFFF; border-right: 4px solid #FFFFFF;
+            left: 20px; 
+            background: linear-gradient(to right, #FFFFFF 2px, transparent 2px, transparent 4px, #FFFFFF 4px, #FFFFFF 10px, transparent 10px, transparent 12px, #FFFFFF 12px);
         }
         .leaderboard-header::after {
-            right: 20px; border-right: 2px solid #FFFFFF; border-left: 4px solid #FFFFFF;
+            right: 20px; 
+            background: linear-gradient(to right, #FFFFFF 2px, transparent 2px, transparent 4px, #FFFFFF 4px, #FFFFFF 10px, transparent 10px, transparent 12px, #FFFFFF 12px);
         }
 
         .lb-row { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; gap: 15px; }
@@ -198,9 +193,7 @@
         <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> YOUTUBE</a>
     </div>
 
-    <div class="impossibles-map-wrapper">
-        <div class="map-inner" id="dynamic-map"></div>
-    </div>
+    <div class="impossibles-map-wrapper" id="dynamic-map"></div>
 
     <div class="xl-heading-container">
         <h1 class="xl-heading">SIGN UP, TELL US WHERE TO PLAY NEXT, AND YOU’LL BE THE FIRST TO KNOW THE LATEST INFO!</h1>
@@ -332,7 +325,7 @@
                             cluster.allNames.push(loc.city.toLowerCase());
                             if (loc.votes > cluster.maxVotes) {
                                 cluster.name = loc.city; 
-                                cluster.state = loc.state; // Track state for leaderboard
+                                cluster.state = loc.state; 
                                 cluster.maxVotes = loc.votes;
                                 cluster.lat = loc.lat; cluster.lng = loc.lng;
                             }
@@ -405,9 +398,9 @@
 
         async function triggerJackpot(city, votes, lat, lng) {
             const layer = document.getElementById('jackpot-layer');
-            const mapInner = document.getElementById('dynamic-map');
+            const mapNode = document.getElementById('dynamic-map');
             
-            mapInner.style.animationPlayState = 'paused';
+            mapNode.style.animationPlayState = 'paused';
 
             const bigB = document.createElement('div');
             bigB.className = 'anim-bubble';
@@ -419,7 +412,7 @@
             requestAnimationFrame(() => bigB.classList.add('show'));
 
             setTimeout(() => {
-                const mapRect = mapInner.getBoundingClientRect();
+                const mapRect = mapNode.getBoundingClientRect();
                 const coords = projection([lng, lat]);
                 if (coords) {
                     const destX = mapRect.left + (coords[0] / width) * mapRect.width;
@@ -452,7 +445,7 @@
                 
                 setTimeout(() => {
                     bigB.remove();
-                    mapInner.style.animationPlayState = 'running'; 
+                    mapNode.style.animationPlayState = 'running'; 
                 }, 500);
                 
             }, 1800); 
