@@ -348,6 +348,9 @@
             bigB.innerHTML = `<div class="v-big">${votes}</div><div class="c-big">${city}</div>`;
             layer.appendChild(bigB);
 
+            // Scoping these variables here so they can be accessed by the confetti injection later
+            let destX = 0, destY = 0;
+
             play8Bit('spawn');
             requestAnimationFrame(() => bigB.classList.add('show'));
 
@@ -355,8 +358,8 @@
                 const mapRect = mapInner.getBoundingClientRect();
                 const coords = projection([lng, lat]);
                 if (coords) {
-                    const destX = mapRect.left + (coords[0] / width) * mapRect.width;
-                    const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
+                    destX = mapRect.left + (coords[0] / width) * mapRect.width;
+                    destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
                     bigB.style.width = '58px'; 
                     bigB.style.height = '58px';
@@ -382,11 +385,26 @@
                 simulation.alpha(0.5).restart();
                 
                 bigB.style.opacity = '0';
+
+                // --- INJECT THE CONFETTI GIF HERE ---
+                const confettiImg = document.createElement('img');
+                confettiImg.src = 'confetti.gif';
+                confettiImg.style.position = 'absolute';
+                confettiImg.style.left = destX + 'px';
+                confettiImg.style.top = destY + 'px';
+                confettiImg.style.transform = 'translate(-50%, -50%)';
+                confettiImg.style.width = '200px'; 
+                confettiImg.style.pointerEvents = 'none';
+                confettiImg.style.zIndex = '10001';
                 
+                layer.appendChild(confettiImg);
+                
+                // Cleanup after 1.5 seconds so the gif doesn't loop infinitely
                 setTimeout(() => {
                     bigB.remove();
+                    confettiImg.remove();
                     mapInner.style.animationPlayState = 'running'; 
-                }, 500);
+                }, 1500);
                 
             }, 1800); 
         }
