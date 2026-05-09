@@ -46,9 +46,9 @@
         }
         
         @media (max-width: 700px) {
-            .impossibles-map-wrapper { width: 100vw; margin-left: calc(-50vw + 50%); } /* Full screen bleed */
+            .impossibles-map-wrapper { width: 100vw; margin-left: calc(-50vw + 50%); } 
             .map-inner { 
-                width: 250%; /* Blows the map up */
+                width: 250%; 
                 animation: panMapMobile 20s linear infinite; 
             }
         }
@@ -90,8 +90,6 @@
             display: flex; flex-direction: column; align-items: center; justify-content: center;
             box-shadow: 0 0 100px rgba(255,255,255,0.5); font-weight: 900;
             transform: translate(-50%, -50%) scale(0); opacity: 0;
-            
-            /* Precision ease-in-out ensures color morphing finishes exactly as it lands */
             transition: all 0.8s ease-in-out; 
             will-change: top, left, width, height, background-color, transform;
         }
@@ -342,7 +340,6 @@
             const layer = document.getElementById('jackpot-layer');
             const mapInner = document.getElementById('dynamic-map');
             
-            // Pauses the map panning on mobile so the target stands still
             mapInner.style.animationPlayState = 'paused';
 
             const bigB = document.createElement('div');
@@ -351,11 +348,9 @@
             bigB.innerHTML = `<div class="v-big">${votes}</div><div class="c-big">${city}</div>`;
             layer.appendChild(bigB);
 
-            // Phase 1: Appear Center
             play8Bit('spawn');
             requestAnimationFrame(() => bigB.classList.add('show'));
 
-            // Phase 2: State Morph & Glide 
             setTimeout(() => {
                 const mapRect = mapInner.getBoundingClientRect();
                 const coords = projection([lng, lat]);
@@ -363,7 +358,6 @@
                     const destX = mapRect.left + (coords[0] / width) * mapRect.width;
                     const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
                     
-                    // The Ghost Bubble dynamically mimics the regular bubble's CSS mid-flight
                     bigB.style.width = '58px'; 
                     bigB.style.height = '58px';
                     bigB.style.left = destX + 'px'; 
@@ -381,20 +375,16 @@
                 }
             }, 1000); 
 
-            // Phase 3: Impact Handoff
             setTimeout(() => {
                 play8Bit('settle');
                 
-                // Pings the underlying map's physics engine for visual impact
                 scrollVelocity = -45; 
                 simulation.alpha(0.5).restart();
                 
-                // Drops ghost opacity, revealing the identical real bubble beneath it
                 bigB.style.opacity = '0';
                 
                 setTimeout(() => {
                     bigB.remove();
-                    // Resumes the mobile map panning
                     mapInner.style.animationPlayState = 'running'; 
                 }, 500);
                 
