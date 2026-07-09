@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hi, we’re the Impossibles from Austin, Texas!</title>
     
-    <!-- SENDER.NET INITIALIZATION SCRIPT -->
     <script>
       (function (s, e, n, d, er) {
         s['Sender'] = er;
@@ -96,7 +95,7 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* LEADERBOARD */
+        /* LEADERBOARD & FORM WRAPPERS */
         .leaderboard-wrapper {
             width: 100%; max-width: 600px; background-color: rgba(0, 0, 51, 0.85);
             border: 2px solid #FFFFFF; border-radius: 15px; padding: 25px;
@@ -106,17 +105,41 @@
             overflow: hidden; 
         }
 
-        /* Leaderboard Glimmer Effect */
         .leaderboard-wrapper::after {
             content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
             background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
             transform: skewX(-25deg); animation: sweepSheen 8s infinite 1s; pointer-events: none; z-index: 10;
         }
 
+        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 30px; padding: 0; }
+
+        /* --- TITLE LOCKUP STYLES --- */
+        .title-lockup {
+            display: flex; 
+            flex-direction: column; 
+            width: max-content; 
+            margin: 0 auto 15px auto; 
+        }
+
+        .xl-heading { 
+            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; 
+            font-size: clamp(38px, 8vw, 68px); 
+            line-height: 1; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            letter-spacing: 1px; text-align: center; margin: 0;
+            white-space: nowrap; 
+        }
+
         .leaderboard-title {
             color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: clamp(18px, 4vw, 28px); text-align: center; margin-top: 0; margin-bottom: 5px;
-            letter-spacing: 2px; text-transform: uppercase;
+            font-size: clamp(14px, 3vw, 22px); 
+            text-transform: uppercase; margin: 0;
+            text-align: justify; text-align-last: justify; 
+            width: 100%;
+        }
+
+        /* Trick to ensure cross-browser text-align-last support for single lines */
+        .leaderboard-title::after {
+            content: ""; display: inline-block; width: 100%; height: 0;
         }
 
         .leaderboard-subtitle {
@@ -125,6 +148,7 @@
             letter-spacing: 1px;
         }
 
+        /* LEADERBOARD LIST */
         .leaderboard-list { list-style: none; padding: 0; margin: 0; position: relative; z-index: 2; }
 
         .leaderboard-item {
@@ -146,14 +170,6 @@
         .leaderboard-votes { 
             background-color: #FFFFFF; color: #000033; padding: 4px 12px; 
             border-radius: 15px; font-size: 14px; font-weight: 900;
-        }
-
-        /* FORM CONTAINER */
-        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 30px; padding: 0; }
-        .xl-heading { 
-            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; font-size: clamp(22px, 4.5vw, 40px);
-            line-height: 1.1; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            letter-spacing: 1px; text-align: center; margin: 0;
         }
 
         /* Centered Form Wrapper */
@@ -188,9 +204,11 @@
         <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> <span style="position: relative; z-index: 2;">YOUTUBE</span></a>
     </div>
 
-    <!-- DYNAMIC REAL-TIME LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
-        <h1 class="xl-heading">IMPOSSIBLES WUSS CORP</h1><BR><h2 class="leaderboard-title">PICK IT UP! TAKE POSITION!</h2>
+        <div class="title-lockup">
+            <h1 class="xl-heading">IMPOSSIBLES WUSS CORP</h1>
+            <h2 class="leaderboard-title">PICK IT UP! TAKE POSITION!</h2>
+        </div>
         <div class="leaderboard-subtitle">Live Standings</div>
         <ul id="leaderboard-list" class="leaderboard-list">
             <li class="leaderboard-item" style="justify-content: center; border: none;">Loading Live Standings...</li>
@@ -198,10 +216,12 @@
     </div>
 
     <div class="xl-heading-container animate-on-load delay-3">
-        <h1 class="xl-heading">SIGN UP<BR><h2 class="leaderboard-title">BE THE FIRST TO KNOW!</h2>
+        <div class="title-lockup">
+            <h1 class="xl-heading">SIGN UP</h1>
+            <h2 class="leaderboard-title">BE THE FIRST TO KNOW!</h2>
+        </div>
     </div>
 
-    <!-- SENDER.NET EMBED CONTAINER -->
     <div class="embed-wrapper">
         <div class="sender-form-field" data-sender-form-id="e5yGGY" style="width: 100%; max-width: 380px;"></div>
     </div>
@@ -212,7 +232,6 @@
         <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon"></a>
     </div>
 
-    <!-- HYBRID FIREBASE SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, get, set, update, increment, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
