@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hi, we’re the Impossibles from Austin, Texas!</title>
     
-    <!-- Sender.net Script (Moved to Head to ensure proper load timing) -->
+    <!-- SENDER.NET INITIALIZATION SCRIPT -->
     <script>
       (function (s, e, n, d, er) {
         s['Sender'] = er;
@@ -42,7 +42,7 @@
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
-        .delay-5 { animation-delay: 0.5s; } /* Delay 4 removed for static form container */
+        .delay-5 { animation-delay: 0.5s; }
 
         @keyframes fadeInUp {
             0% { opacity: 0; transform: translateY(30px); }
@@ -78,6 +78,7 @@
             transform: skewX(-25deg); animation: sweepSheen 6s infinite; pointer-events: none; z-index: 1;
         }
 
+        /* Stagger Sheen */
         .link-button:nth-child(1)::after { animation-delay: 0s; }
         .link-button:nth-child(2)::after { animation-delay: 0.5s; }
         .link-button:nth-child(3)::after { animation-delay: 1.0s; }
@@ -110,8 +111,9 @@
         }
 
         .leaderboard-subtitle {
-            color: rgba(255, 255, 255, 0.6); font-size: 12px; text-align: center;
+            color: #7ca6ff; font-size: 14px; text-align: center;
             text-transform: uppercase; margin-bottom: 20px; font-weight: bold;
+            letter-spacing: 1px;
         }
 
         .leaderboard-list { list-style: none; padding: 0; margin: 0; }
@@ -120,6 +122,12 @@
             display: flex; justify-content: space-between; align-items: center;
             padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.2);
             color: #FFFFFF; font-weight: bold; font-size: 16px; text-transform: uppercase;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        @keyframes fadeIn {
+            0% { opacity: 0; background-color: rgba(124, 166, 255, 0.3); }
+            100% { opacity: 1; background-color: transparent; }
         }
 
         .leaderboard-item:last-child { border-bottom: none; }
@@ -139,7 +147,7 @@
             letter-spacing: 1px; text-align: center; margin: 0;
         }
 
-        /* Fixed Form Wrapper: No flexbox, no animation to prevent script calculation errors */
+        /* Fixed Form Wrapper */
         .embed-wrapper { width: 100%; max-width: 600px; margin: 0 auto; margin-bottom: 60px; min-height: 300px; }
 
         .social-footer { display: flex; justify-content: center; gap: 25px; padding: 40px 0; width: 100%; }
@@ -164,36 +172,12 @@
         <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> <span style="position: relative; z-index: 2;">YOUTUBE</span></a>
     </div>
 
-    <!-- NON-REAL-TIME LEADERBOARD SECTION -->
+    <!-- DYNAMIC REAL-TIME LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
         <h2 class="leaderboard-title">Top Requested Cities</h2>
-        <div class="leaderboard-subtitle">Updated Weekly</div>
-        <ul class="leaderboard-list">
-            <li class="leaderboard-item">
-                <span class="leaderboard-rank">#1</span>
-                <span class="leaderboard-city">Chicago, IL</span>
-                <span class="leaderboard-votes">142</span>
-            </li>
-            <li class="leaderboard-item">
-                <span class="leaderboard-rank">#2</span>
-                <span class="leaderboard-city">St. Louis, MO</span>
-                <span class="leaderboard-votes">89</span>
-            </li>
-            <li class="leaderboard-item">
-                <span class="leaderboard-rank">#3</span>
-                <span class="leaderboard-city">Detroit, MI</span>
-                <span class="leaderboard-votes">76</span>
-            </li>
-            <li class="leaderboard-item">
-                <span class="leaderboard-rank">#4</span>
-                <span class="leaderboard-city">Brooklyn, NY</span>
-                <span class="leaderboard-votes">64</span>
-            </li>
-            <li class="leaderboard-item">
-                <span class="leaderboard-rank">#5</span>
-                <span class="leaderboard-city">Denver, CO</span>
-                <span class="leaderboard-votes">51</span>
-            </li>
+        <div class="leaderboard-subtitle">Live Standings</div>
+        <ul id="leaderboard-list" class="leaderboard-list">
+            <li class="leaderboard-item" style="justify-content: center; border: none;">Loading Live Standings...</li>
         </ul>
     </div>
 
@@ -212,5 +196,118 @@
         <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon"></a>
     </div>
 
+    <!-- HYBRID FIREBASE SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
+        import { getDatabase, ref, get, set, update, increment, onValue } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
+
+        // Your original Firebase Configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyDUDBMlQIsRehOQFRqyoAKlWElWjox4ZOo",
+            authDomain: "the-impossibles-sign-up.firebaseapp.com",
+            databaseURL: "https://the-impossibles-sign-up-default-rtdb.firebaseio.com",
+            projectId: "the-impossibles-sign-up",
+            storageBucket: "the-impossibles-sign-up.firebasestorage.app",
+            messagingSenderId: "1060998426448",
+            appId: "1:1060998426448:web:d6e8da85edbc9cb6fa8655"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        const db = getDatabase(app);
+
+        // 1. POPULATE LEADERBOARD IN REAL-TIME
+        const listEl = document.getElementById('leaderboard-list');
+        onValue(ref(db, 'locations'), (snapshot) => {
+            if (snapshot.exists()) {
+                const data = snapshot.val();
+                
+                // Sort by votes descending and grab Top 10
+                const sortedLocations = Object.values(data)
+                    .sort((a, b) => b.votes - a.votes)
+                    .slice(0, 10);
+                
+                listEl.innerHTML = ''; 
+                
+                if (sortedLocations.length === 0) {
+                    listEl.innerHTML = '<li class="leaderboard-item" style="justify-content: center; border: none;">No votes yet! Be the first.</li>';
+                    return;
+                }
+
+                sortedLocations.forEach((loc, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'leaderboard-item';
+                    li.innerHTML = `
+                        <span class="leaderboard-rank">#${index + 1}</span>
+                        <span class="leaderboard-city">${loc.city}, ${loc.state}</span>
+                        <span class="leaderboard-votes">${loc.votes}</span>
+                    `;
+                    listEl.appendChild(li);
+                });
+            } else {
+                listEl.innerHTML = '<li class="leaderboard-item" style="justify-content: center; border: none;">No votes yet! Be the first.</li>';
+            }
+        });
+
+        // 2. INVISIBLE FORM INTERCEPTION
+        // We use the "capture" phase (true) to intercept the click before Sender scripts block it
+        document.addEventListener('click', async (e) => {
+            const submitBtn = e.target.closest('button[type="submit"], input[type="submit"]'); 
+            
+            // Check if the click was a submit button inside the Sender form
+            if (submitBtn && submitBtn.closest('.sender-form-field')) {
+                const form = submitBtn.closest('form');
+                if (!form) return;
+                
+                let city = '', state = '';
+                
+                // Strategy A: Scrape inputs by Name, Class, or Placeholder
+                form.querySelectorAll('input').forEach(input => {
+                    const attrStr = `${input.name} ${input.placeholder} ${input.className}`.toLowerCase();
+                    if (attrStr.includes('city')) city = input.value;
+                    if (attrStr.includes('state')) state = input.value;
+                });
+
+                // Strategy B: Scrape inputs by associated Label text (Fallback)
+                if (!city || !state) {
+                    form.querySelectorAll('label').forEach(label => {
+                        const text = label.innerText.toLowerCase();
+                        const inputId = label.getAttribute('for');
+                        const input = inputId ? document.getElementById(inputId) : label.querySelector('input');
+                        if (input) {
+                            if (text.includes('city')) city = input.value;
+                            if (text.includes('state')) state = input.value;
+                        }
+                    });
+                }
+
+                // If we successfully grabbed the location, update Firebase instantly
+                if (city && state) {
+                    const cleanCity = city.trim();
+                    const cleanState = state.trim().toUpperCase();
+                    // Generate ID matching original format: e.g., austin_tx
+                    const locationId = `${cleanCity.toLowerCase().replace(/[^a-z]/g, '')}_${cleanState.toLowerCase().replace(/[^a-z]/g, '')}`;
+                    
+                    try {
+                        const locRef = ref(db, `locations/${locationId}`);
+                        const snap = await get(locRef);
+                        
+                        if (snap.exists()) { 
+                            // Add 1 vote to existing city
+                            await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) }); 
+                        } else { 
+                            // Create new city entry
+                            await set(locRef, { 
+                                city: cleanCity, 
+                                state: cleanState, 
+                                votes: 1 
+                            }); 
+                        }
+                    } catch (err) {
+                        console.error("Firebase update failed", err);
+                    }
+                }
+            }
+        }, true); 
+    </script>
 </body>
 </html>
