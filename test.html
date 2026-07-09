@@ -102,11 +102,20 @@
             border: 2px solid #FFFFFF; border-radius: 15px; padding: 25px;
             margin-bottom: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.8);
             box-sizing: border-box;
+            position: relative; 
+            overflow: hidden; 
+        }
+
+        /* Leaderboard Glimmer Effect */
+        .leaderboard-wrapper::after {
+            content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
+            transform: skewX(-25deg); animation: sweepSheen 8s infinite 1s; pointer-events: none; z-index: 10;
         }
 
         .leaderboard-title {
             color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: 28px; text-align: center; margin-top: 0; margin-bottom: 5px;
+            font-size: clamp(18px, 4vw, 28px); text-align: center; margin-top: 0; margin-bottom: 5px;
             letter-spacing: 2px; text-transform: uppercase;
         }
 
@@ -116,7 +125,7 @@
             letter-spacing: 1px;
         }
 
-        .leaderboard-list { list-style: none; padding: 0; margin: 0; }
+        .leaderboard-list { list-style: none; padding: 0; margin: 0; position: relative; z-index: 2; }
 
         .leaderboard-item {
             display: flex; justify-content: space-between; align-items: center;
@@ -181,7 +190,7 @@
 
     <!-- DYNAMIC REAL-TIME LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
-        <h2 class="leaderboard-title">Top Requested Cities</h2>
+        <h2 class="leaderboard-title">IMPOSSIBLES WUSS CORP // PICK IT UP // TAKE POSITION</h2>
         <div class="leaderboard-subtitle">Live Standings</div>
         <ul id="leaderboard-list" class="leaderboard-list">
             <li class="leaderboard-item" style="justify-content: center; border: none;">Loading Live Standings...</li>
@@ -189,7 +198,7 @@
     </div>
 
     <div class="xl-heading-container animate-on-load delay-3">
-        <h1 class="xl-heading">SIGN UP, TELL US WHERE TO PLAY NEXT, AND YOU’LL BE THE FIRST TO KNOW THE LATEST INFO!</h1>
+        <h1 class="xl-heading">SIGN UP FOR THE WUSS CORP AND BE THE FIRST TO KNOW</h1>
     </div>
 
     <!-- SENDER.NET EMBED CONTAINER -->
