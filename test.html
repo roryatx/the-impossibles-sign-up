@@ -5,6 +5,26 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Hi, we’re the Impossibles from Austin, Texas!</title>
     
+    <!-- Sender.net Script (Moved to Head to ensure proper load timing) -->
+    <script>
+      (function (s, e, n, d, er) {
+        s['Sender'] = er;
+        s[er] = s[er] || function () {
+          (s[er].q = s[er].q || []).push(arguments)
+        }, s[er].l = 1 * new Date();
+        s[er].on = function(event, callback) {
+          s[er].listeners = s[er].listeners || {};
+          (s[er].listeners[event] = s[er].listeners[event] || []).push(callback);
+        };
+        var a = e.createElement(n),
+            m = e.getElementsByTagName(n)[0];
+        a.async = 1;
+        a.src = d;
+        m.parentNode.insertBefore(a, m)
+      })(window, document, 'script', 'https://cdn.sender.net/accounts_resources/universal.js', 'sender');
+      sender('b0942fa6cb9524')
+    </script>
+
     <style>
         body {
             background-image: url('THEIMPOSSIBLES_Midwest2026_REGGIES_BG.jpg');
@@ -22,8 +42,7 @@
         .delay-1 { animation-delay: 0.1s; }
         .delay-2 { animation-delay: 0.2s; }
         .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-        .delay-5 { animation-delay: 0.5s; }
+        .delay-5 { animation-delay: 0.5s; } /* Delay 4 removed for static form container */
 
         @keyframes fadeInUp {
             0% { opacity: 0; transform: translateY(30px); }
@@ -120,7 +139,8 @@
             letter-spacing: 1px; text-align: center; margin: 0;
         }
 
-        .embed-wrapper { width: 100%; max-width: 600px; margin: 0 auto; margin-bottom: 60px; min-height: 300px; display: flex; justify-content: center;}
+        /* Fixed Form Wrapper: No flexbox, no animation to prevent script calculation errors */
+        .embed-wrapper { width: 100%; max-width: 600px; margin: 0 auto; margin-bottom: 60px; min-height: 300px; }
 
         .social-footer { display: flex; justify-content: center; gap: 25px; padding: 40px 0; width: 100%; }
         .social-icon { width: 30px; height: 30px; transition: opacity 0.2s ease; filter: brightness(0) invert(1); }
@@ -144,6 +164,7 @@
         <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> <span style="position: relative; z-index: 2;">YOUTUBE</span></a>
     </div>
 
+    <!-- NON-REAL-TIME LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
         <h2 class="leaderboard-title">Top Requested Cities</h2>
         <div class="leaderboard-subtitle">Updated Weekly</div>
@@ -180,8 +201,9 @@
         <h1 class="xl-heading">SIGN UP, TELL US WHERE TO PLAY NEXT, AND YOU’LL BE THE FIRST TO KNOW THE LATEST INFO!</h1>
     </div>
 
-    <div class="embed-wrapper animate-on-load delay-4">
-        <div style="text-align: left; width: 100%; max-width: 600px;" class="sender-form-field" data-sender-form-id="e5yGGY"></div>
+    <!-- SENDER.NET EMBED CONTAINER -->
+    <div class="embed-wrapper">
+        <div style="text-align: left" class="sender-form-field" data-sender-form-id="e5yGGY"></div>
     </div>
 
     <div class="social-footer animate-on-load delay-5">
@@ -190,23 +212,5 @@
         <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon"></a>
     </div>
 
-    <script>
-      (function (s, e, n, d, er) {
-        s['Sender'] = er;
-        s[er] = s[er] || function () {
-          (s[er].q = s[er].q || []).push(arguments)
-        }, s[er].l = 1 * new Date();
-        s[er].on = function(event, callback) {
-          s[er].listeners = s[er].listeners || {};
-          (s[er].listeners[event] = s[er].listeners[event] || []).push(callback);
-        };
-        var a = e.createElement(n),
-            m = e.getElementsByTagName(n)[0];
-        a.async = 1;
-        a.src = d;
-        m.parentNode.insertBefore(a, m)
-      })(window, document, 'script', 'https://cdn.sender.net/accounts_resources/universal.js', 'sender');
-      sender('b0942fa6cb9524')
-    </script>
 </body>
 </html>
