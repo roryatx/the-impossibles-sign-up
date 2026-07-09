@@ -95,7 +95,50 @@
 
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
-        /* LEADERBOARD & FORM WRAPPERS */
+        /* --- TYPOGRAPHY & LOCKUPS --- */
+        .xl-heading { 
+            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; 
+            line-height: 1; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
+            letter-spacing: 1px;
+        }
+
+        /* Leaderboard Specific Lockup */
+        .leaderboard-title-lockup {
+            display: flex; flex-direction: column; 
+            width: max-content; 
+            max-width: 100%; /* Prevents blowouts */
+            margin: 0 auto 15px auto; 
+        }
+
+        .leaderboard-h1 {
+            font-size: clamp(20px, 5vw, 42px); /* Scaled down safely to avoid overflow container clips */
+            margin: 0; white-space: nowrap; text-align: center;
+        }
+
+        /* Form Specific Lockup */
+        .signup-title-lockup {
+            display: flex; flex-direction: column; 
+            width: 100%; 
+            max-width: 380px; /* Perfectly matches the form max-width */
+            margin: 0 auto 15px auto; 
+        }
+
+        .signup-h1 {
+            font-size: clamp(40px, 10vw, 76px); /* Big and bold as requested */
+            margin: 0; text-align: center;
+        }
+
+        /* Bulletproof Justified Subtitles */
+        .flex-justified-subtitle {
+            display: flex; justify-content: space-between; align-items: center;
+            width: 100%;
+            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif;
+            font-size: clamp(12px, 3.5vw, 18px);
+            text-transform: uppercase; margin: 4px 0 0 0;
+            letter-spacing: 0px; 
+        }
+
+        /* LEADERBOARD WRAPPER */
         .leaderboard-wrapper {
             width: 100%; max-width: 600px; background-color: rgba(0, 0, 51, 0.85);
             border: 2px solid #FFFFFF; border-radius: 15px; padding: 25px;
@@ -105,41 +148,11 @@
             overflow: hidden; 
         }
 
+        /* Leaderboard Glimmer Effect */
         .leaderboard-wrapper::after {
             content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
             background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
             transform: skewX(-25deg); animation: sweepSheen 8s infinite 1s; pointer-events: none; z-index: 10;
-        }
-
-        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 30px; padding: 0; }
-
-        /* --- TITLE LOCKUP STYLES --- */
-        .title-lockup {
-            display: flex; 
-            flex-direction: column; 
-            width: max-content; 
-            margin: 0 auto 15px auto; 
-        }
-
-        .xl-heading { 
-            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; 
-            font-size: clamp(38px, 8vw, 68px); 
-            line-height: 1; text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-            letter-spacing: 1px; text-align: center; margin: 0;
-            white-space: nowrap; 
-        }
-
-        .leaderboard-title {
-            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: clamp(14px, 3vw, 22px); 
-            text-transform: uppercase; margin: 0;
-            text-align: justify; text-align-last: justify; 
-            width: 100%;
-        }
-
-        /* Trick to ensure cross-browser text-align-last support for single lines */
-        .leaderboard-title::after {
-            content: ""; display: inline-block; width: 100%; height: 0;
         }
 
         .leaderboard-subtitle {
@@ -148,7 +161,6 @@
             letter-spacing: 1px;
         }
 
-        /* LEADERBOARD LIST */
         .leaderboard-list { list-style: none; padding: 0; margin: 0; position: relative; z-index: 2; }
 
         .leaderboard-item {
@@ -172,7 +184,9 @@
             border-radius: 15px; font-size: 14px; font-weight: 900;
         }
 
-        /* Centered Form Wrapper */
+        /* FORM CONTAINER */
+        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 30px; padding: 0; }
+
         .embed-wrapper { 
             width: 100%; 
             max-width: 600px; 
@@ -205,9 +219,11 @@
     </div>
 
     <div class="leaderboard-wrapper animate-on-load delay-2">
-        <div class="title-lockup">
-            <h1 class="xl-heading">IMPOSSIBLES WUSS CORP</h1>
-            <h2 class="leaderboard-title">PICK IT UP! TAKE POSITION!</h2>
+        <div class="leaderboard-title-lockup">
+            <h1 class="xl-heading leaderboard-h1">IMPOSSIBLES WUSS CORP</h1>
+            <h2 class="flex-justified-subtitle">
+                <span>PICK</span><span>IT</span><span>UP!</span><span>TAKE</span><span>POSITION!</span>
+            </h2>
         </div>
         <div class="leaderboard-subtitle">Live Standings</div>
         <ul id="leaderboard-list" class="leaderboard-list">
@@ -216,9 +232,11 @@
     </div>
 
     <div class="xl-heading-container animate-on-load delay-3">
-        <div class="title-lockup">
-            <h1 class="xl-heading">SIGN UP</h1>
-            <h2 class="leaderboard-title">BE THE FIRST TO KNOW!</h2>
+        <div class="signup-title-lockup">
+            <h1 class="xl-heading signup-h1">SIGN UP</h1>
+            <h2 class="flex-justified-subtitle">
+                <span>BE</span><span>THE</span><span>FIRST</span><span>TO</span><span>KNOW!</span>
+            </h2>
         </div>
     </div>
 
@@ -284,25 +302,21 @@
         });
 
         // 2. INVISIBLE FORM INTERCEPTION
-        // We use the "capture" phase (true) to intercept the click before Sender scripts block it
         document.addEventListener('click', async (e) => {
             const submitBtn = e.target.closest('button[type="submit"], input[type="submit"]'); 
             
-            // Check if the click was a submit button inside the Sender form
             if (submitBtn && submitBtn.closest('.sender-form-field')) {
                 const form = submitBtn.closest('form');
                 if (!form) return;
                 
                 let city = '', state = '';
                 
-                // Strategy A: Scrape inputs by Name, Class, or Placeholder
                 form.querySelectorAll('input').forEach(input => {
                     const attrStr = `${input.name} ${input.placeholder} ${input.className}`.toLowerCase();
                     if (attrStr.includes('city')) city = input.value;
                     if (attrStr.includes('state')) state = input.value;
                 });
 
-                // Strategy B: Scrape inputs by associated Label text (Fallback)
                 if (!city || !state) {
                     form.querySelectorAll('label').forEach(label => {
                         const text = label.innerText.toLowerCase();
@@ -315,11 +329,9 @@
                     });
                 }
 
-                // If we successfully grabbed the location, update Firebase instantly
                 if (city && state) {
                     const cleanCity = city.trim();
                     const cleanState = state.trim().toUpperCase();
-                    // Generate ID matching original format: e.g., austin_tx
                     const locationId = `${cleanCity.toLowerCase().replace(/[^a-z]/g, '')}_${cleanState.toLowerCase().replace(/[^a-z]/g, '')}`;
                     
                     try {
@@ -327,10 +339,8 @@
                         const snap = await get(locRef);
                         
                         if (snap.exists()) { 
-                            // Add 1 vote to existing city
                             await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) }); 
                         } else { 
-                            // Create new city entry
                             await set(locRef, { 
                                 city: cleanCity, 
                                 state: cleanState, 
