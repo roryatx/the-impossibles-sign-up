@@ -35,630 +35,144 @@
             margin: 0; padding: 20px; display: flex; flex-direction: column; align-items: center; padding-bottom: 40px; overflow-x: hidden;
         }
 
-        /* --- FANCY PREMIUM LOADING ANIMATIONS --- */
-        .animate-on-load {
-            opacity: 0; transform: translateY(30px);
-            animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
-            will-change: transform, opacity;
-        }
-        .delay-1 { animation-delay: 0.1s; }
-        .delay-2 { animation-delay: 0.2s; }
-        .delay-3 { animation-delay: 0.3s; }
-        .delay-4 { animation-delay: 0.4s; }
-        .delay-5 { animation-delay: 0.5s; }
-
-        @keyframes fadeInUp {
-            0% { opacity: 0; transform: translateY(30px); }
-            100% { opacity: 1; transform: translateY(0); }
-        }
+        /* --- ANIMATIONS --- */
+        .animate-on-load { opacity: 0; animation: fadeInUp 1s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        @keyframes fadeInUp { 0% { opacity: 0; transform: translateY(30px); } 100% { opacity: 1; transform: translateY(0); } }
 
         .hero-logo-container { width: 100%; max-width: 1000px; margin-bottom: 30px; text-align: center; }
         .full-width-logo { width: 100%; height: auto; max-height: 300px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
 
-        /* BUTTONS (Media Links at Bottom) */
-        .link-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 850px; margin: 0 auto 40px auto; }
-        
-        .link-button {
-            background-color: #000033; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 40px;
-            padding: 6px 20px 6px 8px; text-decoration: none; text-transform: uppercase;
-            font-weight: 900; font-size: 16px; transition: all 0.2s ease;
-            display: flex; align-items: center; justify-content: flex-start; letter-spacing: 1px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5);
-            position: relative; overflow: hidden;
-        }
-        
-        .status-bubble {
-            background-color: #FFFFFF; color: #000033; padding: 8px 18px; border-radius: 25px;
-            font-size: 12px; font-weight: 900; margin-right: 15px; min-width: 70px; text-align: center;
-            position: relative; z-index: 2;
-        }
-        
-        .link-button:hover { background-color: #1a1a4d; transform: scale(1.02); }
-
-        .link-button::after {
-            content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg); animation: sweepSheen 6s infinite; pointer-events: none; z-index: 1;
-        }
-
-        .link-button:nth-child(1)::after { animation-delay: 0s; }
-        .link-button:nth-child(2)::after { animation-delay: 0.5s; }
-        .link-button:nth-child(3)::after { animation-delay: 1.0s; }
-
-        @keyframes sweepSheen {
-            0% { left: -150%; }
-            20% { left: 200%; }
-            100% { left: 200%; }
-        }
-
-        .link-button.jackpot-pulse { animation: jackpotGlitch 0.6s ease-out forwards; }
-        @keyframes jackpotGlitch {
-            0% { border-color: #FFFFFF; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transform: scale(1); }
-            15% { border-color: #7ca6ff; box-shadow: 0 0 20px #7ca6ff, inset 0 0 10px #7ca6ff; transform: scale(1.03); }
-            100% { border-color: #FFFFFF; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transform: scale(1); }
-        }
-
-        @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
-
-        /* --- TYPOGRAPHY & TITLE LOCKUPS --- */
-        .xl-heading { 
-            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif; 
-            text-transform: uppercase; text-shadow: 0 4px 15px rgba(0,0,0,0.8);
-        }
-
-        .leaderboard-title-lockup, .signup-title-lockup {
-            display: flex; flex-direction: column; 
-            width: 100%; max-width: 380px; 
-            margin: 0 auto 15px auto; 
-        }
-
-        .leaderboard-h1 {
-            font-size: clamp(26px, 8.5vw, 36px); 
-            margin: 0; text-align: center; white-space: nowrap; letter-spacing: 0px;
-        }
-
-        .leaderboard-sub-chars {
-            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: clamp(10px, 3.5vw, 15px);
-            text-transform: uppercase; margin: 4px 0 0 0;
-            text-align: center; white-space: nowrap;
-            letter-spacing: clamp(2px, 1vw, 4.5px);
-            margin-right: calc(-1 * clamp(2px, 1vw, 4.5px)); 
-        }
-
-        .signup-h1 {
-            font-size: clamp(52px, 16vw, 84px); 
-            margin: 0; text-align: center; line-height: 0.9;
-            white-space: nowrap; letter-spacing: 2px;
-        }
-
-        .signup-sub-chars {
-            color: #FFFFFF; font-family: 'Impact', 'Arial Black', sans-serif;
-            font-size: clamp(12px, 4vw, 17px);
-            text-transform: uppercase; margin: 4px 0 0 0;
-            text-align: center; white-space: nowrap;
-            letter-spacing: clamp(2px, 1.2vw, 5.5px);
-            margin-right: calc(-1 * clamp(2px, 1.2vw, 5.5px)); 
-        }
-
-        /* SCROLLING INFINITE MAP TRACK */
-        .impossibles-map-wrapper { 
-            position: relative; width: 100%; max-width: 1000px; 
-            margin-top: -10px; margin-bottom: 20px; overflow: hidden; 
-        }
-        .map-pan-track { display: flex; flex-direction: row; width: 100%; will-change: transform; padding: 40px 0; }
-        .map-instance { width: 100%; flex-shrink: 0; position: relative; aspect-ratio: 975 / 610; }
-        #map-clone { display: none; } 
-
-        @media (max-width: 700px) {
-            .impossibles-map-wrapper { width: 100vw; margin-left: calc(-50vw + 50%); }
-            .map-pan-track { width: 500vw; touch-action: pan-y; } 
-            .map-instance { width: 250vw; }
-            #map-clone { display: block; }
-        }
-
+        /* MAP AREA */
+        .impossibles-map-wrapper { position: relative; width: 100%; max-width: 1000px; margin-bottom: 40px; }
+        .map-instance { width: 100%; position: relative; aspect-ratio: 975 / 610; }
         .map-instance svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
         .state-path { fill: #111122; stroke: #333355; stroke-width: 1px; }
         .tour-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
+        .connector-line { stroke: #ff0055; stroke-width: 2px; stroke-dasharray: 4; opacity: 0.6; }
 
-        /* STATIC ARENA TOUR PINS (Upgraded for Tickets) */
-        .tour-pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; }
+        /* TOUR BUTTONS */
         .tour-pin {
-            position: absolute; background: #ff0055; color: #ffffff;
-            font-family: 'Impact', 'Arial Black', sans-serif; padding: 10px 16px;
-            border: 2px solid #ffffff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.8), 0 4px 10px rgba(0,0,0,0.5);
-            border-radius: 8px; text-align: center; transform: translate(-50%, -100%);
-            white-space: nowrap; pointer-events: auto; cursor: pointer; transition: all 0.2s ease;
+            position: absolute; background: #000033; color: #ffffff;
+            font-family: 'Impact', 'Arial Black', sans-serif; padding: 12px;
+            border: 2px solid #ff0055; box-shadow: 0 0 15px rgba(255, 0, 85, 0.5);
+            border-radius: 8px; text-align: center; cursor: pointer;
+            pointer-events: auto; transition: all 0.2s; white-space: nowrap;
         }
-        .tour-pin:hover {
-            transform: translate(-50%, -105%) scale(1.1); background: #ffffff; color: #000033;
-            box-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
-        }
-        .tour-pin::after {
-            content: ''; position: absolute; bottom: -10px; left: 50%; transform: translateX(-50%);
-            border-width: 10px 8px 0; border-style: solid; border-color: #ff0055 transparent;
-        }
-        .tour-pin:hover::after { border-color: #ffffff transparent; }
+        .tour-pin:hover { background: #ff0055; transform: scale(1.05); }
+        .pin-date { font-size: 14px; display: block; }
+        .pin-city { font-size: 18px; display: block; margin: 4px 0; text-transform: uppercase; }
+        .pin-tix { font-size: 12px; background: #ffffff; color: #000033; border-radius: 4px; padding: 2px 8px; }
+
+        /* REST OF UI */
+        .leaderboard-wrapper { width: 100%; max-width: 600px; background-color: rgba(0, 0, 51, 0.85); border: 2px solid #FFFFFF; border-radius: 15px; padding: 25px; margin-bottom: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.8); }
+        .leaderboard-title { color: #FFFFFF; font-family: 'Impact', sans-serif; font-size: 28px; text-align: center; text-transform: uppercase; margin: 0; }
+        .leaderboard-list { list-style: none; padding: 0; margin-top: 20px; }
+        .leaderboard-item { display: flex; justify-content: space-between; padding: 10px; border-bottom: 1px solid #333; color: white; font-weight: bold; }
         
-        .tour-pin-tix {
-            font-size: clamp(12px, 3vw, 16px); background: #ffffff; color: #ff0055;
-            border-radius: 4px; padding: 2px 6px; margin-bottom: 4px; display: inline-block; letter-spacing: 1px;
-        }
-        .tour-pin:hover .tour-pin-tix { background: #000033; color: #ffffff; }
+        .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto 40px; }
+        .impossibles-grid { display: flex; flex-wrap: wrap; gap: 20px; }
+        .field-container { flex: 1; min-width: 200px; margin-bottom: 20px; }
+        .impossibles-input { width: 100%; padding: 10px 0; background: transparent; border: none; border-bottom: 1px solid #555; color: white; font-size: 18px; }
+        .impossibles-submit-btn { width: 100%; padding: 15px; background: white; border: none; border-radius: 30px; font-weight: 900; text-transform: uppercase; cursor: pointer; }
         
-        .tour-pin-date { font-size: clamp(12px, 2.5vw, 14px); letter-spacing: 1px; line-height: 1.2; opacity: 0.9; }
-        .tour-pin-city { font-size: clamp(14px, 3.5vw, 18px); line-height: 1.1; margin-top: 2px; text-transform: uppercase; }
-
-        /* --- THE JACKPOT OVERLAY ANIMATION --- */
-        #jackpot-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10000; }
-        .anim-bubble {
-            position: absolute; width: 220px; height: 220px; border-radius: 50%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 100px rgba(255,255,255,0.5); font-weight: 900;
-            transform: translate(-50%, -50%) scale(0); opacity: 0;
-            border-style: solid; transition: all 0.8s ease-in-out; 
-            will-change: top, left, width, height, background-color, transform;
-        }
-        .anim-bubble.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        .anim-bubble .v-big { font-size: 64px; transition: font-size 0.8s ease-in-out; }
-        .anim-bubble .c-big { font-size: 18px; text-transform: uppercase; margin-top: -10px; transition: all 0.8s ease-in-out; }
-
-        /* LEADERBOARD WRAPPER */
-        .leaderboard-wrapper {
-            width: 100%; max-width: 600px; background-color: rgba(0, 0, 51, 0.85);
-            border: 2px solid #FFFFFF; border-radius: 15px; padding: 25px;
-            margin-bottom: 50px; box-shadow: 0 4px 20px rgba(0,0,0,0.8);
-            box-sizing: border-box; position: relative; overflow: hidden; 
-        }
-        .leaderboard-wrapper::after {
-            content: ''; position: absolute; top: 0; left: -150%; width: 50%; height: 100%;
-            background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.15) 50%, rgba(255,255,255,0) 100%);
-            transform: skewX(-25deg); animation: sweepSheen 8s infinite 1s; pointer-events: none; z-index: 10;
-        }
-        .leaderboard-subtitle { color: #7ca6ff; font-size: 14px; text-align: center; text-transform: uppercase; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px; }
-        .leaderboard-list { list-style: none; padding: 0; margin: 0; position: relative; z-index: 2; }
-        .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.2); color: #FFFFFF; font-weight: bold; font-size: 16px; text-transform: uppercase; animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { 0% { opacity: 0; background-color: rgba(124, 166, 255, 0.3); } 100% { opacity: 1; background-color: transparent; } }
-        .leaderboard-item:last-child { border-bottom: none; }
-        .leaderboard-rank { width: 30px; color: #7ca6ff; }
-        .leaderboard-city { flex-grow: 1; text-align: left; }
-        .leaderboard-votes { background-color: #FFFFFF; color: #000033; padding: 4px 12px; border-radius: 15px; font-size: 14px; font-weight: 900; }
-
-        /* FORM */
-        .xl-heading-container { width: 100%; max-width: 600px; margin-bottom: 50px; padding: 0; }
-        .impossibles-form-wrapper { width: 100%; max-width: 600px; margin: 0 auto; margin-bottom: 40px;}
-        .impossibles-grid { display: flex; flex-wrap: wrap; gap: 30px; margin-bottom: 30px; }
-        .impossibles-half { flex: 1; min-width: 250px; }
-        .field-container { position: relative; margin-top: 20px; }
-        .impossibles-input { width: 100%; padding: 10px 0; background: transparent; border: none; border-bottom: 1px solid rgba(255, 255, 255, 0.5); color: #FFFFFF; font-size: 18px; }
-        .impossibles-input:focus { outline: none; border-bottom: 2px solid #FFFFFF; }
-        .impossibles-label { position: absolute; top: 10px; left: 0; color: rgba(255, 255, 255, 0.6); font-size: 12px; font-weight: bold; text-transform: uppercase; pointer-events: none; transition: 0.3s; }
-        .impossibles-input:focus + .impossibles-label, .impossibles-input:not(:placeholder-shown) + .impossibles-label { top: -15px; font-size: 10px; color: #FFFFFF; }
-        .impossibles-submit-btn { display: block; width: 40%; margin: 20px auto 0; padding: 15px; background-color: transparent; color: #FFFFFF; border: 2px solid #FFFFFF; border-radius: 40px; font-weight: 900; text-transform: uppercase; cursor: pointer; transition: 0.2s; }
-        .impossibles-submit-btn:hover { background-color: #FFFFFF; color: #000033; }
-        .impossibles-submit-btn.error { background-color: #ff3333; border-color: #ff3333; color: #FFFFFF; }
-
-        .social-footer { display: flex; justify-content: center; gap: 25px; padding: 40px 0; width: 100%; }
-        .social-icon { width: 30px; height: 30px; transition: opacity 0.2s ease; filter: brightness(0) invert(1); }
-        .social-icon:hover { opacity: 0.7; }
+        .link-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; width: 100%; max-width: 600px; margin: 0 auto; }
+        .link-button { background: #000033; color: white; border: 2px solid white; border-radius: 30px; padding: 10px; text-align: center; text-transform: uppercase; font-weight: bold; text-decoration: none; }
     </style>
 </head>
 <body>
-
-    <div id="jackpot-layer"></div>
 
     <div class="hero-logo-container animate-on-load">
         <img src="impossibles_logo.png" alt="The Impossibles" class="full-width-logo">
     </div>
 
-    <!-- CLEANED UP MAP TRACK (NO MORE PHYSICS BUBBLES) -->
     <div class="impossibles-map-wrapper animate-on-load delay-1">
-        <div class="map-pan-track" id="map-track">
-            <div class="map-instance" id="dynamic-map"></div>
-            <div class="map-instance" id="map-clone"></div>
-        </div>
+        <div class="map-instance" id="map-container"></div>
     </div>
 
-    <!-- DYNAMIC REAL-TIME LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
-        <div class="leaderboard-title-lockup">
-            <h1 class="xl-heading leaderboard-h1">IMPOSSIBLES WUSS CORP</h1>
-            <h2 class="leaderboard-sub-chars">PICK IT UP! TAKE POSITION!</h2>
-        </div>
-        <div class="leaderboard-subtitle">Live Standings</div>
-        <ul id="leaderboard-list" class="leaderboard-list">
-            <li class="leaderboard-item" style="justify-content: center; border: none;">Loading Live Standings...</li>
-        </ul>
+        <h2 class="leaderboard-title">Live Standings</h2>
+        <ul id="leaderboard-list" class="leaderboard-list"></ul>
     </div>
 
-    <div class="xl-heading-container animate-on-load delay-3">
-        <div class="signup-title-lockup">
-            <h1 class="xl-heading signup-h1">SIGN UP</h1>
-            <h2 class="signup-sub-chars">BE THE FIRST TO KNOW!</h2>
-        </div>
-    </div>
-
-    <!-- WEBHOOK ENABLED VOTE FORM -->
-    <div class="impossibles-form-wrapper animate-on-load delay-4" id="signup-form-section">
+    <div class="impossibles-form-wrapper animate-on-load delay-3">
         <form id="tour-vote-form">
             <div class="impossibles-grid">
-                <div class="impossibles-half field-container">
-                    <input type="text" name="city" id="f-city" class="impossibles-input" placeholder=" " required>
-                    <label for="f-city" class="impossibles-label">City</label>
-                </div>
-                <div class="impossibles-half field-container">
-                    <input type="text" name="state" id="f-state" class="impossibles-input" maxlength="2" placeholder=" " required>
-                    <label for="f-state" class="impossibles-label">State</label>
-                </div>
+                <div class="field-container"><input type="text" name="city" placeholder="City" class="impossibles-input" required></div>
+                <div class="field-container"><input type="text" name="state" placeholder="State" class="impossibles-input" required></div>
             </div>
-            <div class="impossibles-grid">
-                <div class="impossibles-half field-container">
-                    <input type="text" name="firstname" id="f-first" class="impossibles-input" placeholder=" " required>
-                    <label for="f-first" class="impossibles-label">First Name</label>
-                </div>
-                <div class="impossibles-half field-container">
-                    <input type="text" name="lastname" id="f-last" class="impossibles-input" placeholder=" " required>
-                    <label for="f-last" class="impossibles-label">Last Name</label>
-                </div>
-            </div>
-            <div class="impossibles-grid">
-                <div class="impossibles-full field-container">
-                    <input type="email" name="email" id="f-email" class="impossibles-input" placeholder=" " required>
-                    <label for="f-email" class="impossibles-label">Email Address</label>
-                </div>
-            </div>
-            <button type="submit" id="submit-button" class="impossibles-submit-btn">SIGN UP</button>
+            <button type="submit" id="submit-button" class="impossibles-submit-btn">Vote for your city</button>
         </form>
     </div>
 
-    <!-- MEDIA LINKS MOVED BELOW SIGNUP -->
-    <div class="link-grid animate-on-load delay-5">
-        <a href="https://open.spotify.com/artist/6Pb60Ybf9HbyRRQ2ygmeNX" class="link-button" target="_blank"><span class="status-bubble">MUSIC</span> <span style="position: relative; z-index: 2;">SPOTIFY</span></a>
-        <a href="https://music.apple.com/us/artist/the-impossibles/4620137" class="link-button" target="_blank"><span class="status-bubble">MUSIC</span> <span style="position: relative; z-index: 2;">APPLE MUSIC</span></a>
-        <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> <span style="position: relative; z-index: 2;">YOUTUBE</span></a>
-    </div>
-
-    <div class="social-footer animate-on-load delay-5">
-        <a href="https://www.facebook.com/TheImpossibles/" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/facebook.svg" alt="Facebook" class="social-icon"></a>
-        <a href="https://www.instagram.com/theimpossibles/" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg" alt="Instagram" class="social-icon"></a>
-        <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon"></a>
+    <div class="link-grid animate-on-load delay-4">
+        <a href="#" class="link-button">Spotify</a>
+        <a href="#" class="link-button">Apple Music</a>
+        <a href="#" class="link-button">YouTube</a>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue, get, set, update, increment } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyDUDBMlQIsRehOQFRqyoAKlWElWjox4ZOo",
-            authDomain: "the-impossibles-sign-up.firebaseapp.com",
-            databaseURL: "https://the-impossibles-sign-up-default-rtdb.firebaseio.com",
-            projectId: "the-impossibles-sign-up",
-            storageBucket: "the-impossibles-sign-up.firebasestorage.app",
-            messagingSenderId: "1060998426448",
-            appId: "1:1060998426448:web:d6e8da85edbc9cb6fa8655"
-        };
+        const firebaseConfig = { /* ... your config ... */ };
         const app = initializeApp(firebaseConfig);
         const db = getDatabase(app);
 
-        const width = 975, height = 610;
-        const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
-        const path = d3.geoPath().projection(projection);
-            
-        let tourLayer;
-        let pendingJackpotUpdate = { city: null, oldVotes: 0 }; 
-        let currentClusters = []; // Stored globally for the form submit grouping lookup
-
-        let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
-        let touchVelocity = 0, lastTouchX = 0, isInertia = false;
-        const autoPanSpeed = 0.5;
-        let isJackpotPanning = false, jackpotStartPan = 0, jackpotTargetPan = 0, jackpotPanStartTime = 0;
-
-        function panLoop() {
-            if (window.innerWidth <= 700) {
-                if (isJackpotPanning) {
-                    let elapsed = performance.now() - jackpotPanStartTime;
-                    let progress = Math.min(elapsed / 800, 1);
-                    let ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-                    currentPan = jackpotStartPan + (jackpotTargetPan - jackpotStartPan) * ease;
-                    if (progress === 1) isJackpotPanning = false;
-                } else if (isDragging) {
-                } else if (isInertia && !isJackpotPlaying) {
-                    currentPan += touchVelocity; touchVelocity *= 0.95; 
-                    if (Math.abs(touchVelocity) < 0.2) isInertia = false;
-                } else if (!isJackpotPlaying) {
-                    currentPan -= autoPanSpeed; 
-                }
-                
-                const track = document.getElementById('map-track');
-                const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
-
-                if (currentPan <= -instanceWidth) {
-                    currentPan += instanceWidth;
-                    if (isJackpotPanning) { jackpotStartPan += instanceWidth; jackpotTargetPan += instanceWidth; }
-                } else if (currentPan > 0) {
-                    currentPan -= instanceWidth;
-                    if (isJackpotPanning) { jackpotStartPan -= instanceWidth; jackpotTargetPan -= instanceWidth; }
-                }
-                
-                track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
-            } else {
-                document.getElementById('map-track').style.transform = `translate3d(0, 0, 0)`;
-            }
-            requestAnimationFrame(panLoop);
-        }
-        panLoop();
-
-        const track = document.getElementById('map-track');
-        track.addEventListener('touchstart', (e) => {
-            if (window.innerWidth > 700 || isJackpotPlaying) return;
-            isDragging = true; isInertia = false; touchVelocity = 0; lastTouchX = e.touches[0].clientX; startX = e.touches[0].clientX - currentPan;
-        });
-        track.addEventListener('touchmove', (e) => {
-            if (window.innerWidth > 700 || !isDragging || isJackpotPlaying) return;
-            const currentTouchX = e.touches[0].clientX; touchVelocity = currentTouchX - lastTouchX; lastTouchX = currentTouchX; currentPan = currentTouchX - startX;
-        }, { passive: true });
-        track.addEventListener('touchend', () => { isDragging = false; if (Math.abs(touchVelocity) > 0.5) isInertia = true; });
-
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function play8Bit(type) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square'; osc.connect(gain); gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            if(type === 'spawn') {
-                osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(); osc.stop(now + 0.2);
-            } else {
-                osc.frequency.setValueAtTime(800, now); osc.frequency.setValueAtTime(1200, now + 0.05);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(); osc.stop(now + 0.3);
-            }
-        }
-
-        function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 3958.8;
-            const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-        }
-
-        // CONFIRMED TICKETS PLOTTING
+        // TOUR DATA
         const confirmedShows = [
-            { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, url: "https://www.etix.com/ticket/p/32114610/the-impossibles-stlouis-blueberry-hill-duck-room" },
-            { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, url: "https://www.ticketweb.com/event/the-impossibles-space-monkey-mafia-reggies-rock-club-tickets/14894673" },
-            { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, url: "https://www.ticketweb.com/event/magic-bag-presents-the-impossibles-the-magic-bag-tickets/14818043?pl=magicbag" },
-            { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, url: "https://www.tixr.com/groups/supernovaska/events/supernovaska-2026-supernova-international-ska-festival-158685" },
-            { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/" }
+            { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, url: "#" },
+            { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, url: "#" },
+            { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, url: "#" }
         ];
 
-        d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
-            const mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
-            mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
-            
-            tourLayer = d3.select("#dynamic-map").append("div").attr("class", "tour-layer");
-            
-            // Plot Status Tour Stop Pins with TICKETS Badge
-            confirmedShows.forEach(show => {
-                const coords = projection([show.lng, show.lat]);
-                if (coords) {
-                    const pinWrapper = tourLayer.append("div")
-                        .attr("class", "tour-pin-wrapper")
-                        .style("left", `${(coords[0] / width) * 100}%`)
-                        .style("top", `${(coords[1] / height) * 100}%`);
-                        
-                    const pin = pinWrapper.append("div")
-                        .attr("class", "tour-pin")
-                        .on("click", () => window.open(show.url, '_blank'));
-                        
-                    pin.append("div").attr("class", "tour-pin-tix").text("TICKETS");
-                    pin.append("div").attr("class", "tour-pin-date").text(show.date);
-                    pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
-                }
-            });
+        // MAP PHYSICS FOR BUTTONS
+        const width = 975, height = 610;
+        const projection = d3.geoAlbersUsa().scale(1300).translate([width/2, height/2]);
+        const svg = d3.select("#map-container").append("svg").attr("viewBox", [0, 0, width, height]);
+        const tourLayer = d3.select("#map-container").append("div").attr("class", "tour-layer");
 
-            const cloneObserver = new MutationObserver(() => {
-                if (window.innerWidth <= 700) { document.getElementById('map-clone').innerHTML = document.getElementById('dynamic-map').innerHTML; }
+        d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(us => {
+            svg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", d3.geoPath().projection(projection));
+
+            const nodes = confirmedShows.map(d => ({
+                ...d,
+                anchor: projection([d.lng, d.lat]),
+                x: projection([d.lng, d.lat])[0],
+                y: projection([d.lng, d.lat])[1]
+            }));
+
+            const simulation = d3.forceSimulation(nodes)
+                .force("link", d3.forceLink().id(d => d.city).distance(0))
+                .force("charge", d3.forceManyBody().strength(-100))
+                .force("collide", d3.forceCollide().radius(50))
+                .force("x", d3.forceX(d => d.anchor[0]).strength(0.1))
+                .force("y", d3.forceY(d => d.anchor[1]).strength(0.1));
+
+            const lines = svg.append("g").selectAll("line").data(nodes).join("line").attr("class", "connector-line");
+            const pins = tourLayer.selectAll(".tour-pin").data(nodes).join("div")
+                .attr("class", "tour-pin")
+                .html(d => `<span class="pin-date">${d.date}</span><span class="pin-city">${d.city.split(',')[0]}</span><span class="pin-tix">TICKETS</span>`)
+                .on("click", (e, d) => window.open(d.url, '_blank'));
+
+            simulation.on("tick", () => {
+                pins.style("left", d => `${d.x}px`).style("top", d => `${d.y}px`);
+                lines.attr("x1", d => d.x).attr("y1", d => d.y).attr("x2", d => d.anchor[0]).attr("y2", d => d.anchor[1]);
             });
-            cloneObserver.observe(document.getElementById('dynamic-map'), { childList: true, subtree: true, attributes: true });
-            
-            listenToDatabase();
         });
 
-        // 1. DATABASE LISTENER (Leaderboard & Grouping Engine)
-        function listenToDatabase() {
-            onValue(ref(db, 'locations'), (snapshot) => {
-                const data = snapshot.val(); if (!data) return;
-                
-                // Aggressive 115-mile grouping sorting strictly by volume, ignoring population
-                const rawLocations = Object.values(data).sort((a, b) => b.votes - a.votes);
-                const clusters = [];
-
-                rawLocations.forEach(loc => {
-                    let added = false;
-                    for (let cluster of clusters) {
-                        if (getDistance(loc.lat, loc.lng, cluster.lat, cluster.lng) <= 115) {
-                            cluster.votes += loc.votes;
-                            added = true; break;
-                        }
-                    }
-                    if (!added) {
-                        clusters.push({ 
-                            name: loc.city.toUpperCase(), state: loc.state.toUpperCase(), votes: loc.votes, 
-                            lat: loc.lat, lng: loc.lng 
-                        });
-                    }
-                });
-
-                clusters.sort((a, b) => b.votes - a.votes);
-                currentClusters = clusters; // Save to global for form submit grouping lookup
-                
-                window.bubbleColorScale = d3.scaleLinear()
-                    .domain([1, Math.max(...clusters.map(n => n.votes), 1)])
-                    .range(["#1a1a4d", "#7ca6ff"]);
-
-                // LEADERBOARD UI UPDATE
-                const listEl = document.getElementById('leaderboard-list');
-                if (listEl) {
-                    const top10 = clusters.slice(0, 10);
-                    listEl.innerHTML = ''; 
-                    
-                    if (top10.length === 0) {
-                        listEl.innerHTML = '<li class="leaderboard-item" style="justify-content: center; border: none;">No votes yet! Be the first.</li>';
-                    } else {
-                        top10.forEach((cluster, index) => {
-                            const li = document.createElement('li');
-                            li.className = 'leaderboard-item';
-                            li.innerHTML = `
-                                <span class="leaderboard-rank">#${index + 1}</span>
-                                <span class="leaderboard-city">${cluster.name}, ${cluster.state}</span>
-                                <span class="leaderboard-votes">${cluster.votes}</span>
-                            `;
-                            listEl.appendChild(li);
-                        });
-                    }
+        // LEADERBOARD LOGIC
+        onValue(ref(db, 'locations'), (snapshot) => {
+            const data = snapshot.val(); if (!data) return;
+            const clusters = [];
+            Object.values(data).sort((a,b) => b.votes - a.votes).forEach(loc => {
+                let added = false;
+                for (let c of clusters) {
+                    if (getDistance(loc.lat, loc.lng, c.lat, c.lng) <= 115) { c.votes += loc.votes; added = true; break; }
                 }
+                if (!added) clusters.push({ name: loc.city.toUpperCase(), state: loc.state.toUpperCase(), votes: loc.votes, lat: loc.lat, lng: loc.lng });
             });
-        }
-
-        async function triggerJackpot(city, votes, lat, lng, isNewCity) {
-            isJackpotPlaying = true; 
-            const layer = document.getElementById('jackpot-layer');
-            const mapInner = document.getElementById('dynamic-map');
-            const coords = projection([lng, lat]);
-            const targetColor = window.bubbleColorScale ? window.bubbleColorScale(votes) : "#1a1a4d";
-            
-            if (window.innerWidth <= 700 && coords) {
-                const instanceWidth = mapInner.offsetWidth;
-                const intrinsicCityX = (coords[0] / width) * instanceWidth;
-                let targetPan = (window.innerWidth / 2) - intrinsicCityX;
-                while (targetPan > 0) targetPan -= instanceWidth;
-                while (targetPan <= -instanceWidth) targetPan += instanceWidth;
-                let diff = targetPan - currentPan;
-                if (diff > instanceWidth / 2) targetPan -= instanceWidth; if (diff < -instanceWidth / 2) targetPan += instanceWidth;
-                jackpotStartPan = currentPan; jackpotTargetPan = targetPan; jackpotPanStartTime = performance.now(); isJackpotPanning = true;
-            }
-
-            const bigB = document.createElement('div');
-            bigB.className = 'anim-bubble';
-            bigB.style.left = '50%'; bigB.style.top = '50%';
-            bigB.style.backgroundColor = targetColor; bigB.style.color = '#FFFFFF'; bigB.style.borderColor = '#FFFFFF'; bigB.style.borderWidth = '6px';
-            bigB.innerHTML = `<div class="v-big">${votes}</div><div class="c-big">${city}</div>`;
-            layer.appendChild(bigB);
-            
-            play8Bit('spawn');
-            requestAnimationFrame(() => bigB.classList.add('show'));
-
-            document.querySelectorAll('.link-button').forEach(btn => {
-                btn.classList.add('jackpot-pulse');
-                setTimeout(() => btn.classList.remove('jackpot-pulse'), 600);
-            });
-
-            setTimeout(() => {
-                const mapRect = mapInner.getBoundingClientRect();
-                if (coords) {
-                    let destX = mapRect.left + (coords[0] / width) * mapRect.width; 
-                    if (window.innerWidth <= 700) { while (destX < -50) destX += mapRect.width; while (destX > window.innerWidth + 50) destX -= mapRect.width; }
-                    const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
-                    
-                    let targetSize = 58;
-                    let vFontSize = '16px';
-                    let cFontSize = '8px';
-                    
-                    if (votes <= 10) { targetSize = 29; vFontSize = '10px'; cFontSize = '5px'; } 
-                    else if (votes <= 25) { targetSize = 43.5; vFontSize = '12px'; cFontSize = '6px'; }
-
-                    bigB.style.width = targetSize + 'px'; 
-                    bigB.style.height = targetSize + 'px';
-                    bigB.style.left = destX + 'px'; 
-                    bigB.style.top = destY + 'px';
-                    bigB.style.borderWidth = '2px'; 
-                    bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
-                    bigB.querySelector('.v-big').style.fontSize = vFontSize;
-                    bigB.querySelector('.c-big').style.fontSize = cFontSize;
-                    bigB.querySelector('.c-big').style.marginTop = '0px';
-                }
-            }, 1000); 
-
-            setTimeout(() => {
-                play8Bit('settle');
-                
-                const confetti = document.createElement('img');
-                confetti.src = 'confetti.gif?a=' + Math.random(); 
-                confetti.style.position = 'fixed';
-                confetti.style.left = bigB.style.left;
-                confetti.style.top = bigB.style.top;
-                confetti.style.width = '300px'; 
-                confetti.style.height = '300px';
-                confetti.style.transform = 'translate(-50%, -50%)';
-                confetti.style.pointerEvents = 'none';
-                confetti.style.zIndex = '9999'; 
-                confetti.style.transition = 'opacity 1s ease';
-                layer.appendChild(confetti);
-
-                bigB.style.opacity = '0';
-                pendingJackpotUpdate.city = null;
-                
-                setTimeout(() => { confetti.style.opacity = '0'; setTimeout(() => { confetti.remove(); }, 1000); }, 1500);
-                setTimeout(() => { bigB.remove(); isJackpotPlaying = false; }, 500);
-            }, 1800); 
-        }
-
-        // 2. VOTE FORM PROCESSING
-        document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const submitBtn = document.getElementById('submit-button');
-            submitBtn.disabled = true; submitBtn.innerText = "WAIT...";
-            try {
-                const cityInput = e.target.city.value.trim();
-                const state = e.target.state.value.trim().toUpperCase();
-                const email = e.target.email.value.trim().toLowerCase();
-                const emailId = email.replace(/[^a-z0-9]/g, '');
-                const locationId = `${cityInput.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
-
-                const emailSnap = await get(ref(db, `signups/${emailId}`));
-                if (emailSnap.exists()) {
-                    submitBtn.innerText = "ALREADY SIGNED UP!"; submitBtn.classList.add('error');
-                    setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; submitBtn.classList.remove('error'); }, 4000); return;
-                }
-                const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityInput)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
-                const geoData = await geoRes.json();
-                if (!geoData || geoData.length === 0) { alert("City not found! Check spelling."); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; return; }
-                
-                const lat = parseFloat(geoData[0].lat), lng = parseFloat(geoData[0].lon);
-                document.querySelector('.impossibles-map-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city: cityInput, state })
-                });
-                await set(ref(db, `signups/${emailId}`), { timestamp: Date.now() });
-
-                let finalVotes = 1, oldVotes = 0, isNewCity = true, destLat = lat, destLng = lng, displayCity = cityInput;
-                
-                // Form grouping verification against established map hubs
-                for (let cluster of currentClusters) {
-                    if (getDistance(lat, lng, cluster.lat, cluster.lng) <= 115) {
-                        oldVotes = cluster.votes; 
-                        finalVotes = oldVotes + 1; 
-                        isNewCity = false; 
-                        destLat = cluster.lat; 
-                        destLng = cluster.lng; 
-                        displayCity = cluster.name; 
-                        break;
-                    }
-                }
-                
-                pendingJackpotUpdate = { city: displayCity.toLowerCase(), oldVotes: oldVotes };
-                const locRef = ref(db, `locations/${locationId}`);
-                const snap = await get(locRef);
-                if (snap.exists()) { await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) }); }
-                else { await set(locRef, { city: cityInput, state, lat, lng, votes: 1 }); }
-
-                triggerJackpot(displayCity, finalVotes, destLat, destLng, isNewCity);
-                e.target.reset(); submitBtn.innerText = "SUCCESS!";
-                setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
-            } catch (err) { console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }
+            const listEl = document.getElementById('leaderboard-list');
+            listEl.innerHTML = clusters.sort((a,b) => b.votes - a.votes).slice(0, 10).map((c, i) => `<li class="leaderboard-item"><span>#${i+1} ${c.name}, ${c.state}</span><span>${c.votes}</span></li>`).join('');
         });
     </script>
 </body>
