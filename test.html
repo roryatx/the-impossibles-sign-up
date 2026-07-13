@@ -97,13 +97,6 @@
             100% { left: 200%; }
         }
 
-        .link-button.jackpot-pulse { animation: jackpotGlitch 0.6s ease-out forwards; }
-        @keyframes jackpotGlitch {
-            0% { border-color: #FFFFFF; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transform: scale(1); }
-            15% { border-color: #7ca6ff; box-shadow: 0 0 20px #7ca6ff, inset 0 0 10px #7ca6ff; transform: scale(1.03); }
-            100% { border-color: #FFFFFF; box-shadow: 0 4px 15px rgba(0,0,0,0.5); transform: scale(1); }
-        }
-
         @media (max-width: 700px) { .link-grid { grid-template-columns: 1fr; } }
 
         /* --- TYPOGRAPHY & TITLE LOCKUPS --- */
@@ -150,7 +143,7 @@
         /* SCROLLING INFINITE MAP TRACK */
         .impossibles-map-wrapper { 
             position: relative; width: 100%; max-width: 1000px; 
-            margin-top: -40px; margin-bottom: 10px; overflow: hidden; 
+            margin-top: -40px; margin-bottom: 40px; overflow: hidden; 
         }
         .map-pan-track { display: flex; flex-direction: row; width: 100%; will-change: transform; padding: 40px 0; }
         .map-instance { width: 100%; flex-shrink: 0; position: relative; aspect-ratio: 975 / 610; }
@@ -164,38 +157,30 @@
         }
 
         .map-instance svg { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
-        .state-path { fill: #FFFFFF; stroke: #000000; stroke-width: 0.5px; }
-        .lines-layer, .labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 2; pointer-events: none; }
-        .labels-layer { z-index: 10; }
-        .connection-line { stroke: #cccccc; stroke-width: 1.5px; opacity: 0.8; transition: opacity 0.3s; }
-        .anchor-dot { transition: opacity 0.3s; }
+        .state-path { fill: #111122; stroke: #333355; stroke-width: 1px; }
+        .labels-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; pointer-events: none; }
 
-        .pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; transition: opacity 0.3s; }
-        .pin-circle {
-            position: absolute; width: 58px; height: 58px; border-radius: 50%;
-            border: 2px solid #FFFFFF; color: #FFFFFF;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.6); display: flex; flex-direction: column;
-            align-items: center; justify-content: center; transform: translate(-50%, -50%); 
-            pointer-events: auto; text-align: center; transition: background-color 1s ease, transform 0.5s ease;
+        /* --- ARENA ROCK TOUR STATUS BUBBLES --- */
+        .tour-pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; }
+        .tour-pin {
+            position: absolute; background: #ff0055; color: #ffffff;
+            font-family: 'Impact', 'Arial Black', sans-serif; padding: 6px 12px;
+            border: 2px solid #ffffff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.8), 0 4px 10px rgba(0,0,0,0.5);
+            border-radius: 6px; text-align: center; transform: translate(-50%, -100%);
+            white-space: nowrap; pointer-events: auto; cursor: pointer; transition: all 0.2s ease;
         }
-        .pin-circle.size-sm { transform: translate(-50%, -50%) scale(0.50); }
-        .pin-circle.size-md { transform: translate(-50%, -50%) scale(0.75); }
-        .pin-circle.size-lg { transform: translate(-50%, -50%) scale(1.0); }
+        .tour-pin:hover {
+            transform: translate(-50%, -105%) scale(1.08); background: #ffffff; color: #000033;
+            box-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
+        }
+        .tour-pin::after {
+            content: ''; position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%);
+            border-width: 8px 6px 0; border-style: solid; border-color: #ff0055 transparent;
+        }
+        .tour-pin:hover::after { border-color: #ffffff transparent; }
         
-        .vote-count { font-size: 16px; font-weight: bold; pointer-events: none; }
-        .city-label { font-size: 8px; text-transform: uppercase; font-weight: bold; pointer-events: none; }
-
-        #jackpot-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10000; }
-        .anim-bubble {
-            position: absolute; width: 220px; height: 220px; border-radius: 50%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            box-shadow: 0 0 100px rgba(255,255,255,0.5); font-weight: 900;
-            transform: translate(-50%, -50%) scale(0); opacity: 0;
-            border-style: solid; transition: all 0.8s ease-in-out; 
-        }
-        .anim-bubble.show { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-        .anim-bubble .v-big { font-size: 64px; transition: font-size 0.8s ease-in-out; }
-        .anim-bubble .c-big { font-size: 18px; text-transform: uppercase; margin-top: -10px; transition: all 0.8s ease-in-out; }
+        .tour-pin-date { font-size: clamp(10px, 2.5vw, 12px); letter-spacing: 1px; line-height: 1; opacity: 0.9; }
+        .tour-pin-city { font-size: clamp(12px, 3vw, 15px); line-height: 1.1; margin-top: 2px; text-transform: uppercase; }
 
         /* LEADERBOARD WRAPPER */
         .leaderboard-wrapper {
@@ -211,8 +196,7 @@
         }
         .leaderboard-subtitle { color: #7ca6ff; font-size: 14px; text-align: center; text-transform: uppercase; margin-bottom: 20px; font-weight: bold; letter-spacing: 1px; }
         .leaderboard-list { list-style: none; padding: 0; margin: 0; position: relative; z-index: 2; }
-        .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.2); color: #FFFFFF; font-weight: bold; font-size: 16px; text-transform: uppercase; animation: fadeIn 0.5s ease-in; }
-        @keyframes fadeIn { 0% { opacity: 0; background-color: rgba(124, 166, 255, 0.3); } 100% { opacity: 1; background-color: transparent; } }
+        .leaderboard-item { display: flex; justify-content: space-between; align-items: center; padding: 12px 15px; border-bottom: 1px solid rgba(255,255,255,0.2); color: #FFFFFF; font-weight: bold; font-size: 16px; text-transform: uppercase; }
         .leaderboard-item:last-child { border-bottom: none; }
         .leaderboard-rank { width: 30px; color: #7ca6ff; }
         .leaderboard-city { flex-grow: 1; text-align: left; }
@@ -239,8 +223,6 @@
 </head>
 <body>
 
-    <div id="jackpot-layer"></div>
-
     <div class="hero-logo-container animate-on-load">
         <img src="impossibles_logo.png" alt="The Impossibles" class="full-width-logo">
     </div>
@@ -256,7 +238,7 @@
         <a href="https://www.youtube.com/@theimpossiblesatx" class="link-button" target="_blank"><span class="status-bubble">VIDEOS</span> <span style="position: relative; z-index: 2;">YOUTUBE</span></a>
     </div>
 
-    <!-- DYNAMIC MAP -->
+    <!-- ARENA MAP TOUR TRACK -->
     <div class="impossibles-map-wrapper animate-on-load delay-2">
         <div class="map-pan-track" id="map-track">
             <div class="map-instance" id="dynamic-map"></div>
@@ -317,7 +299,7 @@
         </form>
     </div>
 
-    <div class="social-footer animate-on-load delay-5">
+    <div class="social-footer animate-on-load">
         <a href="https://www.facebook.com/TheImpossibles/" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/facebook.svg" alt="Facebook" class="social-icon"></a>
         <a href="https://www.instagram.com/theimpossibles/" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/instagram.svg" alt="Instagram" class="social-icon"></a>
         <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon"></a>
@@ -342,84 +324,41 @@
         const width = 975, height = 610;
         const projection = d3.geoAlbersUsa().scale(1300).translate([width / 2, height / 2]);
         const path = d3.geoPath().projection(projection);
-        
-        let currentNodes = [];
-        
-        let simulation = d3.forceSimulation()
-            .force("collide", d3.forceCollide().radius(26).strength(0.4))
-            .force("x", d3.forceX(d => d.anchorX).strength(0.12)) 
-            .force("y", d3.forceY(d => d.anchorY - 50).strength(0.12)) 
-            .alphaDecay(0.025); 
-            
-        let labelsLayer, linesSvg;
-        let scrollY = window.scrollY, lastScrollY = window.scrollY, scrollVelocity = 0;
-        
-        let hiddenNewCityId = null;
-        let pendingJackpotUpdate = { city: null, oldVotes: 0 }; 
 
-        let currentPan = 0, isDragging = false, startX = 0, isJackpotPlaying = false;
+        // Confirmed Gig Locations mapping cleanly to top actions
+        const confirmedShows = [
+            { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, url: "https://www.etix.com/ticket/p/32114610/the-impossibles-stlouis-blueberry-hill-duck-room" },
+            { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, url: "https://www.ticketweb.com/event/the-impossibles-space-monkey-mafia-reggies-rock-club-tickets/14894673" },
+            { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, url: "https://www.ticketweb.com/event/magic-bag-presents-the-impossibles-the-magic-bag-tickets/14818043?pl=magicbag" },
+            { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, url: "https://www.tixr.com/groups/supernovaska/events/supernovaska-2026-supernova-international-ska-festival-158685" },
+            { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/" }
+        ];
+        
+        let currentPan = 0, isDragging = false, startX = 0;
         let touchVelocity = 0, lastTouchX = 0, isInertia = false;
-        let panVelocity = 0, lastPan = 0;
         const autoPanSpeed = 0.5;
-
-        // ACCELEROMETER VARIABLES
-        let lastBeta = 0, lastGamma = 0;
-        let tiltDriftX = 0, tiltDriftY = 0;
-
-        window.addEventListener('deviceorientation', (e) => {
-            if (!e.gamma || !e.beta) return;
-            let dGamma = e.gamma - lastGamma;
-            let dBeta = e.beta - lastBeta;
-            
-            if (Math.abs(dGamma) > 0.5 || Math.abs(dBeta) > 0.5) {
-                tiltDriftX = dGamma * 1.5; 
-                tiltDriftY = dBeta * 1.5;
-                lastGamma = e.gamma;
-                lastBeta = e.beta;
-                simulation.alpha(0.15).restart(); 
-            }
-        });
-
-        let isJackpotPanning = false;
-        let jackpotStartPan = 0;
-        let jackpotTargetPan = 0;
-        let jackpotPanStartTime = 0;
 
         function panLoop() {
             if (window.innerWidth <= 700) {
-                if (isJackpotPanning) {
-                    let elapsed = performance.now() - jackpotPanStartTime;
-                    let progress = Math.min(elapsed / 800, 1);
-                    let ease = progress < 0.5 ? 2 * progress * progress : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-                    currentPan = jackpotStartPan + (jackpotTargetPan - jackpotStartPan) * ease;
-                    if (progress === 1) isJackpotPanning = false;
-                } else if (isDragging) {
-                } else if (isInertia && !isJackpotPlaying) {
-                    currentPan += touchVelocity;
-                    touchVelocity *= 0.95; 
-                    if (Math.abs(touchVelocity) < 0.2) isInertia = false;
-                } else if (!isJackpotPlaying) {
-                    currentPan -= autoPanSpeed; 
+                if (!isDragging) {
+                    if (isInertia) {
+                        currentPan += touchVelocity;
+                        touchVelocity *= 0.95; 
+                        if (Math.abs(touchVelocity) < 0.2) isInertia = false;
+                    } else {
+                        currentPan -= autoPanSpeed; 
+                    }
                 }
                 
                 const track = document.getElementById('map-track');
                 const instanceWidth = document.getElementById('dynamic-map').offsetWidth;
 
-                if (currentPan <= -instanceWidth) {
-                    currentPan += instanceWidth;
-                    if (isJackpotPanning) { jackpotStartPan += instanceWidth; jackpotTargetPan += instanceWidth; }
-                } else if (currentPan > 0) {
-                    currentPan -= instanceWidth;
-                    if (isJackpotPanning) { jackpotStartPan -= instanceWidth; jackpotTargetPan -= instanceWidth; }
-                }
+                if (currentPan <= -instanceWidth) currentPan += instanceWidth;
+                if (currentPan > 0) currentPan -= instanceWidth;
                 
                 track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
-                panVelocity = currentPan - lastPan;
-                lastPan = currentPan;
-                if (Math.abs(panVelocity) > 0.5) simulation.alphaTarget(0.1).restart();
             } else {
                 document.getElementById('map-track').style.transform = `translate3d(0, 0, 0)`;
-                panVelocity = 0;
             }
             requestAnimationFrame(panLoop);
         }
@@ -427,34 +366,17 @@
 
         const track = document.getElementById('map-track');
         track.addEventListener('touchstart', (e) => {
-            if (window.innerWidth > 700 || isJackpotPlaying) return;
+            if (window.innerWidth > 700) return;
             isDragging = true; isInertia = false; touchVelocity = 0; lastTouchX = e.touches[0].clientX; startX = e.touches[0].clientX - currentPan;
         });
         track.addEventListener('touchmove', (e) => {
-            if (window.innerWidth > 700 || !isDragging || isJackpotPlaying) return;
+            if (window.innerWidth > 700 || !isDragging) return;
             const currentTouchX = e.touches[0].clientX; touchVelocity = currentTouchX - lastTouchX; lastTouchX = currentTouchX; currentPan = currentTouchX - startX;
         }, { passive: true });
         track.addEventListener('touchend', () => { isDragging = false; if (Math.abs(touchVelocity) > 0.5) isInertia = true; });
 
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        function play8Bit(type) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
-            osc.type = 'square'; osc.connect(gain); gain.connect(audioCtx.destination);
-            const now = audioCtx.currentTime;
-            if(type === 'spawn') {
-                osc.frequency.setValueAtTime(150, now); osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.2);
-                osc.start(); osc.stop(now + 0.2);
-            } else {
-                osc.frequency.setValueAtTime(800, now); osc.frequency.setValueAtTime(1200, now + 0.05);
-                gain.gain.setValueAtTime(0.1, now); gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
-                osc.start(); osc.stop(now + 0.3);
-            }
-        }
-
         function getDistance(lat1, lon1, lat2, lon2) {
-            const R = 3958.8;
+            const R = 3958.8; // Radius in miles
             const dLat = (lat2 - lat1) * Math.PI / 180, dLon = (lon2 - lon1) * Math.PI / 180;
             const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
             return R * 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
@@ -463,258 +385,89 @@
         d3.json("https://cdn.jsdelivr.net/npm/us-atlas@3/states-10m.json").then(function(us) {
             const mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
             mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
-            linesSvg = d3.select("#dynamic-map").append("svg").attr("class", "lines-layer").attr("viewBox", [0, 0, width, height]);
+            
             labelsLayer = d3.select("#dynamic-map").append("div").attr("class", "labels-layer");
-            const cloneObserver = new MutationObserver(() => {
-                if (window.innerWidth <= 700) { document.getElementById('map-clone').innerHTML = document.getElementById('dynamic-map').innerHTML; }
+            
+            // Plot Status Tour Stop Pins into dynamic DOM overlay
+            confirmedShows.forEach(show => {
+                const coords = projection([show.lng, show.lat]);
+                if (coords) {
+                    const pinWrapper = labelsLayer.append("div")
+                        .attr("class", "tour-pin-wrapper")
+                        .style("left", `${(coords[0] / width) * 100}%`)
+                        .style("top", `${(coords[1] / height) * 100}%`);
+                        
+                    const pin = pinWrapper.append("div")
+                        .attr("class", "tour-pin")
+                        .on("click", () => window.open(show.url, '_blank'));
+                        
+                    pin.append("div").attr("class", "tour-pin-date").text(show.date);
+                    pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
+                }
             });
-            cloneObserver.observe(document.getElementById('dynamic-map'), { childList: true, subtree: true, attributes: true });
+
+            if (window.innerWidth <= 700) { 
+                document.getElementById('map-clone').innerHTML = document.getElementById('dynamic-map').innerHTML; 
+            }
             listenToDatabase();
         });
 
-        window.addEventListener('scroll', () => {
-            scrollY = window.scrollY; scrollVelocity = scrollY - lastScrollY; lastScrollY = scrollY;
-            simulation.alphaTarget(0.2).restart();
-        });
-
+        // 1. POPULATE LEADERBOARD IN REAL-TIME
         function listenToDatabase() {
             onValue(ref(db, 'locations'), (snapshot) => {
                 const data = snapshot.val(); if (!data) return;
-                const clusters = [];
                 
-                // POPULATION LOGIC: Sort by population descending so Major Cities establish clusters first.
-                const locationsArray = Object.values(data).sort((a, b) => (b.population || 0) - (a.population || 0));
+                // Sort raw locations by vote count descending so the top performer lays down anchor hubs first
+                const rawLocations = Object.values(data).sort((a, b) => b.votes - a.votes);
+                const clusters = [];
 
-                locationsArray.forEach(loc => {
+                rawLocations.forEach(loc => {
                     let added = false;
                     for (let cluster of clusters) {
-                        const dist = getDistance(loc.lat, loc.lng, cluster.centerLat, cluster.centerLng);
-                        
-                        // Treat locations with > 500,000 population as Major Cities
-                        const isLocMajor = (loc.population || 0) > 500000;
-                        const isClusterMajor = (cluster.population || 0) > 500000;
-
-                        // Cluster them if they are within 45 miles, UNLESS they are both Major Cities
-                        if (dist <= 45 && !(isLocMajor && isClusterMajor)) {
+                        // 115 Miles broad cluster radius (~2 hour drive baseline requirement)
+                        if (getDistance(loc.lat, loc.lng, cluster.lat, cluster.lng) <= 115) {
                             cluster.votes += loc.votes;
-                            cluster.allNames.push(loc.city.toLowerCase());
                             added = true; break;
                         }
                     }
                     if (!added) {
                         clusters.push({ 
-                            name: loc.city, votes: loc.votes, maxVotes: loc.votes, lat: loc.lat, lng: loc.lng, 
-                            centerLat: loc.lat, centerLng: loc.lng, allNames: [loc.city.toLowerCase()],
-                            population: loc.population || 0
+                            name: loc.city.toUpperCase(), 
+                            state: loc.state.toUpperCase(), 
+                            votes: loc.votes, 
+                            lat: loc.lat, 
+                            lng: loc.lng 
                         });
                     }
                 });
 
-                // UPDATE LEADERBOARD LIST DOM
+                // Final cluster sort reflecting complete merged configurations
+                clusters.sort((a, b) => b.votes - a.votes);
+
                 const listEl = document.getElementById('leaderboard-list');
                 if (listEl) {
-                    const sortedClusters = [...clusters].sort((a, b) => b.votes - a.votes).slice(0, 10);
                     listEl.innerHTML = ''; 
+                    const top10 = clusters.slice(0, 10);
                     
-                    if (sortedClusters.length === 0) {
-                        listEl.innerHTML = '<li class="leaderboard-item" style="justify-content: center; border: none;">No votes yet! Be the first.</li>';
+                    if (top10.length === 0) {
+                        listEl.innerHTML = '<li class="leaderboard-item" style="justify-content: center; border: none;">No signups yet!</li>';
                     } else {
-                        sortedClusters.forEach((cluster, index) => {
+                        top10.forEach((cluster, index) => {
                             const li = document.createElement('li');
                             li.className = 'leaderboard-item';
                             li.innerHTML = `
                                 <span class="leaderboard-rank">#${index + 1}</span>
-                                <span class="leaderboard-city">${cluster.name}</span>
+                                <span class="leaderboard-city">${cluster.name}, ${cluster.state}</span>
                                 <span class="leaderboard-votes">${cluster.votes}</span>
                             `;
                             listEl.appendChild(li);
                         });
                     }
                 }
-
-                currentNodes = clusters.map(c => {
-                    const coords = projection([c.lng, c.lat]);
-                    if (!coords) return null;
-                    const existing = currentNodes.find(n => n.name === c.name);
-                    return { 
-                        ...c, anchorX: coords[0], anchorY: coords[1], x: existing ? existing.x : coords[0], y: existing ? existing.y : coords[1]-50,
-                        parallaxY: existing ? existing.parallaxY : (0.5 + Math.random()),
-                        parallaxX: existing ? existing.parallaxX : (0.5 + Math.random())
-                    };
-                }).filter(n => n);
-
-                const maxVotes = Math.max(...currentNodes.map(n => n.votes), 1);
-                
-                window.bubbleColorScale = d3.scaleLinear().domain([1, maxVotes]).range(["#1a1a4d", "#7ca6ff"]);
-
-                linesSvg.selectAll(".anchor-dot").data(currentNodes, d => d.name)
-                    .join("circle").attr("class", "anchor-dot").attr("r", 3).attr("fill", "#cccccc")
-                    .attr("cx", d => d.anchorX).attr("cy", d => d.anchorY)
-                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1);
-
-                const link = linesSvg.selectAll(".connection-line").data(currentNodes, d => d.name)
-                    .join("line").attr("class", "connection-line")
-                    .attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y)
-                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 0.8);
-
-                const bubble = labelsLayer.selectAll(".pin-wrapper").data(currentNodes, d => d.name)
-                    .join(enter => {
-                        const w = enter.append("div").attr("class", "pin-wrapper");
-                        const c = w.append("div").attr("class", "pin-circle");
-                        c.append("div").attr("class", "vote-count");
-                        c.append("div").attr("class", "city-label");
-                        return w;
-                    }, update => update, exit => exit.remove())
-                    .style("opacity", d => (hiddenNewCityId && d.name.toLowerCase() === hiddenNewCityId) ? 0 : 1)
-                    .style("z-index", d => d.votes + 10); 
-                
-                bubble.select(".vote-count").text(d => (pendingJackpotUpdate.city === d.name.toLowerCase()) ? pendingJackpotUpdate.oldVotes : d.votes);
-                bubble.select(".city-label").text(d => d.name);
-                
-                bubble.select(".pin-circle")
-                    .style("background-color", d => window.bubbleColorScale(d.votes))
-                    .classed("size-sm", d => d.votes <= 10)
-                    .classed("size-md", d => d.votes > 10 && d.votes <= 25)
-                    .classed("size-lg", d => d.votes > 25);
-
-                simulation.nodes(currentNodes).on("tick", () => {
-                    let driftY = Math.max(-20, Math.min(20, scrollVelocity * 0.8)) + tiltDriftY;
-                    let driftX = Math.max(-20, Math.min(20, panVelocity * 0.8)) + tiltDriftX;
-                    
-                    tiltDriftX *= 0.92;
-                    tiltDriftY *= 0.92;
-
-                    currentNodes.forEach(d => {
-                        const targetY = d.anchorY - 50; const targetX = d.anchorX;
-                        if (Math.abs(scrollVelocity) < 1 && Math.abs(panVelocity) < 1 && Math.abs(tiltDriftX) < 1 && Math.abs(tiltDriftY) < 1) { 
-                            d.x += (targetX - d.x) * 0.03; d.y += (targetY - d.y) * 0.03; 
-                        }
-                        d.y += driftY * d.parallaxY * 0.1; d.x -= driftX * d.parallaxX * 0.1; 
-                        
-                        const maxDist = 87; 
-                        const dx = d.x - targetX; const dy = d.y - targetY;
-                        const dist = Math.sqrt(dx * dx + dy * dy);
-                        if (dist > maxDist) { d.x = targetX + (dx / dist) * maxDist; d.y = targetY + (dy / dist) * maxDist; }
-                        
-                        if (d.x < 30) d.x = 30; if (d.x > width - 30) d.x = width - 30;
-                    });
-                    scrollVelocity *= 0.85;
-                    link.attr("x1", d => d.anchorX).attr("y1", d => d.anchorY).attr("x2", d => d.x).attr("y2", d => d.y);
-                    bubble.style("left", d => `${(d.x / width) * 100}%`).style("top", d => `${(d.y / height) * 100}%`);
-                    
-                    if (Math.abs(scrollVelocity) > 0.05 || Math.abs(panVelocity) > 0.05 || Math.abs(tiltDriftX) > 0.5) {
-                        simulation.alphaTarget(0.1); 
-                    } else {
-                        simulation.alphaTarget(0);
-                    }
-                });
-                simulation.alpha(0.3).restart();
             });
         }
 
-        async function triggerJackpot(city, votes, lat, lng, isNewCity) {
-            isJackpotPlaying = true; 
-            const layer = document.getElementById('jackpot-layer');
-            const mapInner = document.getElementById('dynamic-map');
-            const coords = projection([lng, lat]);
-            const targetColor = window.bubbleColorScale ? window.bubbleColorScale(votes) : "#1a1a4d";
-            
-            if (window.innerWidth <= 700 && coords) {
-                const instanceWidth = mapInner.offsetWidth;
-                const intrinsicCityX = (coords[0] / width) * instanceWidth;
-                let targetPan = (window.innerWidth / 2) - intrinsicCityX;
-                while (targetPan > 0) targetPan -= instanceWidth;
-                while (targetPan <= -instanceWidth) targetPan += instanceWidth;
-                let diff = targetPan - currentPan;
-                if (diff > instanceWidth / 2) targetPan -= instanceWidth; if (diff < -instanceWidth / 2) targetPan += instanceWidth;
-                jackpotStartPan = currentPan; jackpotTargetPan = targetPan; jackpotPanStartTime = performance.now(); isJackpotPanning = true;
-            }
-
-            const bigB = document.createElement('div');
-            bigB.className = 'anim-bubble';
-            bigB.style.left = '50%'; bigB.style.top = '50%';
-            bigB.style.backgroundColor = targetColor; bigB.style.color = '#FFFFFF'; bigB.style.borderColor = '#FFFFFF'; bigB.style.borderWidth = '6px';
-            bigB.innerHTML = `<div class="v-big">${votes}</div><div class="c-big">${city}</div>`;
-            layer.appendChild(bigB);
-            
-            play8Bit('spawn');
-            requestAnimationFrame(() => bigB.classList.add('show'));
-
-            document.querySelectorAll('.link-button').forEach(btn => {
-                btn.classList.add('jackpot-pulse');
-                setTimeout(() => btn.classList.remove('jackpot-pulse'), 600);
-            });
-
-            setTimeout(() => {
-                const mapRect = mapInner.getBoundingClientRect();
-                if (coords) {
-                    let destX = mapRect.left + (coords[0] / width) * mapRect.width; 
-                    if (window.innerWidth <= 700) { while (destX < -50) destX += mapRect.width; while (destX > window.innerWidth + 50) destX -= mapRect.width; }
-                    const destY = mapRect.top + ((coords[1]-50) / height) * mapRect.height;
-                    
-                    let targetSize = 58;
-                    let vFontSize = '16px';
-                    let cFontSize = '8px';
-                    
-                    if (votes <= 10) {
-                        targetSize = 29; 
-                        vFontSize = '10px';
-                        cFontSize = '5px';
-                    } else if (votes <= 25) {
-                        targetSize = 43.5; 
-                        vFontSize = '12px';
-                        cFontSize = '6px';
-                    }
-
-                    bigB.style.width = targetSize + 'px'; 
-                    bigB.style.height = targetSize + 'px';
-                    bigB.style.left = destX + 'px'; 
-                    bigB.style.top = destY + 'px';
-                    bigB.style.borderWidth = '2px'; 
-                    bigB.style.boxShadow = '0 4px 12px rgba(0,0,0,0.6)';
-                    bigB.querySelector('.v-big').style.fontSize = vFontSize;
-                    bigB.querySelector('.c-big').style.fontSize = cFontSize;
-                    bigB.querySelector('.c-big').style.marginTop = '0px';
-                }
-            }, 1000); 
-
-            setTimeout(() => {
-                play8Bit('settle');
-                
-                const confetti = document.createElement('img');
-                confetti.src = 'confetti.gif?a=' + Math.random(); 
-                confetti.style.position = 'fixed';
-                confetti.style.left = bigB.style.left;
-                confetti.style.top = bigB.style.top;
-                confetti.style.width = '300px'; 
-                confetti.style.height = '300px';
-                confetti.style.transform = 'translate(-50%, -50%)';
-                confetti.style.pointerEvents = 'none';
-                confetti.style.zIndex = '9999'; 
-                confetti.style.transition = 'opacity 1s ease';
-                layer.appendChild(confetti);
-
-                scrollVelocity = -45; simulation.alpha(0.5).restart();
-                bigB.style.opacity = '0';
-                pendingJackpotUpdate.city = null;
-                labelsLayer.selectAll(".vote-count").text(d => d.votes);
-                
-                if (isNewCity) {
-                    hiddenNewCityId = null;
-                    labelsLayer.selectAll(".pin-wrapper").style("opacity", 1);
-                    linesSvg.selectAll(".anchor-dot").style("opacity", 1);
-                    linesSvg.selectAll(".connection-line").style("opacity", 0.8);
-                }
-
-                setTimeout(() => {
-                    confetti.style.opacity = '0';
-                    setTimeout(() => { confetti.remove(); }, 1000);
-                }, 1500);
-
-                setTimeout(() => { bigB.remove(); isJackpotPlaying = false; }, 500);
-            }, 1800); 
-        }
-
+        // 2. PROCESS VOTE FORM AND UPDATE FIREBASE
         document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-button');
@@ -726,63 +479,51 @@
                 const emailId = email.replace(/[^a-z0-9]/g, '');
                 const locationId = `${cityInput.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
+                // Anti-spam / Duplicate Check
                 const emailSnap = await get(ref(db, `signups/${emailId}`));
                 if (emailSnap.exists()) {
                     submitBtn.innerText = "ALREADY SIGNED UP!"; submitBtn.classList.add('error');
                     setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; submitBtn.classList.remove('error'); }, 4000); return;
                 }
                 
-                // POPULATION FETCH: Added 'extratags=1' to pull OpenStreetMap population metadata
+                // Fetch Geolocation via OSM
                 const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityInput)}&state=${encodeURIComponent(state)}&country=USA&format=json&extratags=1`);
                 const geoData = await geoRes.json();
                 if (!geoData || geoData.length === 0) { alert("City not found! Check spelling."); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; return; }
                 
                 const lat = parseFloat(geoData[0].lat), lng = parseFloat(geoData[0].lon);
                 
-                // Read Population from API if available
                 let population = 0;
                 if (geoData[0].extratags && geoData[0].extratags.population) {
                     population = parseInt(geoData[0].extratags.population, 10);
                 }
-
-                document.querySelector('.impossibles-map-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
                 
-                // Webhook Push
+                // Webhook Push to Make.com
                 await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
                     method: "POST", headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ email, firstname: e.target.firstname.value, lastname: e.target.lastname.value, city: cityInput, state })
                 });
+                
+                // Log User as Signed Up
                 await set(ref(db, `signups/${emailId}`), { timestamp: Date.now() });
 
-                let finalVotes = 1, oldVotes = 0, isNewCity = true, destLat = lat, destLng = lng, displayCity = cityInput;
-                
-                // Run a temporary clustering check just for the Jackpot animation target calculation
-                for (let node of currentNodes) {
-                    const dist = getDistance(lat, lng, node.centerLat, node.centerLng);
-                    const isIncomingMajor = population > 500000;
-                    const isExistingMajor = (node.population || 0) > 500000;
-
-                    if (dist <= 45 && !(isIncomingMajor && isExistingMajor)) {
-                        oldVotes = node.votes; finalVotes = oldVotes + 1; isNewCity = false; destLat = node.centerLat; destLng = node.centerLng; displayCity = node.name; break;
-                    }
-                }
-                
-                pendingJackpotUpdate = { city: displayCity.toLowerCase(), oldVotes: oldVotes };
-                
+                // Process the Location Vote
                 const locRef = ref(db, `locations/${locationId}`);
                 const snap = await get(locRef);
                 if (snap.exists()) { 
                     await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) }); 
                 } else { 
-                    if (isNewCity) hiddenNewCityId = cityInput.toLowerCase(); 
-                    // Pushing the population data to Firebase so the map renderer can use it
                     await set(locRef, { city: cityInput, state, lat, lng, votes: 1, population }); 
                 }
 
-                triggerJackpot(displayCity, finalVotes, destLat, destLng, isNewCity);
+                // Success State Reset
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
                 setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
-            } catch (err) { console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }
+            } catch (err) { 
+                console.error(err); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = "SIGN UP"; 
+            }
         });
     </script>
 </body>
