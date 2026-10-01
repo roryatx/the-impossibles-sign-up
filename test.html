@@ -145,9 +145,10 @@
         /* TOUR PINS (ACTIVE VS PLAYED) */
         .tour-pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; }
         
-        /* PLAYED SHOWS: GREYED OUT, 66% SCALE WITH HOVER HIGHLIGHT */
+        /* PLAYED SHOWS: ANCHOR TRANSFORM-ORIGIN TO BOTTOM CENTER SO SCALING DOES NOT SHIFT BOTTOM EDGE OVER POST */
         .tour-pin-wrapper.played {
             transform: scale(0.66);
+            transform-origin: bottom center;
             filter: grayscale(100%) opacity(0.55);
             z-index: 10;
             transition: transform 0.2s ease, filter 0.2s ease;
@@ -196,7 +197,7 @@
         .tour-pin-wrapper.pin-fest .tour-pin,
         .tour-pin-wrapper.played .tour-pin {
             transform: translate(-50%, -100%);
-            margin-top: -30px; /* Space for the 30px vector post stem */
+            margin-top: -30px; /* Leaves 30px height for vector post stem */
         }
 
         /* SVG CONNECTING LINE LAYER */
@@ -485,7 +486,7 @@
 
         // CONFIRMED SHOWS CONFIGURATION
         const confirmedShows = [
-            // PLAYED SHOWS (Vertical line from bottom of sign to map coordinate)
+            // PLAYED SHOWS
             { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, status: "played", lineType: "vertical" },
             { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, status: "played", lineType: "vertical" },
             { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, status: "played", lineType: "vertical" },
@@ -579,15 +580,13 @@
 
                     // DRAW CONNECTING LINES
                     if (show.lineType === "vertical") {
-                        // Vertical post drawing from bottom edge of sign down to map point
                         lineSvg.append("line")
                             .attr("x1", coords[0])
-                            .attr("y1", coords[1] - 30) // Starts at bottom edge of sign box
+                            .attr("y1", coords[1] - 30)
                             .attr("x2", coords[0])
-                            .attr("y2", coords[1])       // Ends at map coordinate
+                            .attr("y2", coords[1])
                             .attr("marker-end", "url(#arrowhead)");
                     } else if (show.lineType === "offset" && show.lineStart) {
-                        // Angled line connecting offset sign box corner to map coordinate
                         lineSvg.append("line")
                             .attr("x1", coords[0] + show.lineStart.x)
                             .attr("y1", coords[1] + show.lineStart.y)
