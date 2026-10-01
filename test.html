@@ -145,7 +145,7 @@
         /* TOUR PINS (ACTIVE VS PLAYED) */
         .tour-pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; }
         
-        /* PLAYED SHOWS: GREYED OUT, 66% SCALE WITH HOVER HIGHLIGHT MAINTAINED */
+        /* PLAYED SHOWS: GREYED OUT, 66% SCALE WITH HOVER HIGHLIGHT */
         .tour-pin-wrapper.played {
             transform: scale(0.66);
             filter: grayscale(100%) opacity(0.55);
@@ -167,7 +167,7 @@
             position: absolute; background: #ff0055; color: #ffffff;
             font-family: 'Impact', 'Arial Black', sans-serif; padding: 8px 14px;
             border: 2px solid #ffffff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.8), 0 4px 10px rgba(0,0,0,0.5);
-            border-radius: 8px; text-align: center; transform: translate(-50%, -100%);
+            border-radius: 8px; text-align: center;
             white-space: nowrap; pointer-events: auto; cursor: default; transition: all 0.2s ease;
         }
         
@@ -177,55 +177,38 @@
             cursor: pointer;
         }
 
-        /* --- OFFSET SIDE-BY-SIDE SIGNPOST LAYOUT --- */
-        /* DFW: Offset Top-Left */
+        /* --- OFFSET POSITIONS --- */
+        /* DFW: Shifted Top-Left */
         .tour-pin-wrapper.pin-dfw .tour-pin {
-            transform: translate(-105%, -130%);
-        }
-        .tour-pin-wrapper.pin-dfw .tour-pin-stem-angled {
-            position: absolute;
-            width: 45px;
-            height: 3px;
-            background: #ffffff;
-            top: -20px;
-            left: -35px;
-            transform: rotate(45deg);
-            transform-origin: right center;
-            box-shadow: 0 0 6px rgba(0,0,0,0.5);
-        }
-        .tour-pin-wrapper.pin-dfw .tour-pin-stem-angled::after {
-            content: '';
-            position: absolute;
-            right: -4px;
-            top: -3px;
-            border-width: 5px 0 5px 7px;
-            border-style: solid;
-            border-color: transparent transparent transparent #ffffff;
+            transform: translate(-100%, -120%);
         }
 
-        /* AUSTIN: Offset Bottom-Right */
+        /* AUSTIN: Shifted Bottom-Right */
         .tour-pin-wrapper.pin-austin .tour-pin {
-            transform: translate(5%, 20%);
+            transform: translate(20%, 20%);
         }
-        .tour-pin-wrapper.pin-austin .tour-pin-stem-angled {
-            position: absolute;
-            width: 45px;
-            height: 3px;
-            background: #ffffff;
-            top: 15px;
-            left: -10px;
-            transform: rotate(-135deg);
-            transform-origin: left center;
-            box-shadow: 0 0 6px rgba(0,0,0,0.5);
+
+        /* PAST SHOWS DEFAULT CENTERED */
+        .tour-pin-wrapper.played .tour-pin {
+            transform: translate(-50%, -100%);
         }
-        .tour-pin-wrapper.pin-austin .tour-pin-stem-angled::after {
-            content: '';
+
+        /* SVG CONNECTING LINE LAYER */
+        .pin-line-svg {
             position: absolute;
-            left: -4px;
-            top: -3px;
-            border-width: 5px 7px 5px 0;
-            border-style: solid;
-            border-color: transparent #ffffff transparent transparent;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 22;
+        }
+
+        .pin-line-svg line {
+            stroke: #ffffff;
+            stroke-width: 3px;
+            stroke-dasharray: 4 2;
+            filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));
         }
 
         /* STANDARD VERTICAL STEM FOR PAST SHOWS */
@@ -250,15 +233,8 @@
         }
 
         .tour-pin:hover {
-            transform: translate(-50%, -105%) scale(1.1);
             background: #ffffff; color: #000033;
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
-        }
-        .tour-pin-wrapper.pin-dfw:hover .tour-pin {
-            transform: translate(-105%, -130%) scale(1.1);
-        }
-        .tour-pin-wrapper.pin-austin:hover .tour-pin {
-            transform: translate(5%, 20%) scale(1.1);
         }
         
         .tour-pin-tix {
@@ -505,15 +481,15 @@
 
         // CONFIRMED SHOWS: PLAYED VS UPCOMING
         const confirmedShows = [
-            // PLAYED SHOWS (No link attached)
+            // PLAYED SHOWS
             { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, status: "played" },
             { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, status: "played" },
             { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, status: "played" },
             { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, status: "played" },
             
-            // UPCOMING ACTIVE SHOWS (Side-by-Side Offset)
-            { date: "DEC 4", city: "DFW, TX", lng: -97.3308, lat: 32.7555, url: "https://wl.eventim.us/event/the-impossibles/706586?afflky=TulipsFTW", status: "active", id: "pin-dfw" },
-            { date: "DEC 5", city: "Austin, TX", lng: -97.7431, lat: 30.2672, url: "https://www.etix.com/ticket/p/42713410/the-impossibles-mohawk-20th-anniversary-austin-resound-presents", status: "active", id: "pin-austin" }
+            // UPCOMING ACTIVE SHOWS (Offset + Explicit Line Vectors)
+            { date: "DEC 4", city: "DFW, TX", lng: -97.3308, lat: 32.7555, url: "https://wl.eventim.us/event/the-impossibles/706586?afflky=TulipsFTW", status: "active", id: "pin-dfw", lineOffset: { x: -45, y: -45 } },
+            { date: "DEC 5", city: "Austin, TX", lng: -97.7431, lat: 30.2672, url: "https://www.etix.com/ticket/p/42713410/the-impossibles-mohawk-20th-anniversary-austin-resound-presents", status: "active", id: "pin-austin", lineOffset: { x: 35, y: 25 } }
         ];
 
         // SMART AUTO-CENTERING ON MOBILE BEFORE PANNING
@@ -550,9 +526,14 @@
             const mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
             mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
             
+            // Add SVG Layer for Connecting Pointer Lines
+            const lineSvg = d3.select("#dynamic-map").append("svg")
+                .attr("class", "pin-line-svg")
+                .attr("viewBox", [0, 0, width, height]);
+
             tourLayer = d3.select("#dynamic-map").append("div").attr("class", "tour-layer");
             
-            // Plot Tour Pins
+            // Plot Tour Pins & Lines
             confirmedShows.forEach(show => {
                 const coords = projection([show.lng, show.lat]);
                 if (coords) {
@@ -567,9 +548,17 @@
                     
                     if (show.status === 'active') {
                         pin.on("click", () => window.open(show.url, '_blank'));
-                        pin.append("div").attr("class", "tour-pin-stem-angled");
                         pin.append("div").attr("class", "tour-pin-tix").text("TICKETS");
                         pin.append("div").attr("class", "tour-pin-date").text(show.date);
+
+                        // Draw vector connecting line from city coordinate (coords) to offset box center
+                        if (show.lineOffset) {
+                            lineSvg.append("line")
+                                .attr("x1", coords[0])
+                                .attr("y1", coords[1])
+                                .attr("x2", coords[0] + show.lineOffset.x)
+                                .attr("y2", coords[1] + show.lineOffset.y);
+                        }
                     } else {
                         pin.append("div").attr("class", "tour-pin-stem");
                     }
