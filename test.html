@@ -169,6 +169,7 @@
             border: 2px solid #ffffff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.8), 0 4px 10px rgba(0,0,0,0.5);
             border-radius: 8px; text-align: center;
             white-space: nowrap; pointer-events: auto; cursor: default; transition: all 0.2s ease;
+            display: flex; flex-direction: column; align-items: center;
         }
         
         .tour-pin-wrapper.active .tour-pin {
@@ -188,7 +189,7 @@
             transform: translate(20%, 20%);
         }
 
-        /* GAINESVILLE / THE FEST: Standard Centered Above Coordinate */
+        /* GAINESVILLE / THE FEST: Centered Above Coordinate */
         .tour-pin-wrapper.pin-fest .tour-pin {
             transform: translate(-50%, -100%);
         }
@@ -198,7 +199,7 @@
             transform: translate(-50%, -100%);
         }
 
-        /* SVG CONNECTING LINE LAYER (LOWER Z-INDEX TO SIT BEHIND SIGNS) */
+        /* SVG CONNECTING LINE LAYER FOR SOLID LINES & ARROWS */
         .pin-line-svg {
             position: absolute;
             top: 0;
@@ -206,17 +207,16 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: 15; /* Render behind .tour-pin-wrapper (z-index 30) */
+            z-index: 15; /* Sits behind pin boxes */
         }
 
         .pin-line-svg line {
             stroke: #ffffff;
             stroke-width: 3px;
-            stroke-dasharray: 4 2;
             filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));
         }
 
-        /* STANDARD VERTICAL STEM FOR PAST SHOWS & GAINESVILLE */
+        /* SOLID VERTICAL POST WITH ARROW FOR STANDARD PINS */
         .tour-pin-wrapper .tour-pin-stem {
             position: absolute;
             bottom: -25px;
@@ -229,10 +229,10 @@
         .tour-pin-wrapper .tour-pin-stem::after {
             content: '';
             position: absolute;
-            bottom: -5px;
+            bottom: -6px;
             left: 50%;
             transform: translateX(-50%);
-            border-width: 6px 4px 0;
+            border-width: 7px 5px 0;
             border-style: solid;
             border-color: #ffffff transparent;
         }
@@ -242,14 +242,34 @@
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
         }
         
+        /* UNIFORM HIERARCHY STYLING: DATE (TOP), CITY (MIDDLE), TICKETS (BOTTOM) */
+        .tour-pin-date { 
+            font-size: clamp(11px, 2.5vw, 13px); 
+            letter-spacing: 1px; 
+            line-height: 1.1; 
+            opacity: 0.95; 
+            margin-bottom: 2px;
+            text-transform: uppercase;
+        }
+        
+        .tour-pin-city { 
+            font-size: clamp(14px, 3.5vw, 18px); 
+            line-height: 1.1; 
+            margin-bottom: 4px; 
+            text-transform: uppercase; 
+        }
+
         .tour-pin-tix {
-            font-size: clamp(11px, 2.8vw, 14px); background: #ffffff; color: #d97706;
-            border-radius: 4px; padding: 2px 6px; margin-bottom: 4px; display: inline-block; letter-spacing: 1px;
+            font-size: clamp(10px, 2.5vw, 12px); 
+            background: #ffffff; 
+            color: #d97706;
+            border-radius: 4px; 
+            padding: 2px 8px; 
+            display: inline-block; 
+            letter-spacing: 1px;
+            font-weight: bold;
         }
         .tour-pin:hover .tour-pin-tix { background: #000033; color: #ffffff; }
-        
-        .tour-pin-date { font-size: clamp(12px, 2.5vw, 14px); letter-spacing: 1px; line-height: 1.2; opacity: 0.9; }
-        .tour-pin-city { font-size: clamp(14px, 3.5vw, 18px); line-height: 1.1; margin-top: 2px; text-transform: uppercase; }
 
         /* --- THE JACKPOT OVERLAY ANIMATION --- */
         #jackpot-layer { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; pointer-events: none; z-index: 10000; }
@@ -532,14 +552,28 @@
             const mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
             mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
             
-            // Add SVG Layer for Connecting Pointer Lines (Rendered Behind Pins)
+            // Add SVG Layer for Connecting Lines & Solid Arrowheads
             const lineSvg = d3.select("#dynamic-map").append("svg")
                 .attr("class", "pin-line-svg")
                 .attr("viewBox", [0, 0, width, height]);
 
+            // Define Reusable Arrowhead Marker Definition
+            const defs = lineSvg.append("defs");
+            defs.append("marker")
+                .attr("id", "arrowhead")
+                .attr("viewBox", "0 0 10 10")
+                .attr("refX", 5)
+                .attr("refY", 5)
+                .attr("markerWidth", 6)
+                .attr("markerHeight", 6)
+                .attr("orient", "auto-start-reverse")
+                .append("path")
+                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+                .attr("fill", "#ffffff");
+
             tourLayer = d3.select("#dynamic-map").append("div").attr("class", "tour-layer");
             
-            // Plot Tour Pins & Lines
+            // Plot Tour Pins & Solid Vector Lines
             confirmedShows.forEach(show => {
                 const coords = projection([show.lng, show.lat]);
                 if (coords) {
@@ -554,23 +588,27 @@
                     
                     if (show.status === 'active') {
                         pin.on("click", () => window.open(show.url, '_blank'));
-                        pin.append("div").attr("class", "tour-pin-tix").text("TICKETS");
+                        
+                        // STRICT HIERARCHY: 1. DATE (Top), 2. CITY (Middle), 3. TICKETS (Bottom)
                         pin.append("div").attr("class", "tour-pin-date").text(show.date);
+                        pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
+                        pin.append("div").attr("class", "tour-pin-tix").text("TICKETS");
 
                         if (show.lineOffset) {
                             lineSvg.append("line")
-                                .attr("x1", coords[0])
-                                .attr("y1", coords[1])
-                                .attr("x2", coords[0] + show.lineOffset.x)
-                                .attr("y2", coords[1] + show.lineOffset.y);
+                                .attr("x1", coords[0] + show.lineOffset.x)
+                                .attr("y1", coords[1] + show.lineOffset.y)
+                                .attr("x2", coords[0])
+                                .attr("y2", coords[1])
+                                .attr("marker-end", "url(#arrowhead)");
                         } else {
                             pin.append("div").attr("class", "tour-pin-stem");
                         }
                     } else {
+                        // INACTIVE SHOWS: DISPLAY CITY WITH SOLID POST
+                        pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
                         pin.append("div").attr("class", "tour-pin-stem");
                     }
-                    
-                    pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
                 }
             });
 
