@@ -191,15 +191,15 @@
 
         /* GAINESVILLE / THE FEST: Centered Above Coordinate */
         .tour-pin-wrapper.pin-fest .tour-pin {
-            transform: translate(-50%, -100%);
+            transform: translate(-50%, -115%);
         }
 
         /* PAST SHOWS DEFAULT CENTERED */
         .tour-pin-wrapper.played .tour-pin {
-            transform: translate(-50%, -100%);
+            transform: translate(-50%, -115%);
         }
 
-        /* SVG CONNECTING LINE LAYER FOR SOLID LINES & ARROWS */
+        /* SVG CONNECTING LINE LAYER FOR UNIFIED ARROWS */
         .pin-line-svg {
             position: absolute;
             top: 0;
@@ -214,27 +214,6 @@
             stroke: #ffffff;
             stroke-width: 3px;
             filter: drop-shadow(0 0 4px rgba(0,0,0,0.8));
-        }
-
-        /* SOLID VERTICAL POST WITH ARROW FOR STANDARD PINS */
-        .tour-pin-wrapper .tour-pin-stem {
-            position: absolute;
-            bottom: -25px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 3px;
-            height: 25px;
-            background: #ffffff;
-        }
-        .tour-pin-wrapper .tour-pin-stem::after {
-            content: '';
-            position: absolute;
-            bottom: -6px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 7px 5px 0;
-            border-style: solid;
-            border-color: #ffffff transparent;
         }
 
         .tour-pin:hover {
@@ -506,14 +485,14 @@
 
         // CONFIRMED SHOWS: PLAYED VS UPCOMING
         const confirmedShows = [
-            // PLAYED SHOWS
-            { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, status: "played" },
-            { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, status: "played" },
-            { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, status: "played" },
-            { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, status: "played" },
+            // PLAYED SHOWS (Standard vertical post vectors)
+            { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, status: "played", lineOffset: { x: 0, y: -25 } },
+            { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, status: "played", lineOffset: { x: 0, y: -25 } },
+            { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, status: "played", lineOffset: { x: 0, y: -25 } },
+            { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, status: "played", lineOffset: { x: 0, y: -25 } },
             
             // UPCOMING ACTIVE SHOWS
-            { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/", status: "active", id: "pin-fest" },
+            { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/", status: "active", id: "pin-fest", lineOffset: { x: 0, y: -40 } },
             { date: "DEC 4", city: "DFW, TX", lng: -97.3308, lat: 32.7555, url: "https://wl.eventim.us/event/the-impossibles/706586?afflky=TulipsFTW", status: "active", id: "pin-dfw", lineOffset: { x: -45, y: -45 } },
             { date: "DEC 5", city: "Austin, TX", lng: -97.7431, lat: 30.2672, url: "https://www.etix.com/ticket/p/42713410/the-impossibles-mohawk-20th-anniversary-austin-resound-presents", status: "active", id: "pin-austin", lineOffset: { x: 35, y: 25 } }
         ];
@@ -562,18 +541,18 @@
             defs.append("marker")
                 .attr("id", "arrowhead")
                 .attr("viewBox", "0 0 10 10")
-                .attr("refX", 5)
+                .attr("refX", 6)
                 .attr("refY", 5)
                 .attr("markerWidth", 6)
                 .attr("markerHeight", 6)
                 .attr("orient", "auto-start-reverse")
                 .append("path")
-                .attr("d", "M 0 0 L 10 5 L 0 10 z")
+                .attr("d", "M 0 1.5 L 10 5 L 0 8.5 z")
                 .attr("fill", "#ffffff");
 
             tourLayer = d3.select("#dynamic-map").append("div").attr("class", "tour-layer");
             
-            // Plot Tour Pins & Solid Vector Lines
+            // Plot Tour Pins & Unified Vector Lines
             confirmedShows.forEach(show => {
                 const coords = projection([show.lng, show.lat]);
                 if (coords) {
@@ -593,21 +572,19 @@
                         pin.append("div").attr("class", "tour-pin-date").text(show.date);
                         pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
                         pin.append("div").attr("class", "tour-pin-tix").text("TICKETS");
-
-                        if (show.lineOffset) {
-                            lineSvg.append("line")
-                                .attr("x1", coords[0] + show.lineOffset.x)
-                                .attr("y1", coords[1] + show.lineOffset.y)
-                                .attr("x2", coords[0])
-                                .attr("y2", coords[1])
-                                .attr("marker-end", "url(#arrowhead)");
-                        } else {
-                            pin.append("div").attr("class", "tour-pin-stem");
-                        }
                     } else {
-                        // INACTIVE SHOWS: DISPLAY CITY WITH SOLID POST
+                        // INACTIVE SHOWS: DISPLAY CITY ONLY
                         pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
-                        pin.append("div").attr("class", "tour-pin-stem");
+                    }
+
+                    // DRAW UNIFIED SVG LINE & ARROWHEAD FOR ALL SHOWS
+                    if (show.lineOffset) {
+                        lineSvg.append("line")
+                            .attr("x1", coords[0] + show.lineOffset.x)
+                            .attr("y1", coords[1] + show.lineOffset.y)
+                            .attr("x2", coords[0])
+                            .attr("y2", coords[1])
+                            .attr("marker-end", "url(#arrowhead)");
                     }
                 }
             });
