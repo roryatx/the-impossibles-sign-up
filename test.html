@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Impossibles | Tour Map & Newsletter Signup</title>
+  <style>
+    /* Global Page Styling */
+    body {
+      margin: 0;
+      padding: 0;
+      background-color: #090d16;
+      color: #e2e8f0;
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    /* Map Viewport & Container */
+    .map-wrapper {
+      position: relative;
+      width: 100%;
+      height: 450px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      background-color: #0d131f;
+      border-bottom: 1px solid #1e293b;
+      scroll-behavior: smooth;
+    }
+
+    .map-canvas {
+      position: relative;
+      width: 1000px; /* Base canvas width for coordinate pin layout */
+      height: 100%;
+      background: #111827 url('https://theimpossibles.net/images/tour-map-bg.png') no-repeat center center;
+      background-size: cover;
+    }
+
+    /* Base Map Pins */
+    .map-pin {
+      position: absolute;
+      transform: translate(-50%, -100%);
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .map-pin .pin-icon {
+      width: 32px;
+      height: 32px;
+      background-color: #dc2626;
+      border: 2px solid #ffffff;
+      border-radius: 50% 50% 50% 0;
+      transform: rotate(-45deg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    }
+
+    .map-pin .pin-icon::after {
+      content: '';
+      width: 12px;
+      height: 12px;
+      background-color: #ffffff;
+      border-radius: 50%;
+    }
+
+    /* Past Shows (Greyed out & 66% size) */
+    .map-pin.played {
+      transform: translate(-50%, -100%) scale(0.66);
+      filter: grayscale(100%) opacity(0.55);
+      z-index: 1;
+    }
+
+    /* Active / Upcoming Shows */
+    .map-pin.active {
+      z-index: 10;
+    }
+
+    .map-pin.active .pin-icon {
+      background-color: #f59e0b;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0.7); }
+      70% { box-shadow: 0 0 0 12px rgba(245, 158, 11, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(245, 158, 11, 0); }
+    }
+
+    /* Form Section */
+    .signup-container {
+      max-width: 540px;
+      margin: 40px auto;
+      padding: 24px;
+      background-color: #111827;
+      border: 1px solid #1e293b;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+      text-align: left;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #94a3b8;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .form-control {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 12px 14px;
+      background-color: #1e293b;
+      border: 1px solid #334155;
+      border-radius: 6px;
+      color: #ffffff;
+      font-size: 15px;
+    }
+
+    .form-control:focus {
+      outline: none;
+      border-color: #38bdf8;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background-color: #dc2626;
+      color: #ffffff;
+      font-weight: 800;
+      font-size: 15px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      transition: background-color 0.2s ease;
+    }
+
+    .btn-submit:hover {
+      background-color: #b91c1c;
+    }
+
+    .status-msg {
+      display: none;
+      padding: 12px;
+      border-radius: 6px;
+      font-size: 14px;
+      margin-bottom: 16px;
+      text-align: center;
+    }
+
+    .status-msg.success { display: block; background-color: #064e3b; color: #a7f3d0; border: 1px solid #059669; }
+    .status-msg.error { display: block; background-color: #7f1d1d; color: #fecaca; border: 1px solid #dc2626; }
+  </style>
+</head>
+<body>
+
+  <!-- INTERACTIVE TOUR MAP -->
+  <div class="map-wrapper" id="mapWrapper">
+    <div class="map-canvas" id="mapCanvas">
+      
+      <!-- Past Shows (Played: Scaled 66% + Greyed out) -->
+      <div class="map-pin played" style="left: 220px; top: 180px;" title="St. Louis, MO - Played">
+        <div class="pin-icon"></div>
+      </div>
+      <div class="map-pin played" style="left: 480px; top: 140px;" title="Chicago, IL - Played">
+        <div class="pin-icon"></div>
+      </div>
+      <div class="map-pin played" style="left: 750px; top: 220px;" title="Fort Monroe, VA - Played">
+        <div class="pin-icon"></div>
+      </div>
+
+      <!-- Upcoming Active Shows (New Dates) -->
+      <div class="map-pin active" id="pin-dfw" style="left: 390px; top: 290px;" title="Dec 4: Tulips (FT Worth, TX)">
+        <div class="pin-icon"></div>
+      </div>
+      <div class="map-pin active" id="pin-austin" style="left: 400px; top: 320px;" title="Dec 5: Mohawk (Austin, TX)">
+        <div class="pin-icon"></div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BREVO SIGNUP FORM & LEADERBOARD TICK -->
+  <div class="signup-container">
+    <div id="statusMsg" class="status-msg"></div>
+
+    <form id="brevoSignupForm" method="POST" action="https://4d863324.sibforms.com/serve/MUIFANR4AGJhFT0wEsFWTwpziy-tQojRt9vEyxtX39KdSrMhgcIHeKCXPTXYba-zaJS7MVoIMQc74hKS_1vxdIQqVWPXMBMaYftppTZw2CPtx9vxzLxz2O6gPo8ysMxPeNt92ctrXS7b30fS9p_05xKmmTk0qoImULMwbrwSoStuKbPhx5LudJ5lobJv2v3B0121ejhMl7ktRc46nQ==">
+      
+      <div class="form-group">
+        <label for="FIRSTNAME">First Name</label>
+        <input class="form-control" type="text" id="FIRSTNAME" name="FIRSTNAME" required placeholder="First Name">
+      </div>
+
+      <div class="form-group">
+        <label for="LASTNAME">Last Name</label>
+        <input class="form-control" type="text" id="LASTNAME" name="LASTNAME" required placeholder="Last Name">
+      </div>
+
+      <div class="form-group">
+        <label for="EMAIL">Email Address</label>
+        <input class="form-control" type="email" id="EMAIL" name="EMAIL" required placeholder="you@example.com">
+      </div>
+
+      <div class="form-group">
+        <label for="CITY">City</label>
+        <input class="form-control" type="text" id="CITY" name="CITY" placeholder="City">
+      </div>
+
+      <div class="form-group">
+        <label for="STATE">State</label>
+        <input class="form-control" type="text" id="STATE" name="STATE" placeholder="State">
+      </div>
+
+      <input type="hidden" name="locale" value="en">
+      <input type="text" name="email_address_check" value="" style="display:none;">
+
+      <button type="submit" class="btn-submit" id="submitBtn">Join Newsletter</button>
+    </form>
+  </div>
+
+  <script>
+    /* 1. SMART MAP AUTO-CENTERING FOR ACTIVE PINS */
+    function centerActiveShows() {
+      const wrapper = document.getElementById('mapWrapper');
+      const activePins = document.querySelectorAll('.map-pin.active');
+      
+      if (activePins.length === 0) return;
+
+      let totalLeft = 0;
+      activePins.forEach(pin => {
+        totalLeft += pin.offsetLeft;
+      });
+
+      // Calculate average X position of upcoming show pins
+      const avgPinX = totalLeft / activePins.length;
+      const viewportWidth = wrapper.clientWidth;
+
+      // Scroll canvas so active pins are perfectly centered horizontally
+      const targetScroll = avgPinX - (viewportWidth / 2);
+      wrapper.scrollLeft = Math.max(0, targetScroll);
+    }
+
+    // Run map centering on initial load and window resize
+    window.addEventListener('load', centerActiveShows);
+    window.addEventListener('resize', centerActiveShows);
+
+    /* 2. BREVO FORM SUBMISSION & LEADERBOARD TICK */
+    const form = document.getElementById('brevoSignupForm');
+    const statusMsg = document.getElementById('statusMsg');
+
+    form.addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = new FormData(form);
+      const submitBtn = document.getElementById('submitBtn');
+      submitBtn.disabled = true;
+      submitBtn.innerText = 'Submitting...';
+
+      fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        mode: 'no-cors' // Allows cross-origin posting directly to Brevo endpoint
+      })
+      .then(() => {
+        // Trigger Leaderboard Point Tick Call
+        tickLeaderboard(formData.get('EMAIL'));
+
+        statusMsg.className = 'status-msg success';
+        statusMsg.innerText = 'Your subscription has been successful! Welcome aboard.';
+        form.reset();
+      })
+      .catch((err) => {
+        statusMsg.className = 'status-msg error';
+        statusMsg.innerText = 'Your subscription could not be saved. Please try again.';
+        console.error('Brevo Submission Error:', err);
+      })
+      .finally(() => {
+        submitBtn.disabled = false;
+        submitBtn.innerText = 'Join Newsletter';
+      });
+    });
+
+    function tickLeaderboard(email) {
+      // Leaderboard endpoint ping
+      fetch('/api/leaderboard-tick', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email, timestamp: new Date().toISOString() })
+      })
+      .then(res => res.json())
+      .catch(err => console.log('Leaderboard tick synced.'));
+    }
+  </script>
+</body>
+</html>
