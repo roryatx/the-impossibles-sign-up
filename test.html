@@ -164,16 +164,19 @@
         }
 
         .tour-pin {
-            position: absolute; background: #ff0055; color: #ffffff;
+            position: absolute; 
+            background-color: #000033; /* Opaque Background so posts don't show through */
+            color: #ffffff;
             font-family: 'Impact', 'Arial Black', sans-serif; padding: 8px 14px;
             border: 2px solid #ffffff; box-shadow: 0 0 20px rgba(255, 0, 85, 0.8), 0 4px 10px rgba(0,0,0,0.5);
             border-radius: 8px; text-align: center;
             white-space: nowrap; pointer-events: auto; cursor: default; transition: all 0.2s ease;
             display: flex; flex-direction: column; align-items: center;
+            z-index: 2;
         }
         
         .tour-pin-wrapper.active .tour-pin {
-            background: #f59e0b;
+            background-color: #f59e0b;
             box-shadow: 0 0 25px rgba(245, 158, 11, 0.9), 0 4px 12px rgba(0,0,0,0.6);
             cursor: pointer;
         }
@@ -189,9 +192,9 @@
             transform: translate(20%, 20%);
         }
 
-        /* GAINESVILLE / THE FEST: Centered Above Coordinate */
+        /* GAINESVILLE / THE FEST: Shifted slightly higher up to reveal more post */
         .tour-pin-wrapper.pin-fest .tour-pin {
-            transform: translate(-50%, -115%);
+            transform: translate(-50%, -135%);
         }
 
         /* PAST SHOWS DEFAULT CENTERED */
@@ -217,7 +220,7 @@
         }
 
         .tour-pin:hover {
-            background: #ffffff; color: #000033;
+            background-color: #ffffff; color: #000033;
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
         }
         
@@ -485,14 +488,14 @@
 
         // CONFIRMED SHOWS: PLAYED VS UPCOMING
         const confirmedShows = [
-            // PLAYED SHOWS (Standard vertical post vectors)
+            // PLAYED SHOWS
             { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, status: "played", lineOffset: { x: 0, y: -25 } },
             { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, status: "played", lineOffset: { x: 0, y: -25 } },
             { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, status: "played", lineOffset: { x: 0, y: -25 } },
             { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, status: "played", lineOffset: { x: 0, y: -25 } },
             
             // UPCOMING ACTIVE SHOWS
-            { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/", status: "active", id: "pin-fest", lineOffset: { x: 0, y: -40 } },
+            { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/", status: "active", id: "pin-fest", lineOffset: { x: 0, y: -50 } },
             { date: "DEC 4", city: "DFW, TX", lng: -97.3308, lat: 32.7555, url: "https://wl.eventim.us/event/the-impossibles/706586?afflky=TulipsFTW", status: "active", id: "pin-dfw", lineOffset: { x: -45, y: -45 } },
             { date: "DEC 5", city: "Austin, TX", lng: -97.7431, lat: 30.2672, url: "https://www.etix.com/ticket/p/42713410/the-impossibles-mohawk-20th-anniversary-austin-resound-presents", status: "active", id: "pin-austin", lineOffset: { x: 35, y: 25 } }
         ];
