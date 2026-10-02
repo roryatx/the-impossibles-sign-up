@@ -151,7 +151,6 @@
             transform-origin: center; 
         }
         
-        /* PLAYED SHOWS: Scaling happens completely anchored to the bottom edge */
         .tour-pin-wrapper.played {
             transform: scale(0.66);
             filter: grayscale(100%) opacity(0.55);
@@ -188,18 +187,14 @@
         }
 
         /* --- SIGN OFFSET TRANSFORMATIONS --- */
-        /* DFW: Offset Top-Left */
         .tour-pin-wrapper.pin-dfw .tour-pin {
             transform: translate(-100%, -120%);
         }
 
-        /* AUSTIN: Offset Bottom-Right */
         .tour-pin-wrapper.pin-austin .tour-pin {
             transform: translate(20%, 20%);
         }
 
-        /* GAINESVILLE & PLAYED SHOWS: 
-           Bottom-center sits perfectly flush with the origin point calculated in the JS */
         .tour-pin-wrapper.pin-fest .tour-pin,
         .tour-pin-wrapper.played .tour-pin {
             transform: translate(-50%, -100%);
@@ -227,7 +222,6 @@
             box-shadow: 0 0 30px rgba(255, 255, 255, 0.9);
         }
         
-        /* UNIFORM HIERARCHY: DATE (TOP), CITY (MIDDLE), TICKETS (BOTTOM) */
         .tour-pin-date { 
             font-size: clamp(11px, 2.5vw, 13px); 
             letter-spacing: 1px; 
@@ -491,22 +485,17 @@
 
         // CONFIRMED SHOWS CONFIGURATION
         const confirmedShows = [
-            // PLAYED SHOWS
             { date: "AUG 21", city: "St. Louis, MO", lng: -90.1994, lat: 38.6270, status: "played", lineType: "vertical" },
             { date: "AUG 22", city: "Chicago, IL", lng: -87.6298, lat: 41.8781, status: "played", lineType: "vertical" },
             { date: "AUG 23", city: "Detroit, MI", lng: -83.0458, lat: 42.3314, status: "played", lineType: "vertical" },
             { date: "SEP 12", city: "Supernova, VA", lng: -76.3094, lat: 37.0024, status: "played", lineType: "vertical" },
-            
-            // UPCOMING ACTIVE SHOWS
             { date: "OCT 23-25", city: "The Fest, FL", lng: -82.3248, lat: 29.6516, url: "https://thefestfl.com/ticket-info/", status: "active", id: "pin-fest", lineType: "vertical" },
             { date: "DEC 4", city: "DFW, TX", lng: -97.3308, lat: 32.7555, url: "https://wl.eventim.us/event/the-impossibles/706586?afflky=TulipsFTW", status: "active", id: "pin-dfw", lineType: "offset", lineStart: { x: -45, y: -45 } },
             { date: "DEC 5", city: "Austin, TX", lng: -97.7431, lat: 30.2672, url: "https://www.etix.com/ticket/p/42713410/the-impossibles-mohawk-20th-anniversary-austin-resound-presents", status: "active", id: "pin-austin", lineType: "offset", lineStart: { x: 35, y: 25 } }
         ];
 
-        // SMART AUTO-CENTERING ON MOBILE BEFORE PANNING
         function centerUpcomingShowsOnMobile() {
             if (window.innerWidth > 700) return;
-            
             const activeShows = confirmedShows.filter(s => s.status === 'active');
             if (activeShows.length === 0) return;
 
@@ -527,9 +516,7 @@
                 
                 currentPan = targetPan;
                 const track = document.getElementById('map-track');
-                if (track) {
-                    track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
-                }
+                if (track) track.style.transform = `translate3d(${currentPan}px, 0, 0)`;
             }
         }
 
@@ -537,12 +524,10 @@
             const mapSvg = d3.select("#dynamic-map").append("svg").attr("viewBox", [0, 0, width, height]);
             mapSvg.append("g").selectAll("path").data(topojson.feature(us, us.objects.states).features).join("path").attr("class", "state-path").attr("d", path);
             
-            // SVG Layer for Connecting Vector Lines
             const lineSvg = d3.select("#dynamic-map").append("svg")
                 .attr("class", "pin-line-svg")
                 .attr("viewBox", [0, 0, width, height]);
 
-            // Reusable Arrowhead Marker Definition
             const defs = lineSvg.append("defs");
             defs.append("marker")
                 .attr("id", "arrowhead")
@@ -558,15 +543,10 @@
 
             tourLayer = d3.select("#dynamic-map").append("div").attr("class", "tour-layer");
             
-            // Plot Tour Pins & Vector Lines
             confirmedShows.forEach(show => {
                 const coords = projection([show.lng, show.lat]);
                 if (coords) {
                     const extraClass = show.id ? show.id : '';
-                    
-                    // --- MATHEMATICALLY LOCKING THE HTML WRAPPER ---
-                    // By placing the HTML wrapper exactly at the SVG line's top coordinate (coords[1] - 30), 
-                    // the scaling origin anchors there. The line will never penetrate the sign regardless of screen size.
                     const topYCoord = show.lineType === "vertical" ? coords[1] - 30 : coords[1];
 
                     const pinWrapper = tourLayer.append("div")
@@ -574,26 +554,21 @@
                         .style("left", `${(coords[0] / width) * 100}%`)
                         .style("top", `${(topYCoord / height) * 100}%`);
                         
-                    const pin = pinWrapper.append("div")
-                        .attr("class", "tour-pin");
+                    const pin = pinWrapper.append("div").attr("class", "tour-pin");
                     
                     if (show.status === 'active') {
                         pin.on("click", () => window.open(show.url, '_blank'));
-                        
-                        // STRICT HIERARCHY: 1. DATE (Top), 2. CITY (Middle), 3. TICKETS (Bottom)
                         pin.append("div").attr("class", "tour-pin-date").text(show.date);
                         pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
                         pin.append("div").attr("class", "tour-pin-tix").text("TICKETS");
                     } else {
-                        // INACTIVE SHOWS: DISPLAY CITY ONLY
                         pin.append("div").attr("class", "tour-pin-city").text(show.city.split(',')[0]);
                     }
 
-                    // DRAW CONNECTING LINES
                     if (show.lineType === "vertical") {
                         lineSvg.append("line")
                             .attr("x1", coords[0])
-                            .attr("y1", coords[1] - 30) // Matches HTML wrapper exactly
+                            .attr("y1", coords[1] - 30)
                             .attr("x2", coords[0])
                             .attr("y2", coords[1])
                             .attr("marker-end", "url(#arrowhead)");
@@ -608,7 +583,6 @@
                 }
             });
 
-            // Initial center alignment before launching pan loop
             centerUpcomingShowsOnMobile();
             panLoop();
 
@@ -620,7 +594,7 @@
             listenToDatabase();
         });
 
-        // 1. DATABASE LISTENER (Leaderboard Engine)
+        // 1. DATABASE LISTENER (Leaderboard Engine & Realtime Counts)
         function listenToDatabase() {
             onValue(ref(db, 'locations'), (snapshot) => {
                 const data = snapshot.val(); if (!data) return;
@@ -651,7 +625,6 @@
                     .domain([1, Math.max(...clusters.map(n => n.votes), 1)])
                     .range(["#1a1a4d", "#7ca6ff"]);
 
-                // LEADERBOARD UI UPDATE
                 const listEl = document.getElementById('leaderboard-list');
                 if (listEl) {
                     const top10 = clusters.slice(0, 10);
@@ -758,7 +731,7 @@
             }, 1800); 
         }
 
-        // 2. VOTE FORM PROCESSING (BREVO + MAKE WEBHOOK + FIREBASE)
+        // 2. VOTE FORM PROCESSING (FIREBASE REALTIME DATABASE)
         document.getElementById('tour-vote-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             const submitBtn = document.getElementById('submit-button');
@@ -773,44 +746,38 @@
                 const emailId = email.replace(/[^a-z0-9]/g, '');
                 const locationId = `${cityInput.toLowerCase().replace(/[^a-z]/g, '')}_${state.toLowerCase().replace(/[^a-z]/g, '')}`;
 
+                // Check duplicate signup in Firebase
                 const emailSnap = await get(ref(db, `signups/${emailId}`));
                 if (emailSnap.exists()) {
                     submitBtn.innerText = "ALREADY SIGNED UP!"; submitBtn.classList.add('error');
-                    setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; submitBtn.classList.remove('error'); }, 4000); return;
+                    setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; submitBtn.classList.remove('error'); }, 4000); 
+                    return;
                 }
                 
+                // Geocode city location for mapping
                 const geoRes = await fetch(`https://nominatim.openstreetmap.org/search?city=${encodeURIComponent(cityInput)}&state=${encodeURIComponent(state)}&country=USA&format=json`);
                 const geoData = await geoRes.json();
-                if (!geoData || geoData.length === 0) { alert("City not found! Check spelling."); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; return; }
+                if (!geoData || geoData.length === 0) { 
+                    alert("City not found! Check spelling."); 
+                    submitBtn.disabled = false; 
+                    submitBtn.innerText = "SIGN UP"; 
+                    return; 
+                }
                 
                 const lat = parseFloat(geoData[0].lat), lng = parseFloat(geoData[0].lon);
                 document.querySelector('.impossibles-map-wrapper').scrollIntoView({ behavior: 'smooth', block: 'center' });
-                
-                // POST TO BREVO SUBSCRIBER ENDPOINT
-                const brevoData = new FormData();
-                brevoData.append('EMAIL', email);
-                brevoData.append('FIRSTNAME', firstname);
-                brevoData.append('LASTNAME', lastname);
-                brevoData.append('CITY', cityInput);
-                brevoData.append('STATE', state);
-                brevoData.append('locale', 'en');
-                brevoData.append('email_address_check', '');
 
-                fetch('https://4d863324.sibforms.com/serve/MUIFANR4AGJhFT0wEsFWTwpziy-tQojRt9vEyxtX39KdSrMhgcIHeKCXPTXYba-zaJS7MVoIMQc74hKS_1vxdIQqVWPXMBMaYftppTZw2CPtx9vxzLxz2O6gPo8ysMxPeNt92ctrXS7b30fS9p_05xKmmTk0qoImULMwbrwSoStuKbPhx5LudJ5lobJv2v3B0121ejhMl7ktRc46nQ==', {
-                    method: 'POST',
-                    body: brevoData,
-                    mode: 'no-cors'
-                }).catch(err => console.error('Brevo sync:', err));
-
-                // POST TO MAKE.COM WEBHOOK
-                await fetch("https://hook.us2.make.com/kaxkanr8vi1tj4nywptgio127hfr3bds", {
-                    method: "POST", headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ email, firstname, lastname, city: cityInput, state })
+                // RECORD SIGNUP RECORD IN FIREBASE (Includes all Brevo contact details)
+                await set(ref(db, `signups/${emailId}`), { 
+                    email, 
+                    firstname, 
+                    lastname, 
+                    city: cityInput, 
+                    state, 
+                    timestamp: Date.now() 
                 });
 
-                // RECORD SIGNUP IN FIREBASE
-                await set(ref(db, `signups/${emailId}`), { timestamp: Date.now() });
-
+                // INCREMENT & CLUSTER CITY-REGION CONTACT VOTE COUNTS FOR LEADERBOARD
                 let finalVotes = 1, oldVotes = 0, isNewCity = true, destLat = lat, destLng = lng, displayCity = cityInput;
                 
                 for (let cluster of currentClusters) {
@@ -828,13 +795,20 @@
                 pendingJackpotUpdate = { city: displayCity.toLowerCase(), oldVotes: oldVotes };
                 const locRef = ref(db, `locations/${locationId}`);
                 const snap = await get(locRef);
-                if (snap.exists()) { await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) }); }
-                else { await set(locRef, { city: cityInput, state, lat, lng, votes: 1 }); }
+                if (snap.exists()) { 
+                    await update(ref(db, 'locations'), { [`${locationId}/votes`]: increment(1) }); 
+                } else { 
+                    await set(locRef, { city: cityInput, state, lat, lng, votes: 1 }); 
+                }
 
                 triggerJackpot(displayCity, finalVotes, destLat, destLng, isNewCity);
                 e.target.reset(); submitBtn.innerText = "SUCCESS!";
                 setTimeout(() => { submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }, 3000);
-            } catch (err) { console.error(err); submitBtn.disabled = false; submitBtn.innerText = "SIGN UP"; }
+            } catch (err) { 
+                console.error(err); 
+                submitBtn.disabled = false; 
+                submitBtn.innerText = "SIGN UP"; 
+            }
         });
     </script>
 </body>
