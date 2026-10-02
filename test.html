@@ -143,12 +143,17 @@
         .tour-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 20; pointer-events: none; }
 
         /* TOUR PINS (ACTIVE VS PLAYED) */
-        .tour-pin-wrapper { position: absolute; width: 0; height: 0; pointer-events: none; }
+        .tour-pin-wrapper { 
+            position: absolute; 
+            width: 0; 
+            height: 0; 
+            pointer-events: none; 
+            transform-origin: center; 
+        }
         
-        /* PLAYED SHOWS: ANCHOR TRANSFORM-ORIGIN TO BOTTOM CENTER SO SCALING DOES NOT SHIFT BOTTOM EDGE OVER POST */
+        /* PLAYED SHOWS: Scaling happens completely anchored to the bottom edge */
         .tour-pin-wrapper.played {
             transform: scale(0.66);
-            transform-origin: bottom center;
             filter: grayscale(100%) opacity(0.55);
             z-index: 10;
             transition: transform 0.2s ease, filter 0.2s ease;
@@ -193,11 +198,11 @@
             transform: translate(20%, 20%);
         }
 
-        /* GAINESVILLE & PLAYED SHOWS: Centered Above Post */
+        /* GAINESVILLE & PLAYED SHOWS: 
+           Bottom-center sits perfectly flush with the origin point calculated in the JS */
         .tour-pin-wrapper.pin-fest .tour-pin,
         .tour-pin-wrapper.played .tour-pin {
             transform: translate(-50%, -100%);
-            margin-top: -30px; /* Leaves 30px height for vector post stem */
         }
 
         /* SVG CONNECTING LINE LAYER */
@@ -558,10 +563,16 @@
                 const coords = projection([show.lng, show.lat]);
                 if (coords) {
                     const extraClass = show.id ? show.id : '';
+                    
+                    // --- MATHEMATICALLY LOCKING THE HTML WRAPPER ---
+                    // By placing the HTML wrapper exactly at the SVG line's top coordinate (coords[1] - 30), 
+                    // the scaling origin anchors there. The line will never penetrate the sign regardless of screen size.
+                    const topYCoord = show.lineType === "vertical" ? coords[1] - 30 : coords[1];
+
                     const pinWrapper = tourLayer.append("div")
                         .attr("class", `tour-pin-wrapper ${show.status} ${extraClass}`)
                         .style("left", `${(coords[0] / width) * 100}%`)
-                        .style("top", `${(coords[1] / height) * 100}%`);
+                        .style("top", `${(topYCoord / height) * 100}%`);
                         
                     const pin = pinWrapper.append("div")
                         .attr("class", "tour-pin");
@@ -582,7 +593,7 @@
                     if (show.lineType === "vertical") {
                         lineSvg.append("line")
                             .attr("x1", coords[0])
-                            .attr("y1", coords[1] - 30)
+                            .attr("y1", coords[1] - 30) // Matches HTML wrapper exactly
                             .attr("x2", coords[0])
                             .attr("y2", coords[1])
                             .attr("marker-end", "url(#arrowhead)");
