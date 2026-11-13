@@ -419,31 +419,31 @@
     <div class="carousel-viewport animate-on-load">
         <div class="carousel-track" id="carousel-track">
             <!-- Slide 0 -->
-            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(0)">
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(0, true)">
                 <div class="slide-content">
                     <img src="imp-anth-01-all-colors.jpg" alt="All Colors">
                 </div>
             </div>
             <!-- Slide 1 -->
-            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(1)">
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(1, true)">
                 <a href="http://www.hibernationrelease.com/product/the-impossibles-anthology-94-98-2lp-reissue" target="_blank" class="slide-content has-link">
                     <img src="imp-anth-02-blue-splatter.jpg" alt="Blue Splatter">
                 </a>
             </div>
             <!-- Slide 2 -->
-            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(2)">
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(2, true)">
                 <a href="https://smartpunk.com/products/the-impossibles-anthology-2xlp-smartpunk-exclusive" target="_blank" class="slide-content has-link">
                     <img src="imp-anth-05-clear-wings.jpg" alt="Clear Wings">
                 </a>
             </div>
             <!-- Slide 3 -->
-            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(3)">
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(3, true)">
                 <a href="#" target="_blank" class="slide-content has-link">
                     <img src="imp-anth-03-black.jpg" alt="Black">
                 </a>
             </div>
             <!-- Slide 4 -->
-            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(4)">
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(4, true)">
                 <a href="#" target="_blank" class="slide-content has-link">
                     <img src="imp-anth-04-violet.jpg" alt="Violet">
                 </a>
@@ -452,11 +452,11 @@
     </div>
 
     <div class="carousel-thumbnails animate-on-load">
-        <img src="imp-anth-01-all-colors.jpg" class="thumb active" onclick="setSlide(0)" alt="All Colors">
-        <img src="imp-anth-02-blue-splatter.jpg" class="thumb" onclick="setSlide(1)" alt="Blue Splatter">
-        <img src="imp-anth-05-clear-wings.jpg" class="thumb" onclick="setSlide(2)" alt="Clear Wings">
-        <img src="imp-anth-03-black.jpg" class="thumb" onclick="setSlide(3)" alt="Black">
-        <img src="imp-anth-04-violet.jpg" class="thumb" onclick="setSlide(4)" alt="Violet">
+        <img src="imp-anth-01-all-colors.jpg" class="thumb active" onclick="setSlide(0, true)" alt="All Colors">
+        <img src="imp-anth-02-blue-splatter.jpg" class="thumb" onclick="setSlide(1, true)" alt="Blue Splatter">
+        <img src="imp-anth-05-clear-wings.jpg" class="thumb" onclick="setSlide(2, true)" alt="Clear Wings">
+        <img src="imp-anth-03-black.jpg" class="thumb" onclick="setSlide(3, true)" alt="Black">
+        <img src="imp-anth-04-violet.jpg" class="thumb" onclick="setSlide(4, true)" alt="Violet">
     </div>
 
     <!-- MAP TRACK -->
@@ -470,7 +470,7 @@
     <!-- LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
         <div class="leaderboard-title-lockup">
-            <h1 class="xl-heading leaderboard-h1">IMPOSPOSSIBLES WUSS CORP</h1>
+            <h1 class="xl-heading leaderboard-h1">IMPOSSIBLES WUSS CORP</h1>
             <h2 class="leaderboard-sub-chars">PICK IT UP! TAKE POSITION!</h2>
         </div>
         <div class="leaderboard-subtitle">Live Standings</div>
@@ -537,10 +537,16 @@
         const slideCount = 5;
         let currentSlide = 0;
         let slideTimer;
+        let autoAdvance = true; // Flag for auto-play
 
-        function setSlide(index) {
+        function setSlide(index, isManual = false) {
             clearTimeout(slideTimer);
             currentSlide = index;
+            
+            // If the user interacted, stop auto-advancing permanently
+            if (isManual) {
+                autoAdvance = false;
+            }
             
             const track = document.getElementById('carousel-track');
             const slides = document.querySelectorAll('.carousel-slide');
@@ -560,18 +566,21 @@
                 else t.classList.remove('active');
             });
             
-            // Timing Logic: Header (Index 0) holds for 1.5s, all variants hold for 3s
-            const holdTime = (index === 0) ? 1500 : 3000;
-            slideTimer = setTimeout(nextSlide, holdTime);
+            // Only set the timer if we are still auto-advancing
+            if (autoAdvance) {
+                const holdTime = (index === 0) ? 1500 : 3000;
+                slideTimer = setTimeout(nextSlide, holdTime);
+            }
         }
 
         function nextSlide() {
+            if (!autoAdvance) return; // Safeguard
             let next = (currentSlide + 1) % slideCount;
-            setSlide(next);
+            setSlide(next, false);
         }
 
         document.addEventListener("DOMContentLoaded", () => {
-            setSlide(0);
+            setSlide(0, false);
         });
     </script>
 
