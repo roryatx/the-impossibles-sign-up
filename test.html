@@ -9,6 +9,24 @@
     <script src="https://unpkg.com/topojson-client@3"></script>
 
     <style>
+        :root {
+            /* Carousel Desktop Sizing */
+            --slide-width: 55%;
+            --slide-margin: 2.5%;
+            --slide-total: 60%; /* 55 + 2.5 + 2.5 */
+            --slide-offset: 20%; /* (100 - 60) / 2 */
+        }
+
+        @media (max-width: 700px) {
+            :root {
+                /* Carousel Mobile Sizing */
+                --slide-width: 75%;
+                --slide-margin: 2.5%;
+                --slide-total: 80%; /* 75 + 2.5 + 2.5 */
+                --slide-offset: 10%; /* (100 - 80) / 2 */
+            }
+        }
+
         body {
             background-image: url('THEIMPOSSIBLES_Midwest2026_REGGIES_BG.jpg');
             background-size: cover; background-position: center; background-attachment: fixed; background-repeat: no-repeat;
@@ -33,42 +51,66 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        /* --- VINYL CAROUSEL --- */
-        .carousel-wrapper {
-            width: 100%;
-            max-width: 800px;
-            margin: 10px auto 50px auto;
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
+        /* --- MOTION CAROUSEL --- */
+        .carousel-viewport {
+            width: 100vw;
+            max-width: 1200px;
+            margin: 0 auto 15px auto;
+            overflow: hidden;
+            position: relative;
+            padding: 20px 0; /* Space for shadows */
         }
         
-        #carousel-main-link {
+        .carousel-track {
+            display: flex;
+            align-items: center;
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+            width: 100%;
+        }
+
+        .carousel-slide {
+            flex: 0 0 var(--slide-width);
+            margin: 0 var(--slide-margin);
+            transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease;
+            opacity: 0.35;
+            transform: scale(0.85);
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .carousel-slide.active {
+            opacity: 1;
+            transform: scale(1);
+            cursor: default;
+        }
+
+        .carousel-slide.active:hover {
+            transform: scale(1.02);
+        }
+
+        .slide-content {
             display: block;
             width: 100%;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
             overflow: hidden;
-            transition: transform 0.2s ease, box-shadow 0.2s ease;
-            position: relative;
+            transition: box-shadow 0.2s ease;
             background-color: #0a0a1a;
         }
-        
-        #carousel-main-link.has-link:hover {
-            transform: scale(1.02);
+
+        .carousel-slide.active .slide-content.has-link:hover {
             box-shadow: 0 0 25px rgba(124, 166, 255, 0.6);
             cursor: pointer;
         }
 
-        #carousel-main-link:not(.has-link) {
-            cursor: default;
+        .carousel-slide:not(.active) a {
+            pointer-events: none; /* Prevents clicking links when slide is in the background */
         }
 
-        #carousel-main-img {
+        .slide-content img {
             width: 100%;
-            height: auto;
             display: block;
-            transition: opacity 0.2s ease-in-out;
+            height: auto;
         }
 
         .carousel-thumbnails {
@@ -76,6 +118,8 @@
             justify-content: center;
             gap: 12px;
             width: 100%;
+            max-width: 800px;
+            margin: 0 auto 50px auto;
         }
 
         .thumb {
@@ -371,18 +415,48 @@
 
     <div id="jackpot-layer"></div>
 
-    <!-- VINYL CAROUSEL (Replaces Logo & Stack) -->
-    <div class="carousel-wrapper animate-on-load">
-        <a id="carousel-main-link" target="_blank">
-            <img id="carousel-main-img" src="imp-anth-01-all-colors.jpg" alt="The Impossibles Anthology '94-'98">
-        </a>
-        <div class="carousel-thumbnails">
-            <img src="imp-anth-01-all-colors.jpg" class="thumb active" onclick="setSlide(0)" alt="All Colors">
-            <img src="imp-anth-02-blue-splatter.jpg" class="thumb" onclick="setSlide(1)" alt="Blue Splatter">
-            <img src="imp-anth-05-clear-wings.jpg" class="thumb" onclick="setSlide(2)" alt="Clear Wings">
-            <img src="imp-anth-03-black.jpg" class="thumb" onclick="setSlide(3)" alt="Black">
-            <img src="imp-anth-04-violet.jpg" class="thumb" onclick="setSlide(4)" alt="Violet">
+    <!-- MOTION CAROUSEL -->
+    <div class="carousel-viewport animate-on-load">
+        <div class="carousel-track" id="carousel-track">
+            <!-- Slide 0 -->
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(0)">
+                <div class="slide-content">
+                    <img src="imp-anth-01-all-colors.jpg" alt="All Colors">
+                </div>
+            </div>
+            <!-- Slide 1 -->
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(1)">
+                <a href="http://www.hibernationrelease.com/product/the-impossibles-anthology-94-98-2lp-reissue" target="_blank" class="slide-content has-link">
+                    <img src="imp-anth-02-blue-splatter.jpg" alt="Blue Splatter">
+                </a>
+            </div>
+            <!-- Slide 2 -->
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(2)">
+                <a href="https://smartpunk.com/products/the-impossibles-anthology-2xlp-smartpunk-exclusive" target="_blank" class="slide-content has-link">
+                    <img src="imp-anth-05-clear-wings.jpg" alt="Clear Wings">
+                </a>
+            </div>
+            <!-- Slide 3 -->
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(3)">
+                <a href="#" target="_blank" class="slide-content has-link">
+                    <img src="imp-anth-03-black.jpg" alt="Black">
+                </a>
+            </div>
+            <!-- Slide 4 -->
+            <div class="carousel-slide" onclick="if(!this.classList.contains('active')) setSlide(4)">
+                <a href="#" target="_blank" class="slide-content has-link">
+                    <img src="imp-anth-04-violet.jpg" alt="Violet">
+                </a>
+            </div>
         </div>
+    </div>
+
+    <div class="carousel-thumbnails animate-on-load">
+        <img src="imp-anth-01-all-colors.jpg" class="thumb active" onclick="setSlide(0)" alt="All Colors">
+        <img src="imp-anth-02-blue-splatter.jpg" class="thumb" onclick="setSlide(1)" alt="Blue Splatter">
+        <img src="imp-anth-05-clear-wings.jpg" class="thumb" onclick="setSlide(2)" alt="Clear Wings">
+        <img src="imp-anth-03-black.jpg" class="thumb" onclick="setSlide(3)" alt="Black">
+        <img src="imp-anth-04-violet.jpg" class="thumb" onclick="setSlide(4)" alt="Violet">
     </div>
 
     <!-- MAP TRACK -->
@@ -396,7 +470,7 @@
     <!-- LEADERBOARD SECTION -->
     <div class="leaderboard-wrapper animate-on-load delay-2">
         <div class="leaderboard-title-lockup">
-            <h1 class="xl-heading leaderboard-h1">IMPOSSIBLES WUSS CORP</h1>
+            <h1 class="xl-heading leaderboard-h1">IMPOSPOSSIBLES WUSS CORP</h1>
             <h2 class="leaderboard-sub-chars">PICK IT UP! TAKE POSITION!</h2>
         </div>
         <div class="leaderboard-subtitle">Live Standings</div>
@@ -460,55 +534,40 @@
 
     <!-- CAROUSEL SCRIPT -->
     <script>
-        const vinylSlides = [
-            { src: 'imp-anth-01-all-colors.jpg', link: null },
-            { src: 'imp-anth-02-blue-splatter.jpg', link: 'http://www.hibernationrelease.com/product/the-impossibles-anthology-94-98-2lp-reissue' },
-            { src: 'imp-anth-05-clear-wings.jpg', link: 'https://smartpunk.com/products/the-impossibles-anthology-2xlp-smartpunk-exclusive' },
-            { src: 'imp-anth-03-black.jpg', link: '#' },
-            { src: 'imp-anth-04-violet.jpg', link: '#' }
-        ];
-        
+        const slideCount = 5;
         let currentSlide = 0;
-        let slideInterval;
+        let slideTimer;
 
         function setSlide(index) {
+            clearTimeout(slideTimer);
             currentSlide = index;
-            const mainImg = document.getElementById('carousel-main-img');
-            const mainLink = document.getElementById('carousel-main-link');
+            
+            const track = document.getElementById('carousel-track');
+            const slides = document.querySelectorAll('.carousel-slide');
             const thumbs = document.querySelectorAll('.thumb');
             
-            mainImg.style.opacity = 0;
+            // Translate track using CSS variables to dynamically center the active slide
+            track.style.transform = `translateX(calc(var(--slide-offset) - (${index} * var(--slide-total))))`;
             
-            setTimeout(() => {
-                mainImg.src = vinylSlides[index].src;
-                
-                if (vinylSlides[index].link) {
-                    mainLink.href = vinylSlides[index].link;
-                    mainLink.classList.add('has-link');
-                } else {
-                    mainLink.removeAttribute('href');
-                    mainLink.classList.remove('has-link');
-                }
-                
-                mainImg.style.opacity = 1;
-            }, 200);
-
+            // Update active states
+            slides.forEach((s, i) => {
+                if (i === index) s.classList.add('active');
+                else s.classList.remove('active');
+            });
+            
             thumbs.forEach((t, i) => {
                 if (i === index) t.classList.add('active');
                 else t.classList.remove('active');
             });
             
-            resetInterval();
+            // Timing Logic: Header (Index 0) holds for 1.5s, all variants hold for 3s
+            const holdTime = (index === 0) ? 1500 : 3000;
+            slideTimer = setTimeout(nextSlide, holdTime);
         }
 
         function nextSlide() {
-            let next = (currentSlide + 1) % vinylSlides.length;
+            let next = (currentSlide + 1) % slideCount;
             setSlide(next);
-        }
-
-        function resetInterval() {
-            clearInterval(slideInterval);
-            slideInterval = setInterval(nextSlide, 3500); 
         }
 
         document.addEventListener("DOMContentLoaded", () => {
