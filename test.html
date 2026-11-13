@@ -33,35 +33,70 @@
             100% { opacity: 1; transform: translateY(0); }
         }
 
-        .hero-logo-container { width: 100%; max-width: 1000px; margin-bottom: 30px; text-align: center; }
-        .full-width-logo { width: 100%; height: auto; max-height: 300px; object-fit: contain; filter: drop-shadow(0 10px 20px rgba(0,0,0,0.8)); }
-
-        /* --- VINYL STACK --- */
-        .vinyl-stack-container {
+        /* --- VINYL CAROUSEL --- */
+        .carousel-wrapper {
             width: 100%;
-            max-width: 750px;
-            margin: 0 auto 50px auto;
+            max-width: 800px;
+            margin: 10px auto 50px auto;
             display: flex;
             flex-direction: column;
-            gap: 25px;
-            align-items: center;
+            gap: 15px;
         }
-        .vinyl-image {
+        
+        #carousel-main-link {
+            display: block;
             width: 100%;
-            height: auto;
             border-radius: 8px;
             box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            overflow: hidden;
             transition: transform 0.2s ease, box-shadow 0.2s ease;
-            display: block;
+            position: relative;
+            background-color: #0a0a1a;
         }
-        a.vinyl-link {
-            display: block;
-            width: 100%;
-            transition: transform 0.2s ease;
-        }
-        a.vinyl-link:hover .vinyl-image {
+        
+        #carousel-main-link.has-link:hover {
             transform: scale(1.02);
             box-shadow: 0 0 25px rgba(124, 166, 255, 0.6);
+            cursor: pointer;
+        }
+
+        #carousel-main-link:not(.has-link) {
+            cursor: default;
+        }
+
+        #carousel-main-img {
+            width: 100%;
+            height: auto;
+            display: block;
+            transition: opacity 0.2s ease-in-out;
+        }
+
+        .carousel-thumbnails {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            width: 100%;
+        }
+
+        .thumb {
+            width: 18%;
+            height: auto;
+            border-radius: 4px;
+            cursor: pointer;
+            opacity: 0.4;
+            transition: opacity 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
+            border: 2px solid transparent;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+        }
+
+        .thumb.active {
+            opacity: 1;
+            border-color: #7ca6ff;
+            transform: scale(1.05);
+        }
+
+        .thumb:hover {
+            opacity: 0.8;
         }
 
         /* BUTTONS (Media Links at Bottom) */
@@ -336,40 +371,22 @@
 
     <div id="jackpot-layer"></div>
 
-    <div class="hero-logo-container animate-on-load">
-        <img src="impossibles_logo.png" alt="The Impossibles" class="full-width-logo">
-    </div>
-
-    <!-- VINYL PRE-ORDER STACK -->
-    <div class="vinyl-stack-container animate-on-load delay-1">
-        <!-- Header Image (No Link) -->
-        <img src="imp-anth-01-all-colors.jpg" alt="The Impossibles Anthology '94-'98 All Colors" class="vinyl-image" style="pointer-events: none;">
-
-        <!-- Blue Splatter (Hibernation Release) -->
-        <a href="http://www.hibernationrelease.com/product/the-impossibles-anthology-94-98-2lp-reissue" target="_blank" class="vinyl-link">
-            <img src="imp-anth-02-blue-splatter.jpg" alt="Blue Splatter - Hibernation Release Exclusive" class="vinyl-image">
+    <!-- VINYL CAROUSEL (Replaces Logo & Stack) -->
+    <div class="carousel-wrapper animate-on-load">
+        <a id="carousel-main-link" target="_blank">
+            <img id="carousel-main-img" src="imp-anth-01-all-colors.jpg" alt="The Impossibles Anthology '94-'98">
         </a>
-        
-        <!-- Black (Distro / Retail - PLACEHOLDER LINK) -->
-        <!-- TO DO: Update the href="#" below when you have the link -->
-        <a href="#" target="_blank" class="vinyl-link">
-            <img src="imp-anth-03-black.jpg" alt="Black - Distro / Retail" class="vinyl-image">
-        </a>
-
-        <!-- Violet (Some Merch Exclusive - PLACEHOLDER LINK) -->
-        <!-- TO DO: Update the href="#" below when you have the link -->
-        <a href="#" target="_blank" class="vinyl-link">
-            <img src="imp-anth-04-violet.jpg" alt="Violet - Some Merch Exclusive" class="vinyl-image">
-        </a>
-
-        <!-- Clear with Blue Butterfly Wings (Smartpunk Exclusive) -->
-        <a href="https://smartpunk.com/products/the-impossibles-anthology-2xlp-smartpunk-exclusive" target="_blank" class="vinyl-link">
-            <img src="imp-anth-05-clear-wings.jpg" alt="Clear with Blue Butterfly Wings - Smartpunk Exclusive" class="vinyl-image">
-        </a>
+        <div class="carousel-thumbnails">
+            <img src="imp-anth-01-all-colors.jpg" class="thumb active" onclick="setSlide(0)" alt="All Colors">
+            <img src="imp-anth-02-blue-splatter.jpg" class="thumb" onclick="setSlide(1)" alt="Blue Splatter">
+            <img src="imp-anth-05-clear-wings.jpg" class="thumb" onclick="setSlide(2)" alt="Clear Wings">
+            <img src="imp-anth-03-black.jpg" class="thumb" onclick="setSlide(3)" alt="Black">
+            <img src="imp-anth-04-violet.jpg" class="thumb" onclick="setSlide(4)" alt="Violet">
+        </div>
     </div>
 
     <!-- MAP TRACK -->
-    <div class="impossibles-map-wrapper animate-on-load delay-2">
+    <div class="impossibles-map-wrapper animate-on-load delay-1">
         <div class="map-pan-track" id="map-track">
             <div class="map-instance" id="dynamic-map"></div>
             <div class="map-instance" id="map-clone"></div>
@@ -377,7 +394,7 @@
     </div>
 
     <!-- LEADERBOARD SECTION -->
-    <div class="leaderboard-wrapper animate-on-load delay-3">
+    <div class="leaderboard-wrapper animate-on-load delay-2">
         <div class="leaderboard-title-lockup">
             <h1 class="xl-heading leaderboard-h1">IMPOSSIBLES WUSS CORP</h1>
             <h2 class="leaderboard-sub-chars">PICK IT UP! TAKE POSITION!</h2>
@@ -388,7 +405,7 @@
         </ul>
     </div>
 
-    <div class="xl-heading-container animate-on-load delay-4">
+    <div class="xl-heading-container animate-on-load delay-3">
         <div class="signup-title-lockup">
             <h1 class="xl-heading signup-h1">SIGN UP</h1>
             <h2 class="signup-sub-chars">BE THE FIRST TO KNOW!</h2>
@@ -396,7 +413,7 @@
     </div>
 
     <!-- SIGNUP FORM -->
-    <div class="impossibles-form-wrapper animate-on-load delay-5" id="signup-form-section">
+    <div class="impossibles-form-wrapper animate-on-load delay-4" id="signup-form-section">
         <form id="tour-vote-form">
             <div class="impossibles-grid">
                 <div class="impossibles-half field-container">
@@ -441,6 +458,65 @@
         <a href="https://www.youtube.com/@TheImpossiblesATX" target="_blank"><img src="https://cdn.jsdelivr.net/npm/simple-icons@v11/icons/youtube.svg" alt="YouTube" class="social-icon"></a>
     </div>
 
+    <!-- CAROUSEL SCRIPT -->
+    <script>
+        const vinylSlides = [
+            { src: 'imp-anth-01-all-colors.jpg', link: null },
+            { src: 'imp-anth-02-blue-splatter.jpg', link: 'http://www.hibernationrelease.com/product/the-impossibles-anthology-94-98-2lp-reissue' },
+            { src: 'imp-anth-05-clear-wings.jpg', link: 'https://smartpunk.com/products/the-impossibles-anthology-2xlp-smartpunk-exclusive' },
+            { src: 'imp-anth-03-black.jpg', link: '#' },
+            { src: 'imp-anth-04-violet.jpg', link: '#' }
+        ];
+        
+        let currentSlide = 0;
+        let slideInterval;
+
+        function setSlide(index) {
+            currentSlide = index;
+            const mainImg = document.getElementById('carousel-main-img');
+            const mainLink = document.getElementById('carousel-main-link');
+            const thumbs = document.querySelectorAll('.thumb');
+            
+            mainImg.style.opacity = 0;
+            
+            setTimeout(() => {
+                mainImg.src = vinylSlides[index].src;
+                
+                if (vinylSlides[index].link) {
+                    mainLink.href = vinylSlides[index].link;
+                    mainLink.classList.add('has-link');
+                } else {
+                    mainLink.removeAttribute('href');
+                    mainLink.classList.remove('has-link');
+                }
+                
+                mainImg.style.opacity = 1;
+            }, 200);
+
+            thumbs.forEach((t, i) => {
+                if (i === index) t.classList.add('active');
+                else t.classList.remove('active');
+            });
+            
+            resetInterval();
+        }
+
+        function nextSlide() {
+            let next = (currentSlide + 1) % vinylSlides.length;
+            setSlide(next);
+        }
+
+        function resetInterval() {
+            clearInterval(slideInterval);
+            slideInterval = setInterval(nextSlide, 3500); 
+        }
+
+        document.addEventListener("DOMContentLoaded", () => {
+            setSlide(0);
+        });
+    </script>
+
+    <!-- FIREBASE & MAP SCRIPT -->
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-app.js";
         import { getDatabase, ref, onValue, get, set, update, increment } from "https://www.gstatic.com/firebasejs/10.11.1/firebase-database.js";
